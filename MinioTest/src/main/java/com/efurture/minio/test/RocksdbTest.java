@@ -12,11 +12,12 @@ import org.rocksdb.RocksDBException;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.*;
 
 public class RocksdbTest {
 
     static {
-        xcccc.loadLibrary();
+        RocksDB.loadLibrary();
     }
 
     /**
@@ -30,7 +31,7 @@ public class RocksdbTest {
     private static RocksDB fileStoreDB;
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         initRocksDb();
 
         String[] datas = {"/Users/efurture/Downloads/settings.xml", "/Users/efurture/Downloads/5c919e180001d70808320538.jpg",
@@ -43,22 +44,33 @@ public class RocksdbTest {
 
         int numOfFiles = 10000;
 
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 8, TimeUnit.MINUTES,
+                new LinkedBlockingDeque<Runnable>());
+
 
 
         long start = System.currentTimeMillis();
         for(int i=0; i<numOfFiles; i++){
-            byte[] bts =  dataBts[i%datas.length];
-            String saveName = save(bts);
+            final byte[] bts =  dataBts[i%datas.length];
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+
+                    String saveName = save(bts);
+                    System.out.println("save success");
+                }
+            });
 
         }
-        fileStoreDB.getDefaultColumnFamily();
+        executor.shutdown();
+        executor.awaitTermination(10, TimeUnit.DAYS);
         System.out.println("used " + (System.currentTimeMillis() - start)  + " ms ");
         fileStoreDB.close();
 
     }
 
 
-    public static  String save(byte[] bts) {
+    public static  synchronized String save(byte[] bts) {
         String uuid = UUID.randomUUID().toString();
         try {
             fileStoreDB.put(uuid.getBytes(), bts);
