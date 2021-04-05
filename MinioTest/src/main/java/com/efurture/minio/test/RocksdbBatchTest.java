@@ -1,21 +1,13 @@
 package com.efurture.minio.test;
 
-import io.minio.ObjectWriteResponse;
-import io.minio.UploadObjectArgs;
-import javafx.application.Application;
-import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
-import org.rocksdb.Env;
-import org.rocksdb.Options;
-import org.rocksdb.RocksDB;
-import org.rocksdb.RocksDBException;
+import org.rocksdb.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
-import java.util.concurrent.*;
 
-public class RocksdbTest {
+public class RocksdbBatchTest {
 
     static {
         RocksDB.loadLibrary();
@@ -32,7 +24,7 @@ public class RocksdbTest {
     private static RocksDB fileStoreDB;
 
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException, RocksDBException {
         initRocksDb();
 
         String[] datas = {"/Users/efurture/Downloads/settings.xml", "/Users/efurture/Downloads/5c919e180001d70808320538.jpg",
@@ -45,14 +37,24 @@ public class RocksdbTest {
 
         save(dataBts[0]);
 
-        int numOfFiles = 10000;
+        int numOfFiles = 100000;
 
-
+        int numBatchSize = 1000;
+        int length = numOfFiles/numBatchSize;
         long start = System.currentTimeMillis();
-        for(int i=0; i<numOfFiles; i++){
-            final byte[] bts =  dataBts[i%datas.length];
-            String saveName = save(bts);
-
+        for(int i=0; i<length; i++){
+            WriteBatch writeBatch = new WriteBatch();
+            WriteOptions writeOptions = new WriteOptions();
+            writeOptions.setSync(false);
+            for(int m=0; m<numBatchSize; m++){
+                int num = i*numBatchSize + m;
+                final byte[] bts =  dataBts[num%datas.length];
+                String uuid = UUID.randomUUID().toString();
+                writeBatch.put(uuid.getBytes(), bts);
+            }
+            fileStoreDB.write(writeOptions, writeBatch);
+            //writeBatch.close();
+           // writeOptions.close();
         }
         System.out.println("used " + (System.currentTimeMillis() - start)  + " ms ");
         fileStoreDB.close();
@@ -92,7 +94,7 @@ public class RocksdbTest {
             options.setMaxBackgroundCompactions(threads);
             // options.optimizeLevelStyleCompaction(1<<30);
 
-            Env.getDefault().setBackgroundThreads(threads*2);
+            Env.getDefault().setBackgroundThreads(threads);
 
             options.setEnv(Env.getDefault());
             fileStoreDB = RocksDB.open(options, rocksdbFilePath);
