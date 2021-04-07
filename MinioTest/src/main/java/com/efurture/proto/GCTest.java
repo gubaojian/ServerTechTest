@@ -1,7 +1,7 @@
 package com.efurture.proto;
 
 public class GCTest {
-    
+
     /**
      * GC参数：
      *

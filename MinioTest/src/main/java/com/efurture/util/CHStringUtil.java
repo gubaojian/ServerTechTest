@@ -20,6 +20,11 @@ public class CHStringUtil {
         return sb.toString();
     }
 
+    public static String randomString(int start, int end) {
+        int len = start + random.nextInt(end - start);
+        return randomString(len);
+    }
+
     public static char getRandomChar() {
         return (char) (0x4e00 + random.nextInt(BASE_RANDOM));
     }
