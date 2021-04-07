@@ -1,0 +1,20 @@
+syntax = "proto3";
+package com.efurture.love;
+
+
+message Message {
+    int64 id = 1;
+    int64 time = 2;
+    string message = 3;
+}
+
+
+message Messages {
+    int64 id = 1;
+    string uuid = 2;
+    string owner = 3;
+    string nextMessage = 4;
+    string preMessage = 5;
+    repeated Message messages = 6;
+    int64 u = 7;
+}

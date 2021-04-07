@@ -35,8 +35,7 @@ public class RocksdbTest {
     public static void main(String[] args) throws IOException, InterruptedException {
         initRocksDb();
 
-        String[] datas = {"/Users/efurture/Downloads/settings.xml", "/Users/efurture/Downloads/5c919e180001d70808320538.jpg",
-                "/Users/efurture/照片/2019/11/IMG_4420.JPG", "/Users/efurture/Downloads/房屋租赁合同简单版修改版本.pdf"};
+        String[] datas = {"/Users/efurture/Downloads/settings.xml"};
 
         byte[][] dataBts = new byte[datas.length][];
         for(int i=0 ;i<dataBts.length; i++){
@@ -45,7 +44,7 @@ public class RocksdbTest {
 
         save(dataBts[0]);
 
-        int numOfFiles = 10000;
+        int numOfFiles = 10000*1000;
 
 
         long start = System.currentTimeMillis();

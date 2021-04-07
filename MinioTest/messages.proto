@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+import "./message.proto";
+
+
+
+message Messages {
+    int64 id = 1;
+    string uuid = 2;
+    string owner = 3;
+    string nextMessage = 4;
+    string preMessage = 5;
+    repeat Message messages = 6;
+}
