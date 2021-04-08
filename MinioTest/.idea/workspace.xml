@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1d4a4163-cf63-4205-b74f-0726a008b353" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/efurture/mysql/MYSqlTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/efurture/proto/GCTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/efurture/proto/GCTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/efurture/util/CHStringUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/efurture/util/CHStringUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/efurture/mysql/MYSqlTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/efurture/mysql/MYSqlTest.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -36,13 +32,40 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/efurture/mysql/MYSqlTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="208">
-              <caret line="35" column="17" selection-start-line="35" selection-start-column="17" selection-end-line="35" selection-end-column="17" />
+            <state relative-caret-position="246">
+              <caret line="69" column="12" selection-start-line="69" selection-start-column="12" selection-end-line="69" selection-end-column="12" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1450#1753#0" expanded="true" />
-                <element signature="e#1752#1753#0" expanded="true" />
+                <element signature="e#3333#3636#0" expanded="true" />
+                <element signature="e#3635#3636#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/sql/Date.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="705">
+              <caret line="73" column="11" selection-start-line="73" selection-start-column="11" selection-end-line="73" selection-end-column="11" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/sql/PreparedStatement.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="399">
+              <caret line="235" column="9" selection-start-line="235" selection-start-column="9" selection-end-line="235" selection-end-column="9" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/sql/Connection.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="202">
+              <caret line="137" column="4" lean-forward="true" selection-start-line="137" selection-start-column="4" selection-end-line="137" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -87,30 +110,6 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-lang3/3.4/commons-lang3-3.4.jar!/org/apache/commons/lang3/time/DateFormatUtils.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="14" column="102" selection-start-line="14" selection-start-column="102" selection-end-line="14" selection-end-column="110" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="jar://$MAVEN_REPOSITORY$/junit/junit/4.11/junit-4.11.jar!/junit/framework/TestCase.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="451">
-              <caret line="251" column="18" selection-start-line="251" selection-start-column="18" selection-end-line="251" selection-end-column="18" />
-              <folding>
-                <element signature="e#2655#2656#0" expanded="true" />
-                <element signature="e#2691#2692#0" expanded="true" />
-                <element signature="e#7285#7286#0" expanded="true" />
-                <element signature="e#7318#7319#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/efurture/util/CHStringUtil.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="271">
@@ -119,15 +118,6 @@
                 <element signature="imports" expanded="true" />
                 <element signature="e#768#769#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/message.proto">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" column="27" lean-forward="true" selection-start-line="15" selection-start-column="27" selection-end-line="15" selection-end-column="27" />
             </state>
           </provider>
         </entry>
@@ -336,8 +326,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.MYSqlTest.testInsertTableBenchInsertPools">
-    <configuration name="MYSqlTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.MYSqlTest.testInsertTableBenchPrepareInsert">
+    <configuration name="MYSqlTest.showSql" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="MinioTest" />
       <extension name="coverage">
         <pattern>
@@ -347,38 +337,7 @@
       </extension>
       <option name="PACKAGE_NAME" value="com.efurture.mysql" />
       <option name="MAIN_CLASS_NAME" value="com.efurture.mysql.MYSqlTest" />
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="MYSqlTest.testExampleSelect" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="MinioTest" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.efurture.mysql.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.efurture.mysql" />
-      <option name="MAIN_CLASS_NAME" value="com.efurture.mysql.MYSqlTest" />
-      <option name="METHOD_NAME" value="testExampleSelect" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="MYSqlTest.testInsertTable" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="MinioTest" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.efurture.mysql.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.efurture.mysql" />
-      <option name="MAIN_CLASS_NAME" value="com.efurture.mysql.MYSqlTest" />
-      <option name="METHOD_NAME" value="testInsertTable" />
+      <option name="METHOD_NAME" value="showSql" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -416,20 +375,52 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="MYSqlTest.testInsertTableBenchPrepareInsert" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="MinioTest" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.efurture.mysql.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.efurture.mysql" />
+      <option name="MAIN_CLASS_NAME" value="com.efurture.mysql.MYSqlTest" />
+      <option name="METHOD_NAME" value="testInsertTableBenchPrepareInsert" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="MYSqlTest.testShowSql" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="MinioTest" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.efurture.mysql.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.efurture.mysql" />
+      <option name="MAIN_CLASS_NAME" value="com.efurture.mysql.MYSqlTest" />
+      <option name="METHOD_NAME" value="testShowSql" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <list>
-      <item itemvalue="JUnit.MYSqlTest" />
-      <item itemvalue="JUnit.MYSqlTest.testExampleSelect" />
-      <item itemvalue="JUnit.MYSqlTest.testInsertTable" />
       <item itemvalue="JUnit.MYSqlTest.testInsertTableBenchInsert" />
       <item itemvalue="JUnit.MYSqlTest.testInsertTableBenchInsertPools" />
+      <item itemvalue="JUnit.MYSqlTest.showSql" />
+      <item itemvalue="JUnit.MYSqlTest.testShowSql" />
+      <item itemvalue="JUnit.MYSqlTest.testInsertTableBenchPrepareInsert" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.MYSqlTest.testInsertTableBenchInsertPools" />
+        <item itemvalue="JUnit.MYSqlTest.testInsertTableBenchPrepareInsert" />
         <item itemvalue="JUnit.MYSqlTest.testInsertTableBenchInsert" />
-        <item itemvalue="JUnit.MYSqlTest.testInsertTable" />
-        <item itemvalue="JUnit.MYSqlTest.testExampleSelect" />
-        <item itemvalue="JUnit.MYSqlTest" />
+        <item itemvalue="JUnit.MYSqlTest.testShowSql" />
+        <item itemvalue="JUnit.MYSqlTest.showSql" />
+        <item itemvalue="JUnit.MYSqlTest.testInsertTableBenchInsertPools" />
       </list>
     </recent_temporary>
   </component>
@@ -447,18 +438,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="MYSqlTest_testInsertTable - 2021.04.07 at 23h 49m 45s.xml">
-      <configuration name="MYSqlTest.testInsertTable" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="MYSqlTest_testInsertTableBenchInsert - 2021.04.07 at 23h 51m 54s.xml">
-      <configuration name="MYSqlTest.testInsertTableBenchInsert" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="MYSqlTest_testInsertTableBenchInsert - 2021.04.07 at 23h 52m 47s.xml">
-      <configuration name="MYSqlTest.testInsertTableBenchInsert" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="MYSqlTest_testInsertTableBenchInsertPools - 2021.04.07 at 23h 59m 06s.xml">
-      <configuration name="MYSqlTest.testInsertTableBenchInsertPools" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="MYSqlTest_testInsertTableBenchInsertPools - 2021.04.08 at 00h 00m 20s.xml">
       <configuration name="MYSqlTest.testInsertTableBenchInsertPools" configurationId="JUnit" />
     </history-entry>
@@ -477,6 +456,18 @@
     <history-entry file="MYSqlTest_testInsertTableBenchInsertPools - 2021.04.08 at 00h 08m 30s.xml">
       <configuration name="MYSqlTest.testInsertTableBenchInsertPools" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="MYSqlTest_showSql - 2021.04.08 at 09h 41m 53s.xml">
+      <configuration name="MYSqlTest.showSql" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="MYSqlTest_showSql - 2021.04.08 at 09h 42m 11s.xml">
+      <configuration name="MYSqlTest.showSql" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="MYSqlTest_testShowSql - 2021.04.08 at 09h 42m 28s.xml">
+      <configuration name="MYSqlTest.testShowSql" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="MYSqlTest_testShowSql - 2021.04.08 at 09h 42m 43s.xml">
+      <configuration name="MYSqlTest.testShowSql" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
     <frame x="89" y="23" width="1400" height="987" extended-state="0" />
@@ -491,15 +482,15 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49779087" weight="0.32960895" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.742268" visible="true" weight="0.34301677" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.74153167" visible="true" weight="0.29497206" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4992636" weight="0.52402234" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Terminal" order="7" />
-      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.25773194" side_tool="true" visible="true" weight="0.34301677" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.25846833" side_tool="true" visible="true" weight="0.29497206" />
       <window_info anchor="bottom" id="Version Control" order="9" />
-      <window_info anchor="bottom" id="Messages" order="10" sideWeight="0.49484536" weight="0.32960895" />
+      <window_info anchor="bottom" id="Messages" order="10" sideWeight="0.49410897" weight="0.32960895" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -521,7 +512,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/com/efurture/mysql/MYSqlTest.java</url>
-          <line>39</line>
+          <line>105</line>
           <properties />
           <option name="timeStamp" value="3" />
         </line-breakpoint>
@@ -548,30 +539,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/efurture/love.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="7" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/efurture/minio/test/LevelDBBatchTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="227">
-          <caret line="40" column="28" selection-start-line="40" selection-start-column="28" selection-end-line="40" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/efurture/minio/test/LevelDBTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="337">
-          <caret line="67" column="24" selection-start-line="67" selection-start-column="24" selection-end-line="67" selection-end-column="24" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/org/msgpack/msgpack/0.6.12/msgpack-0.6.12.jar!/org/msgpack/template/TemplateRegistry.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="249">
@@ -951,14 +918,35 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/sql/Connection.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="202">
+          <caret line="137" column="4" lean-forward="true" selection-start-line="137" selection-start-column="4" selection-end-line="137" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/sql/PreparedStatement.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="399">
+          <caret line="235" column="9" selection-start-line="235" selection-start-column="9" selection-end-line="235" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/sql/Date.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="705">
+          <caret line="73" column="11" selection-start-line="73" selection-start-column="11" selection-end-line="73" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/efurture/mysql/MYSqlTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="208">
-          <caret line="35" column="17" selection-start-line="35" selection-start-column="17" selection-end-line="35" selection-end-column="17" />
+        <state relative-caret-position="246">
+          <caret line="69" column="12" selection-start-line="69" selection-start-column="12" selection-end-line="69" selection-end-column="12" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#1450#1753#0" expanded="true" />
-            <element signature="e#1752#1753#0" expanded="true" />
+            <element signature="e#3333#3636#0" expanded="true" />
+            <element signature="e#3635#3636#0" expanded="true" />
           </folding>
         </state>
       </provider>

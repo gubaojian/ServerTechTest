@@ -32,6 +32,73 @@ public class MYSqlTest  extends TestCase {
      * */
 
 
+    @Test
+    public void testShowSql(){
+        String sql;
+        sql = "INSERT INTO  user" +
+                "(id," +
+                "name," +
+                "password," +
+                "nick," +
+                "uuid," +
+                "message," +
+                "gmt_create," +
+                "gmt_modified)" +
+                " VALUES " +
+                "(null,'"
+                + RandomStringUtils.randomAlphabetic(32) +
+                "','" + RandomStringUtils.randomAlphabetic(24) +
+                "','" + RandomStringUtils.randomAlphabetic(16) +
+                "','" + UUID.randomUUID().toString() +
+                "','" + CHStringUtil.randomString(128, 1024) +
+                "','" + DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss") +
+                "','" + DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss") +
+                "');";
+        System.out.println(sql);
+    }
+
+    @Test
+    public void testInsertTableBenchPrepareInsert() throws ClassNotFoundException, SQLException {
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try{
+            conn = getCollection();
+            String sql = "INSERT INTO  user(id,name,password,nick,uuid,message,gmt_create,gmt_modified) VALUES (null,?, ?, ?, ?, ?,?,?)";
+            stmt = conn.prepareStatement(sql);
+
+
+            int count = 10000;
+            long start = System.currentTimeMillis();
+
+            for(int i=0; i<count; i++) {
+                stmt.setString(1, RandomStringUtils.randomAlphabetic(32));
+                stmt.setString(2, RandomStringUtils.randomAlphabetic(24));
+                stmt.setString(3, RandomStringUtils.randomAlphabetic(16));
+                stmt.setString(4, UUID.randomUUID().toString());
+                stmt.setString(5, CHStringUtil.randomString(128, 1024));
+                stmt.setDate(6, new java.sql.Date(new Date().getTime()));
+                stmt.setDate(7, new java.sql.Date(new Date().getTime()));
+                boolean rs =  stmt.execute();
+
+            }
+
+            System.out.println("parpare bench inser used " + (System.currentTimeMillis() - start));
+            // 完成后关闭
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(stmt != null){
+                stmt.close();
+            }
+            if(conn != null){
+                conn.close();
+            }
+        }
+    }
+
+
     /**
      * 每秒1-2万的QPS
      * */
