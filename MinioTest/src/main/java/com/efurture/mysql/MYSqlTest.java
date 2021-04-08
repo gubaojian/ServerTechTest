@@ -57,6 +57,116 @@ public class MYSqlTest  extends TestCase {
         System.out.println(sql);
     }
 
+
+
+    /**
+     * select 每秒6-10万的QPS
+     * */
+    @Test
+    public void testInsertTableBenchSelectPools() throws ClassNotFoundException, SQLException, InterruptedException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+
+
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(16, 16, 8, TimeUnit.MINUTES,
+                new LinkedBlockingDeque<Runnable>());
+
+
+        long start = System.currentTimeMillis();
+        for(int i=0; i<32; i++){
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        testInsertTableBenchPrepareSelect(20000);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            };
+            executor.execute(runnable);
+        }
+        executor.shutdown();
+        executor.awaitTermination(10, TimeUnit.DAYS);
+        System.out.println("pool bench insert used " + (System.currentTimeMillis() - start));
+
+    }
+
+    @Test
+    public void testInsertTableBenchPrepareSelect(int count) throws ClassNotFoundException, SQLException {
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try{
+            conn = getCollection();
+            String sql = "select * from user where id = ?";
+            stmt = conn.prepareStatement(sql);
+
+
+            long start = System.currentTimeMillis();
+
+            for(int i=0; i<count; i++) {
+                stmt.setLong(1, RandomUtils.nextLong(2l, 300*10000l));
+                ResultSet rs =  stmt.executeQuery();
+                while (rs.next()){
+                    long id  = rs.getLong(1);
+                }
+                rs.close();
+
+            }
+
+            System.out.println("parpare bench select used " + (System.currentTimeMillis() - start));
+            // 完成后关闭
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(stmt != null){
+                stmt.close();
+            }
+            if(conn != null){
+                conn.close();
+            }
+        }
+    }
+    @Test
+    public void testInsertTableBenchPrepareSelect() throws ClassNotFoundException, SQLException {
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try{
+            conn = getCollection();
+            String sql = "select * from user where id = ?";
+            stmt = conn.prepareStatement(sql);
+
+
+            int count = 10000;
+            long start = System.currentTimeMillis();
+
+            for(int i=0; i<count; i++) {
+                stmt.setLong(1, RandomUtils.nextLong(2l, 300*10000l));
+                ResultSet rs =  stmt.executeQuery();
+                while (rs.next()){
+                    long id  = rs.getLong(1);
+                }
+                rs.close();
+
+            }
+
+            System.out.println("parpare bench select used " + (System.currentTimeMillis() - start));
+            // 完成后关闭
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(stmt != null){
+                stmt.close();
+            }
+            if(conn != null){
+                conn.close();
+            }
+        }
+    }
+
     @Test
     public void testInsertTableBenchPrepareInsert() throws ClassNotFoundException, SQLException {
 
