@@ -14,6 +14,22 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+
+/**
+ *
+ * mysql 单个表1000万数据影响不大，查询速度依旧很快。
+ *
+ * count时候注意，限制最大页数。设计时候通过隐藏总页数或者缓存总页数来处理。
+ * 通过上一页，下一页，来处理。也可以通过id来限制。
+ *
+ * 页数超过50-10万就比较难以处理啦。
+ *
+ * 10000万条数据 20G 左右
+ *
+ * 尽量把文件单独独立存储起来。
+ *
+ *
+ * */
 public class MYSqlTest  extends TestCase {
 
 
@@ -128,6 +144,10 @@ public class MYSqlTest  extends TestCase {
             }
         }
     }
+
+    /**
+     * select 每秒6-10万的QPS
+     * */
     @Test
     public void testInsertTableBenchPrepareSelect() throws ClassNotFoundException, SQLException {
 
@@ -140,7 +160,7 @@ public class MYSqlTest  extends TestCase {
             stmt = conn.prepareStatement(sql);
 
 
-            int count = 10000;
+            int count = 100000;
             long start = System.currentTimeMillis();
 
             for(int i=0; i<count; i++) {
