@@ -1,6 +1,6 @@
 package com.efurture.algorithm.tree;
 
-public class MaxPathSumTest {
+public class RootMaxPathTest {
 
 
     public static void main(String[] args){
@@ -10,7 +10,7 @@ public class MaxPathSumTest {
 
         TreeNode next = addRight(right , 10);
         addLeft(right, 10);
-        addRight(next, 100);
+        addRight(next, -100);
 
         System.out.println("maxPathSum " + maxPathSum(root));
 
@@ -32,55 +32,36 @@ public class MaxPathSumTest {
 
 
     public static int maxPathSum(TreeNode root){
-        return new TreeMaxPathSum(root).getMaxPathSum();
+        return new RootMaxPathSum(root).getMaxPathSum();
     }
 
 
 
-    private static class TreeMaxPathSum{
+    private static class RootMaxPathSum {
         private TreeNode root;
         private int maxPathSum;
 
-        public TreeMaxPathSum(TreeNode root) {
+        public RootMaxPathSum(TreeNode root) {
             this.root = root;
             this.maxPathSum = Integer.MIN_VALUE;
         }
 
         public int getMaxPathSum(){
-            maxPathSum(root);
+            maxPathSum(root, 0);
             return maxPathSum;
         }
 
-        private int maxPathSum(TreeNode root){
+        private void maxPathSum(TreeNode root, int parentVal){
             int max = Integer.MIN_VALUE;
-            int val  = root.val;
-            int leftVal = 0;
-            int rightVal = 0;
+            int val = root.val + parentVal;
             max = Math.max(val, max);
+            maxPathSum = Math.max(max, maxPathSum);
             if(root.left != null){
-                leftVal = maxPathSum(root.left);
-                max = Math.max(max, leftVal);
-                max = Math.max(max, val + leftVal);
+                maxPathSum(root.left, val);
             }
             if(root.right != null){
-                rightVal = maxPathSum(root.right);
-                max = Math.max(max, rightVal);
-                max = Math.max(max, val + rightVal);
+                maxPathSum(root.right, val);
             }
-
-            if(root.left != null && root.right != null){
-                max = Math.max(max, val + leftVal + rightVal);
-            }
-
-            max =  Math.max(max, val);
-            maxPathSum = Math.max(maxPathSum, max);
-
-
-
-            int pathVal = Math.max(val, val + leftVal);
-            pathVal = Math.max(val, val + rightVal);
-
-            return pathVal;
         }
     }
 }
