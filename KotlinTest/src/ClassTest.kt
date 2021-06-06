@@ -12,7 +12,15 @@ class Runoob{
     }
 }
 
-class Person constructor(firstName:String){
+class Person constructor(_firstName:String){
+
+
+    constructor(name:String, alexa:Int):this(name){
+        println("Alexa 拍名 $alexa");
+    }
+
+
+    var firstName = _firstName
 
     var lastName:String = "zhang"
         get() = field.toUpperCase()
@@ -28,6 +36,11 @@ class Person constructor(firstName:String){
         }
     var height:Float = 145.4f
         private set
+
+    init{
+        println("FirstName is $firstName")
+    }
+
 
 }
 
@@ -49,5 +62,7 @@ fun main(args:Array<String>){
 
     person.no = 20
     println("no: ${person.no}")
+
+    var p2:Person = Person("World", 100)
 
 }
