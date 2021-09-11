@@ -131,7 +131,7 @@ public class HelloKryo {
             MessageDO message = new MessageDO();
             message.id = RandomUtils.nextLong(0, Long.MAX_VALUE);
             message.time = System.currentTimeMillis();
-            int len = RandomUtils.nextInt(100, 500);
+            int len = RandomUtils.nextInt(10, 50);
             message.message = CHStringUtil.randomString(len);
             list.add(message);
         }
@@ -218,7 +218,6 @@ public class HelloKryo {
         long id;
         long time;
         String message;
-        byte[] bts = new byte[1024];
 
         public long getId() {
             return id;
@@ -244,13 +243,6 @@ public class HelloKryo {
             this.message = message;
         }
 
-        public byte[] getBts() {
-            return bts;
-        }
-
-        public void setBts(byte[] bts) {
-            this.bts = bts;
-        }
     }
 
 
