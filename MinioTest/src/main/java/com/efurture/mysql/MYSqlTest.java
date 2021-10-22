@@ -79,7 +79,7 @@ public class MYSqlTest  extends TestCase {
      * select 每秒6-10万的QPS
      * */
     @Test
-    public void testInsertTableBenchSelectPools() throws ClassNotFoundException, SQLException, InterruptedException {
+    public void testTableBenchSelectPools() throws ClassNotFoundException, SQLException, InterruptedException {
         Class.forName("com.mysql.cj.jdbc.Driver");
 
 
@@ -93,7 +93,7 @@ public class MYSqlTest  extends TestCase {
                 @Override
                 public void run() {
                     try{
-                        testInsertTableBenchPrepareSelect(20000);
+                        testTableBenchPrepareSelect(20000);
                     }catch (Exception e){
                         e.printStackTrace();
                     }
@@ -107,8 +107,7 @@ public class MYSqlTest  extends TestCase {
 
     }
 
-    @Test
-    public void testInsertTableBenchPrepareSelect(int count) throws ClassNotFoundException, SQLException {
+    private void testTableBenchPrepareSelect(int count) throws ClassNotFoundException, SQLException {
 
         Class.forName("com.mysql.cj.jdbc.Driver");
         Connection conn = null;
@@ -149,7 +148,7 @@ public class MYSqlTest  extends TestCase {
      * select 每秒6-10万的QPS
      * */
     @Test
-    public void testInsertTableBenchPrepareSelect() throws ClassNotFoundException, SQLException {
+    public void testTableBenchPrepareSelect() throws ClassNotFoundException, SQLException {
 
         Class.forName("com.mysql.cj.jdbc.Driver");
         Connection conn = null;
@@ -261,8 +260,8 @@ public class MYSqlTest  extends TestCase {
 
     }
 
-    @Test
-    public void testInsertTableBenchInsert(int count) throws ClassNotFoundException, SQLException {
+
+    private void testInsertTableBenchInsert(int count) throws ClassNotFoundException, SQLException {
         Connection conn = null;
         Statement stmt = null;
         try{

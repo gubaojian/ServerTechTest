@@ -5,19 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d4a4163-cf63-4205-b74f-0726a008b353" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/efurture/cbor/CborTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../RenderReuse/src/com/gubaojian/render/CellComponent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../RenderReuse/src/com/gubaojian/render/ListComponent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../RenderReuse/src/com/gubaojian/render/Pager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/dbnavigator.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/file.bin" beforeDir="false" afterPath="$PROJECT_DIR$/file.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/file.json" beforeDir="false" afterPath="$PROJECT_DIR$/file.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/file.mp" beforeDir="false" afterPath="$PROJECT_DIR$/file.mp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/efurture/proto/HelloKryo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/efurture/proto/HelloKryo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/META-INF/MinioTest.kotlin_module" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/efurture/mysql/MYSqlTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/efurture/mysql/MYSqlTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -240,6 +234,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -248,89 +243,101 @@
       <recent name="com.efurture.minio.test" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.CborTest.testCbor">
-    <configuration name="App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.efurture.App" />
+  <component name="RunManager" selected="JUnit.SqlitePerformanceTest.testMemoryTableBenchPrepareInsert">
+    <configuration name="SqlitePerformanceTest.testInsertTableBenchInsertPools" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="MinioTest" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="com.efurture.algorithm.tree.*" />
+          <option name="PATTERN" value="com.efurture.sqlite.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
+      <option name="PACKAGE_NAME" value="com.efurture.sqlite" />
+      <option name="MAIN_CLASS_NAME" value="com.efurture.sqlite.SqlitePerformanceTest" />
+      <option name="METHOD_NAME" value="testInsertTableBenchInsertPools" />
+      <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="HelloKryo" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.efurture.proto.HelloKryo" />
+    <configuration name="SqlitePerformanceTest.testInsertTableBenchPrepareInsert" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="MinioTest" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="com.efurture.proto.*" />
+          <option name="PATTERN" value="com.efurture.sqlite.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
+      <option name="PACKAGE_NAME" value="com.efurture.sqlite" />
+      <option name="MAIN_CLASS_NAME" value="com.efurture.sqlite.SqlitePerformanceTest" />
+      <option name="METHOD_NAME" value="testInsertTableBenchPrepareInsert" />
+      <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MaxPathSumTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.efurture.algorithm.tree.MaxPathSumTest" />
+    <configuration name="SqlitePerformanceTest.testMemoryTableBenchPrepareInsert" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="MinioTest" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="com.efurture.algorithm.tree.*" />
+          <option name="PATTERN" value="com.efurture.sqlite.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
+      <option name="PACKAGE_NAME" value="com.efurture.sqlite" />
+      <option name="MAIN_CLASS_NAME" value="com.efurture.sqlite.SqlitePerformanceTest" />
+      <option name="METHOD_NAME" value="testMemoryTableBenchPrepareInsert" />
+      <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="RootMaxPathTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.efurture.algorithm.tree.RootMaxPathTest" />
+    <configuration name="SqlitePerformanceTest.testTableBenchPrepareSelect" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="MinioTest" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="com.efurture.algorithm.tree.*" />
+          <option name="PATTERN" value="com.efurture.sqlite.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
+      <option name="PACKAGE_NAME" value="com.efurture.sqlite" />
+      <option name="MAIN_CLASS_NAME" value="com.efurture.sqlite.SqlitePerformanceTest" />
+      <option name="METHOD_NAME" value="testTableBenchPrepareSelect" />
+      <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="CborTest.testCbor" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="SqlitePerformanceTest.testTableBenchSelectPools" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="MinioTest" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="com.efurture.cbor.*" />
+          <option name="PATTERN" value="com.efurture.sqlite.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="com.efurture.cbor" />
-      <option name="MAIN_CLASS_NAME" value="com.efurture.cbor.CborTest" />
-      <option name="METHOD_NAME" value="testCbor" />
+      <option name="PACKAGE_NAME" value="com.efurture.sqlite" />
+      <option name="MAIN_CLASS_NAME" value="com.efurture.sqlite.SqlitePerformanceTest" />
+      <option name="METHOD_NAME" value="testTableBenchSelectPools" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <list>
-      <item itemvalue="Application.App" />
-      <item itemvalue="Application.MaxPathSumTest" />
-      <item itemvalue="Application.RootMaxPathTest" />
-      <item itemvalue="Application.HelloKryo" />
-      <item itemvalue="JUnit.CborTest.testCbor" />
+      <item itemvalue="JUnit.SqlitePerformanceTest.testInsertTableBenchPrepareInsert" />
+      <item itemvalue="JUnit.SqlitePerformanceTest.testTableBenchPrepareSelect" />
+      <item itemvalue="JUnit.SqlitePerformanceTest.testTableBenchSelectPools" />
+      <item itemvalue="JUnit.SqlitePerformanceTest.testInsertTableBenchInsertPools" />
+      <item itemvalue="JUnit.SqlitePerformanceTest.testMemoryTableBenchPrepareInsert" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.CborTest.testCbor" />
-        <item itemvalue="Application.HelloKryo" />
-        <item itemvalue="Application.RootMaxPathTest" />
-        <item itemvalue="Application.MaxPathSumTest" />
-        <item itemvalue="Application.App" />
+        <item itemvalue="JUnit.SqlitePerformanceTest.testMemoryTableBenchPrepareInsert" />
+        <item itemvalue="JUnit.SqlitePerformanceTest.testInsertTableBenchInsertPools" />
+        <item itemvalue="JUnit.SqlitePerformanceTest.testTableBenchPrepareSelect" />
+        <item itemvalue="JUnit.SqlitePerformanceTest.testTableBenchSelectPools" />
+        <item itemvalue="JUnit.SqlitePerformanceTest.testInsertTableBenchPrepareInsert" />
       </list>
     </recent_temporary>
   </component>
