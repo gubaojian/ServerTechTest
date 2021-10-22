@@ -22,6 +22,20 @@ public class JedisTest {
 
     /**
      * 插入性能每秒10万左右
+     * Spring data redis, multi-threading issue with Jedis
+     * */
+    /**
+     * <bean id="jedisConnFactory"
+     *       class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+     *       redis:usePool="true" redis:poolConfig-ref="jedisPoolConfig" redis:hostName="${redis.datasource.hostName}"
+     *       redis:database="${redis.database.index}" redis:port="${redis.datastore.port}"/>
+     *
+     * <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+     *     <property name="maxIdle" value="${redis.conn.maxIdle}"/>
+     *     <property name="maxTotal" value="${redis.conn.maxTotal}"/>
+     *     <property name="minIdle" value="${redis.conn.minIdle}"/>
+     *     <property name="testOnBorrow" value="true"/>
+     * </bean>
      * */
     @Test
     public void testPut() throws IOException, InterruptedException {
