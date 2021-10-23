@@ -48,6 +48,9 @@ public class MYSqlTest  extends TestCase {
      * */
 
 
+    /**
+     * INSERT INTO  user(name,password,nick,status,uuid,message,gmt_create,gmt_modified) VALUES ('kdnxppyahxiIIIozQUmHbpHrAgQCqLpI','lhcOaIoGdUrHspRRjPiaqlGx','IgIWhBixOAvTBVoY',0,'3491c769-6743-419c-a182-6a5b6af3dcd0','攩撎縭玬惁庱燑期棁覧脵逵匠邬垖僾闿笑烙觿儧崮忹婱瓴貦衦聿兾揇稻邷赜膒稺蟯札搗訖慃疺圦犠譡婅玵錷脏溌嶚铩橂駶撽賾籈钮徇砷豵邛熲芔嫑耀甧靣啕葀媢醠铹礋漥伣伇氌畠遶诊宦儣搇欘雧亽呷賧蒠訇灿斤錌輻偸馛郩滜丱乐桒鱸亁炵鸑句朆萘耹炻弙馾缩祆璭豰锺蒯蕶弗囂僆薝疡凬繤堪俔厳魘栾楉駉恮胍鬅鱈鲦图酢甖裡尖鑟趕謆烧若篸嗶圳阅硠拵初秒絧楬絒鍟擦趷獕墁狩簼逘觇鬞庠鬦璑柭仯斻甶廵訋悪嵛冾丱尾晓简','2021-10-23 22:14:16','2021-10-23 22:14:16');
+     * */
     @Test
     public void testShowSql(){
         String sql;

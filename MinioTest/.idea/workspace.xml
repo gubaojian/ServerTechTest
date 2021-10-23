@@ -5,9 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1d4a4163-cf63-4205-b74f-0726a008b353" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dbnavigator.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dbnavigator.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/efurture/redis/JedisTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/efurture/redis/JedisTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/efurture/mysql/MYSqlTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/efurture/mysql/MYSqlTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -239,7 +238,7 @@
       <recent name="com.efurture.minio.test" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.FurtureTaskTest.testSingleThreadMultiRequest">
+  <component name="RunManager" selected="JUnit.MYSqlTest.testShowSql">
     <configuration name="FurtureTaskTest.testSingleThread" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="MinioTest" />
       <extension name="coverage">
@@ -267,6 +266,22 @@
       <option name="PACKAGE_NAME" value="com.efurture.thread" />
       <option name="MAIN_CLASS_NAME" value="com.efurture.thread.FurtureTaskTest" />
       <option name="METHOD_NAME" value="testSingleThreadMultiRequest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="MYSqlTest.testShowSql" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="MinioTest" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.efurture.mysql.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.efurture.mysql" />
+      <option name="MAIN_CLASS_NAME" value="com.efurture.mysql.MYSqlTest" />
+      <option name="METHOD_NAME" value="testShowSql" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -304,36 +319,20 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SqlitePerformanceTest.testTableBenchPrepareSelect" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="MinioTest" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.efurture.sqlite.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.efurture.sqlite" />
-      <option name="MAIN_CLASS_NAME" value="com.efurture.sqlite.SqlitePerformanceTest" />
-      <option name="METHOD_NAME" value="testTableBenchPrepareSelect" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <list>
-      <item itemvalue="JUnit.SqlitePerformanceTest.testTableBenchPrepareSelect" />
       <item itemvalue="JUnit.SqlitePerformanceTest.testInsertTableBenchInsertPools" />
       <item itemvalue="JUnit.SqlitePerformanceTest.testMemoryTableBenchPrepareInsert" />
       <item itemvalue="JUnit.FurtureTaskTest.testSingleThread" />
       <item itemvalue="JUnit.FurtureTaskTest.testSingleThreadMultiRequest" />
+      <item itemvalue="JUnit.MYSqlTest.testShowSql" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.MYSqlTest.testShowSql" />
         <item itemvalue="JUnit.FurtureTaskTest.testSingleThreadMultiRequest" />
         <item itemvalue="JUnit.FurtureTaskTest.testSingleThread" />
         <item itemvalue="JUnit.SqlitePerformanceTest.testMemoryTableBenchPrepareInsert" />
         <item itemvalue="JUnit.SqlitePerformanceTest.testInsertTableBenchInsertPools" />
-        <item itemvalue="JUnit.SqlitePerformanceTest.testTableBenchPrepareSelect" />
       </list>
     </recent_temporary>
   </component>
