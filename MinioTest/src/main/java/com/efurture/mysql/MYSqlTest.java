@@ -189,6 +189,9 @@ public class MYSqlTest  extends TestCase {
         }
     }
 
+    /**
+     * 插入6-7秒左右
+     * */
     @Test
     public void testInsertTableBenchPrepareInsert() throws ClassNotFoundException, SQLException {
 
@@ -233,6 +236,7 @@ public class MYSqlTest  extends TestCase {
 
     /**
      * 每秒1-2万的QPS
+     * 6秒左右， 数据6万左右
      * */
     @Test
     public void testInsertTableBenchInsertPools() throws ClassNotFoundException, SQLException, InterruptedException {
@@ -249,7 +253,7 @@ public class MYSqlTest  extends TestCase {
                 @Override
                 public void run() {
                     try{
-                        testInsertTableBenchInsert(20000);
+                        testInsertTableBenchInsert(2000);
                     }catch (Exception e){
                         e.printStackTrace();
                     }

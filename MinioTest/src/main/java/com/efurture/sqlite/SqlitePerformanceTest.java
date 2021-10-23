@@ -143,10 +143,50 @@ public class SqlitePerformanceTest {
         }
     }
 
+    /**
+     * 同步 6-7秒 每秒2000左右
+     * 异步 3秒，相当于每秒3000
+     * */
     @Test
     public void testInsertTableBenchPrepareInsert() throws SQLException, ClassNotFoundException {
         Class.forName("org.sqlite.JDBC");
         Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
+
+        connection.createStatement().execute("PRAGMA synchronous = 0;");
+        PreparedStatement stmt = null;
+        String sql = "INSERT INTO  user(name,password,status,nick,uuid,message,gmt_create,gmt_modified) VALUES (?, ?, 0, ?, ?, ?,?,?)";
+        stmt = connection.prepareStatement(sql);
+        int count = 10000;
+        long start = System.currentTimeMillis();
+
+        for(int i=0; i<count; i++) {
+            stmt.setString(1, RandomStringUtils.randomAlphabetic(32));
+            stmt.setString(2, RandomStringUtils.randomAlphabetic(24));
+            stmt.setString(3, RandomStringUtils.randomAlphabetic(16));
+            stmt.setString(4, UUID.randomUUID().toString());
+            stmt.setString(5, CHStringUtil.randomString(128, 1024));
+            stmt.setDate(6, new java.sql.Date(new java.util.Date().getTime()));
+            stmt.setDate(7, new java.sql.Date(new java.util.Date().getTime()));
+            boolean rs =  stmt.execute();
+
+        }
+
+        System.out.println("parpare bench inser used " + (System.currentTimeMillis() - start));
+
+        stmt.close();
+        connection.close();
+    }
+
+    /**
+     * 同步 6-7秒 每秒2000左右
+     * 异步 3秒，相当于每秒3000
+     * */
+    @Test
+    public void testWALTableBenchPrepareInsert() throws SQLException, ClassNotFoundException {
+        Class.forName("org.sqlite.JDBC");
+        Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
+
+        connection.createStatement().execute("PRAGMA synchronous = 0;");
         PreparedStatement stmt = null;
         String sql = "INSERT INTO  user(name,password,status,nick,uuid,message,gmt_create,gmt_modified) VALUES (?, ?, 0, ?, ?, ?,?,?)";
         stmt = connection.prepareStatement(sql);
