@@ -77,7 +77,7 @@ public class SqlitePerformanceTest {
 
 
     @Test
-    public void prepareTable() throws ClassNotFoundException, SQLException {
+    public void testPrepareTable() throws ClassNotFoundException, SQLException {
         Class.forName("org.sqlite.JDBC");
         Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
         Statement stmt = connection.createStatement();
@@ -103,13 +103,16 @@ public class SqlitePerformanceTest {
 
 
     /**
-     * 1 - 1.5s
+     * 1 - 1.5s 总共 10万次查询
+     * 二次测试2.3秒，相当于每秒2万次查询
      * */
     @Test
     public void testTableBenchPrepareSelect() throws ClassNotFoundException, SQLException {
 
         Class.forName("org.sqlite.JDBC");
         Connection conn = DriverManager.getConnection("jdbc:sqlite:test.db");
+       // conn.createStatement().execute("PRAGMA synchronous = 0;PRAGMA cache_size=-200000");
+
         PreparedStatement stmt = null;
         try{
             String sql = "select * from user where id = ?";
@@ -146,6 +149,7 @@ public class SqlitePerformanceTest {
     /**
      * 同步 6-7秒 每秒2000左右
      * 异步 3秒，相当于每秒3000
+     * 关键还是异步
      * */
     @Test
     public void testInsertTableBenchPrepareInsert() throws SQLException, ClassNotFoundException {
@@ -180,13 +184,14 @@ public class SqlitePerformanceTest {
     /**
      * 同步 6-7秒 每秒2000左右
      * 异步 3秒，相当于每秒3000
+     *
      * */
     @Test
     public void testWALTableBenchPrepareInsert() throws SQLException, ClassNotFoundException {
         Class.forName("org.sqlite.JDBC");
         Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
 
-        connection.createStatement().execute("PRAGMA synchronous = 0;");
+        connection.createStatement().execute("PRAGMA synchronous = 0;PRAGMA cache_size=-200000");
         PreparedStatement stmt = null;
         String sql = "INSERT INTO  user(name,password,status,nick,uuid,message,gmt_create,gmt_modified) VALUES (?, ?, 0, ?, ?, ?,?,?)";
         stmt = connection.prepareStatement(sql);
@@ -214,7 +219,7 @@ public class SqlitePerformanceTest {
 
 
     /**
-     * select 每秒8-10万的QPS
+     * select 每秒8-10万的QPS,
      * */
     @Test
     public void testTableBenchSelectPools() throws ClassNotFoundException, SQLException, InterruptedException {

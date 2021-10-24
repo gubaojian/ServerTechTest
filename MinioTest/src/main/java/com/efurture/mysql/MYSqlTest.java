@@ -30,6 +30,9 @@ import java.util.concurrent.TimeUnit;
  *
  *
  * */
+/**
+ * mysql 版本 8.0
+ * */
 public class MYSqlTest  extends TestCase {
 
 
@@ -76,16 +79,42 @@ public class MYSqlTest  extends TestCase {
         System.out.println(sql);
     }
 
+    @Test
+    public void testPrepareTable() throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection = getCollection();
+        Statement stmt = connection.createStatement();
+        String dropSql = "DROP TABLE IF EXISTS user;";
+        stmt.executeUpdate(dropSql);
+
+        String createTableSql = "CREATE TABLE `user` (\n" +
+                "  `id` bigint NOT NULL AUTO_INCREMENT,\n" +
+                "  `name` varchar(64) DEFAULT NULL,\n" +
+                "  `password` varchar(32) DEFAULT NULL,\n" +
+                "  `status` tinyint DEFAULT '0',\n" +
+                "  `nick` varchar(64) DEFAULT NULL,\n" +
+                "  `uuid` varchar(64) DEFAULT NULL,\n" +
+                "  `message` text,\n" +
+                "  `gmt_create` datetime DEFAULT NULL,\n" +
+                "  `gmt_modified` datetime DEFAULT NULL,\n" +
+                "  PRIMARY KEY (`id`),\n" +
+                "  UNIQUE KEY `id_UNIQUE` (`id`),\n" +
+                "  KEY `name_password` (`name`,`password`)\n" +
+                ") ENGINE=InnoDB AUTO_INCREMENT=9993939 DEFAULT CHARSET=utf8;\n";
+        stmt.executeUpdate(createTableSql);
+        stmt.close();
+        connection.close();
+    }
+
+
 
 
     /**
-     * select 每秒6-10万的QPS
+     * 多线程 9秒-10秒 select 每秒6万的QPS
      * */
     @Test
     public void testTableBenchSelectPools() throws ClassNotFoundException, SQLException, InterruptedException {
         Class.forName("com.mysql.cj.jdbc.Driver");
-
-
         ThreadPoolExecutor executor = new ThreadPoolExecutor(16, 16, 8, TimeUnit.MINUTES,
                 new LinkedBlockingDeque<Runnable>());
 
@@ -111,8 +140,6 @@ public class MYSqlTest  extends TestCase {
     }
 
     private void testTableBenchPrepareSelect(int count) throws ClassNotFoundException, SQLException {
-
-        Class.forName("com.mysql.cj.jdbc.Driver");
         Connection conn = null;
         PreparedStatement stmt = null;
         try{
@@ -148,7 +175,7 @@ public class MYSqlTest  extends TestCase {
     }
 
     /**
-     * select 每秒6-10万的QPS
+     * 单线程整体时间6-7秒， 10万条数据，相当于一次数据 1.5-2万
      * */
     @Test
     public void testTableBenchPrepareSelect() throws ClassNotFoundException, SQLException {
@@ -235,8 +262,8 @@ public class MYSqlTest  extends TestCase {
 
 
     /**
-     * 每秒1-2万的QPS
-     * 6秒左右， 数据6万左右
+     * 每秒1的1万的QPS
+     * 6万条6秒左右， 数据6万左右
      * */
     @Test
     public void testInsertTableBenchInsertPools() throws ClassNotFoundException, SQLException, InterruptedException {
@@ -316,6 +343,9 @@ public class MYSqlTest  extends TestCase {
         }
     }
 
+    /**
+     * 单线程插入 1万条 插入性能 5-6秒左右，
+     * */
     @Test
     public void testInsertTableBenchInsert() throws ClassNotFoundException, SQLException {
         Class.forName("com.mysql.cj.jdbc.Driver");
