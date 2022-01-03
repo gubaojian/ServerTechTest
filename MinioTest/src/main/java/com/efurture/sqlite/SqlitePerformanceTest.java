@@ -111,7 +111,7 @@ public class SqlitePerformanceTest {
 
         Class.forName("org.sqlite.JDBC");
         Connection conn = DriverManager.getConnection("jdbc:sqlite:test.db");
-       // conn.createStatement().execute("PRAGMA synchronous = 0;PRAGMA cache_size=-200000");
+        conn.createStatement().execute("PRAGMA synchronous = 0;PRAGMA cache_size=-2000000");
 
         PreparedStatement stmt = null;
         try{

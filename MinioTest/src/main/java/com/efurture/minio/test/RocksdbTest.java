@@ -2,8 +2,6 @@ package com.efurture.minio.test;
 
 import io.minio.ObjectWriteResponse;
 import io.minio.UploadObjectArgs;
-import javafx.application.Application;
-import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.rocksdb.Env;
 import org.rocksdb.Options;

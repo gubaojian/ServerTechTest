@@ -71,7 +71,7 @@ int main(int argc, char **argv){
 
      int64_t start_time = time_now_ms();
      
-     for(int i=0; i < 100000; i++) {
+     for (int i=0; i < 100000; i++) {
          rc = sqlite3_exec(db, insertSql, callback, 0, &zErrMsg);
          if( rc!=SQLITE_OK ){
 	      fprintf(stderr, "SQL error: %s\n", zErrMsg);
