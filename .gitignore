@@ -22,3 +22,23 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 MinioTest/Target/classes/
+
+json_test/a.out.dSYM
+
+json_test/a.out
+
+*.out
+
+## 测试目录
+json_test/yyjson-master/test/
+
+
+json_test/yyjson-master/test/data/json/test_yyjson
+
+
+json_test/rapidjson-master/bin
+
+json_test/yyjson-master/doc/
+
+json_test/rapidjson-master/doc/
+

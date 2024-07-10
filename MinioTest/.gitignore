@@ -1,2 +1,22 @@
 .idea/
+
 *.db
+
+json_test/a.out.dSYM
+
+json_test/a.out
+
+*.out
+
+## 测试目录
+json_test/yyjson-master/test/
+
+
+json_test/yyjson-master/test/data/json/test_yyjson
+
+./json_test/yyjson-master/test/data/json/test_yyjson/
+
+json_test/rapidjson-master/bin/*
+
+
+./json_test/rapidjson-master/bin/
