@@ -20,14 +20,16 @@
 #include <map>
 
 /***
+ data size 160mb
+ 
 yy serialized used 651.924ms
 yyjson parse used 347.792ms
 
 rapidjson json used 1188.3ms
 rapidjson parse used 719.355ms
 
-normal cson used 220.943ms
-normal cson parse used 43.838ms
+ normal cson used 210.685ms
+ normal cson parse used 137.191ms
 
 normal pb used 519.65ms
 normal pb parse used 423.637ms
@@ -149,22 +151,24 @@ namespace json {
      }
 
     void parse(const std::string& msg) {
-        std::string connId = "connect-id-111119";
-        std::string authId = "auth-id-111119-4rwqrwqrrr";
-        const std::string action = "auth";
         wson_buffer* buffer =  wson_buffer_from((char*)msg.data(), msg.length());
+        
         wson_next_type(buffer);
         int length = wson_next_uint(buffer);
-        wson_next_bts(buffer, length);
+        std::string connId((char*)wson_next_bts(buffer, length), length);
+        
         wson_next_type(buffer);
         length = wson_next_uint(buffer);
-        wson_next_bts(buffer, length);
-         wson_next_type(buffer);
+        std::string authId((char*)wson_next_bts(buffer, length), length);
+        
+        wson_next_type(buffer);
         length = wson_next_uint(buffer);
-        wson_next_bts(buffer, length);
-         wson_next_type(buffer);
+        std::string action((char*)wson_next_bts(buffer, length), length);
+        
+        wson_next_type(buffer);
         length = wson_next_uint(buffer);
-        char* m = (char*)wson_next_bts(buffer, length);
+        std::string innerMsg((char*)wson_next_bts(buffer, length), length);
+        
         buffer->data = NULL;
      }
 }
@@ -180,7 +184,7 @@ int main() {
     for(int i=0; i<10000*100; i++) {
          bts +=serverMsg.length();
     }
-     std::cout << "data length used " << (bts/(1000*1000)) << "mb" << std::endl;
+     std::cout << serverMsg.length() << "data length used " << (bts/(1000*1000)) << "mb" << std::endl;
     auto start = std::chrono::system_clock::now();
     for(int i=0; i<10000*100; i++) {
         serverMsg = json::yy::toJsonMsg(msg);
