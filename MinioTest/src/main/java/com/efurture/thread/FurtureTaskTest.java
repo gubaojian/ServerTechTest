@@ -26,6 +26,27 @@ public class FurtureTaskTest {
     }
 
 
+
+    /***
+     * 15万左右 30 50ms。 * 20
+     * 线程发送任务每秒 15*20/30 = 300万 - 500万
+     * */
+    @Test
+    public void testSingleThreadOneRequest2() throws ExecutionException, InterruptedException {
+        ExecutorService executors = Executors.newFixedThreadPool(4);
+        long start = System.currentTimeMillis();
+        for (int i=0; i<150000; i++) {
+            Future<?> furture = executors.submit(new Runnable() {
+                @Override
+                public void run() {
+                    //System.out.println("end used ");
+                }
+            });
+        }
+        System.out.println("end usedX " + (System.currentTimeMillis() - start));
+    }
+
+
     /**
      * 50-80万左右
      * */

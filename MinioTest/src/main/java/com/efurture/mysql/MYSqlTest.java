@@ -110,7 +110,8 @@ public class MYSqlTest  extends TestCase {
 
 
     /**
-     * 多线程 9秒-10秒 select 每秒6万的QPS
+     * mysql 多线程 9秒-10秒 select 每秒6万的QPS
+     * postgresql 多线程 6秒-7秒 总共64万，select 每秒9-10万的QPS
      * */
     @Test
     public void testTableBenchSelectPools() throws ClassNotFoundException, SQLException, InterruptedException {
@@ -175,7 +176,8 @@ public class MYSqlTest  extends TestCase {
     }
 
     /**
-     * 单线程整体时间6-7秒， 10万条数据，相当于一次数据 1.5-2万
+     * mysql 单线程整体时间6-7秒， 10万次查询，相当于一次数据 1.5-2万
+     * postgresql 单线程 4 秒左右，10万次查询 相当于2.5万次 1秒
      * */
     @Test
     public void testTableBenchPrepareSelect() throws ClassNotFoundException, SQLException {
@@ -262,8 +264,8 @@ public class MYSqlTest  extends TestCase {
 
 
     /**
-     * 每秒1的1万的QPS
-     * 6万条6秒左右， 数据6万左右
+     * mysql  每秒1的1万的QPS 6万条6秒左右， 数据6万左右
+     * postgresql 数据总量6万左右 总共4秒左右，相当于1秒钟1-1.5万
      * */
     @Test
     public void testInsertTableBenchInsertPools() throws ClassNotFoundException, SQLException, InterruptedException {
@@ -275,7 +277,7 @@ public class MYSqlTest  extends TestCase {
 
 
         long start = System.currentTimeMillis();
-        for(int i=0; i<32; i++){
+        for(int i=0; i<320; i++){
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -344,7 +346,8 @@ public class MYSqlTest  extends TestCase {
     }
 
     /**
-     * 单线程插入 1万条 插入性能 5-6秒左右，
+     * mysql : 单线程插入 1万条 插入性能 5-6秒左右，
+     * postgresql. 单线程 1 万 插入 2.8-3.520 秒，相当于每秒 2000-3000条
      * */
     @Test
     public void testInsertTableBenchInsert() throws ClassNotFoundException, SQLException {

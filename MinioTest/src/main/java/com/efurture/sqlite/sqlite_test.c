@@ -4,6 +4,19 @@
 #include <unistd.h>
 #include <stdint.h>
 
+/***
+ * rocksdb性能： http://rocksdb.org.cn
+ * https://blog.csdn.net/weixin_44275820/article/details/119869999
+ * http://cppcms.com/wikipp/en/page/cppcms_2_0_whats_new
+ * https://www.sqlite.org/howtocompile.html
+ * https://www.sqlite.org/speed.html
+ * https://www.sqlite.org/inmemorydb.html
+ * clang -O2 sqlite_test.c  -lsqlite3
+ * 文件 2.9-3 秒 10 万
+ * 内存模式 0.6秒 10万
+ * sqlite4 https://sqlite.org/src4/doc/trunk/www/lsmusr.wiki#using_lsm_in_applications
+ *         https://sqlite.org/src4/doc/trunk/www/lsmperf.wiki
+ */
 static int callback(void *NotUsed, int argc, char **argv, char **azColName){
     int i;
     for(i=0; i<argc; i++){
@@ -24,6 +37,7 @@ int main(int argc, char **argv){
     char *zErrMsg = 0;
     int rc;
     rc = sqlite3_open("test.db", &db);
+    //rc = sqlite3_open(":memory:", &db);
     if( rc ){
       fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
       sqlite3_close(db);
@@ -57,7 +71,7 @@ int main(int argc, char **argv){
     char* insertSql = "INSERT INTO  user(name,password,nick,status,uuid,message,gmt_create,gmt_modified) VALUES ('kdnxppyahxiIIIozQUmHbpHrAgQCqLpI','lhcOaIoGdUrHspRRjPiaqlGx','IgIWhBixOAvTBVoY',0,'3491c769-6743-419c-a182-6a5b6af3dcd0','攩撎縭玬惁庱燑期棁覧脵逵匠邬垖僾闿笑烙觿儧崮忹婱瓴貦衦聿兾揇稻邷赜膒稺蟯札搗訖慃疺圦犠譡婅玵錷脏溌嶚铩橂駶撽賾籈钮徇砷豵邛熲芔嫑耀甧靣啕葀媢醠铹礋漥伣伇氌畠遶诊宦儣搇欘雧亽呷賧蒠訇灿斤錌輻偸馛郩滜丱乐桒鱸亁炵鸑句朆萘耹炻弙馾缩祆璭豰锺蒯蕶弗囂僆薝疡凬繤堪俔厳魘栾楉駉恮胍鬅鱈鲦图酢甖裡尖鑟趕謆烧若篸嗶圳阅硠拵初秒絧楬絒鍟擦趷獕墁狩簼逘觇鬞庠鬦璑柭仯斻甶廵訋悪嵛冾丱尾晓简','2021-10-23 22:14:16','2021-10-23 22:14:16');";
 
     char* selectSql = "select * from user limit 1;";
-     rc = sqlite3_exec(db, "PRAGMA journal_mode=WAL;PRAGMA synchronous = 0; ", callback, 0, &zErrMsg);
+     rc = sqlite3_exec(db, "PRAGMA journal_mode=WAL;PRAGMA synchronous = OFF;", callback, 0, &zErrMsg);
      if( rc!=SQLITE_OK ){
       fprintf(stderr, "SQL error: %s\n", zErrMsg);
       sqlite3_free(zErrMsg);
@@ -81,7 +95,7 @@ int main(int argc, char **argv){
      
      int64_t end_time = time_now_ms();
      
-     printf("used %ld ms ", (end_time - start_time));
+     printf("used %lld ms ", (end_time - start_time));
 
 
     sqlite3_close(db);

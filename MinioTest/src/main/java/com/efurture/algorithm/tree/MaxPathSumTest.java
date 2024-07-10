@@ -13,7 +13,7 @@ public class MaxPathSumTest {
         addRight(next, 100);
 
         System.out.println("maxPathSum " + maxPathSum(root));
-
+        System.out.println("maxPathSum " + 100%3.0);
     }
 
 

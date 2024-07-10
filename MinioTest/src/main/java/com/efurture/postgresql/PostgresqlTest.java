@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * postgresql 版本14.0
- *
  * */
 public class PostgresqlTest {
 

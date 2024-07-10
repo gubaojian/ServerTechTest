@@ -69,7 +69,7 @@ public class SqlitePerformanceTest {
 
         }
 
-        System.out.println("parpare bench inser used " + (System.currentTimeMillis() - start));
+        System.out.println("parpare bench inser used " + (System.currentTimeMillis() - start) + "ms");
 
         insertStmt.close();
         connection.close();
@@ -156,7 +156,7 @@ public class SqlitePerformanceTest {
         Class.forName("org.sqlite.JDBC");
         Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
 
-        connection.createStatement().execute("PRAGMA synchronous = 0;");
+        connection.createStatement().execute("PRAGMA synchronous = OFF;");
         PreparedStatement stmt = null;
         String sql = "INSERT INTO  user(name,password,status,nick,uuid,message,gmt_create,gmt_modified) VALUES (?, ?, 0, ?, ?, ?,?,?)";
         stmt = connection.prepareStatement(sql);
@@ -191,7 +191,7 @@ public class SqlitePerformanceTest {
         Class.forName("org.sqlite.JDBC");
         Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
 
-        connection.createStatement().execute("PRAGMA synchronous = 0;PRAGMA cache_size=-200000");
+        connection.createStatement().execute("PRAGMA synchronous = OFF;PRAGMA cache_size=-200000");
         PreparedStatement stmt = null;
         String sql = "INSERT INTO  user(name,password,status,nick,uuid,message,gmt_create,gmt_modified) VALUES (?, ?, 0, ?, ?, ?,?,?)";
         stmt = connection.prepareStatement(sql);
