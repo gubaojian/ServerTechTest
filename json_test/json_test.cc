@@ -170,6 +170,8 @@ namespace json {
         std::string innerMsg((char*)wson_next_bts(buffer, length), length);
         
         buffer->data = NULL;
+        
+        wson_buffer_free(buffer);
      }
 }
 
