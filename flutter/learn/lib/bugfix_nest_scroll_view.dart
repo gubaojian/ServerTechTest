@@ -303,8 +303,8 @@ class NestedScrollView extends StatefulWidget {
   final ScrollBehavior? scrollBehavior;
 
   /// {@macro flutter.widgets.shadow.scrollBehavior}
-  /// 1.9999999999999999 2.0
-  ///  *  不相等导致位置未被恢复
+  /// 199.9999999999999999 200.0
+  ///  *  不相等导致滑动的位置未被恢复
   ///  *  @override
   ///     void restoreScrollOffset() {
   ///     if (coordinator.canScrollBody) {
