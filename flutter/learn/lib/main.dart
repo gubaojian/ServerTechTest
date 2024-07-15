@@ -8,6 +8,8 @@ import 'package:learn/one_page.dart';
 import 'package:learn/provider_test.dart';
 
 import 'discover_page2.dart';
+import 'discover_page3.dart';
+import 'discover_page4.dart';
 
 // Be sure to annotate your callback function to avoid issues in release mode on Flutter >= 3.3.0
 @pragma('vm:entry-point')
@@ -59,7 +61,9 @@ class MyApp extends StatelessWidget {
         "/test": (context) => ProviderTest(),
         "/discover": (context) => DiscoverPage(),
         "/discover2": (context) => DiscoverPage2(),
-        "/discover3": (context) => MyHomePage(title: "测试"),
+        "/discover3": (context) => DiscoverPage3(),
+        "/discover4": (context) => DiscoverPage4(),
+        "/home": (context) => MyHomePage(title: "测试"),
       },
     );
   }
@@ -181,7 +185,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () {
                   Navigator.of(context).pushNamed("/discover2");
                 },
-                child: Text("Discover2")),
+                child: Text("Discover2 PageView and float appbar")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/discover3");
+                },
+                child: Text("Discover3 Single Float Header")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/discover4");
+                },
+                child: Text("Discover3 Single & Inner Float Header")),
             TextField(
               keyboardType: TextInputType.multiline,
               minLines: 1, //Normal textInputField will be displayed
