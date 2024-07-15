@@ -1,0 +1,10 @@
+{
+  "@@last_modified": "2024-03-15T15:40:34.504245",
+  "title": "你好你好",
+  "@title": {
+    "description": "Title for the Demo application",
+    "type": "text",
+    "placeholders_order": [],
+    "placeholders": {}
+  }
+}
