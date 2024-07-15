@@ -48,6 +48,15 @@ class DiscoverPageState6 extends State<DiscoverPage6> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: createBody(),
+      floatingActionButton: ElevatedButton(
+          onPressed: () {
+            setState(() {});
+            Future.delayed(Duration(milliseconds: 300), () {
+              main.jumpTo(0);
+              controllerPage.jumpToPage(0);
+            });
+          },
+          child: Text("刷新页面")),
     );
   }
 
@@ -55,6 +64,7 @@ class DiscoverPageState6 extends State<DiscoverPage6> {
     debugPrint("hello build");
     return bufgix.NestedScrollView(
       forceRestoreScrollOffset: true,
+      controller: main,
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
         // 返回一个 Sliver 数组给外部可滚动组件。
         return <Widget>[
