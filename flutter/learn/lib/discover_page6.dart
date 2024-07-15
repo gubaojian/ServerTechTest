@@ -8,7 +8,9 @@ import 'bugfix_nest_scroll_view.dart' as bufgix;
 /**
  *  nexted_scroll_view下面代码有bug，
  *  1.9999999999999999 2.0
- *  不相等导致位置未被恢复
+ *  不相等导致位置未被恢复，
+ *  outer.extentAfter == 0.0
+ *  比如： 0.00000000000001 其实是相当的
  *  @override
     void restoreScrollOffset() {
     if (coordinator.canScrollBody) {
