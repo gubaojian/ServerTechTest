@@ -10,6 +10,8 @@ import 'package:learn/provider_test.dart';
 import 'discover_page2.dart';
 import 'discover_page3.dart';
 import 'discover_page4.dart';
+import 'discover_page5.dart';
+import 'discover_page6.dart';
 
 // Be sure to annotate your callback function to avoid issues in release mode on Flutter >= 3.3.0
 @pragma('vm:entry-point')
@@ -63,6 +65,8 @@ class MyApp extends StatelessWidget {
         "/discover2": (context) => DiscoverPage2(),
         "/discover3": (context) => DiscoverPage3(),
         "/discover4": (context) => DiscoverPage4(),
+        "/discover5": (context) => DiscoverPage5(),
+        "/discover6": (context) => DiscoverPage6(),
         "/home": (context) => MyHomePage(title: "测试"),
       },
     );
@@ -195,7 +199,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () {
                   Navigator.of(context).pushNamed("/discover4");
                 },
-                child: Text("Discover3 Single & Inner Float Header")),
+                child: Text("Discover4 Single & Inner Float Header")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/discover5");
+                },
+                child: Text("Discover5 Single & Inner Banner Header")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/discover6");
+                },
+                child: Text("Discover6 Bugfix & Inner Banner Header")),
             TextField(
               keyboardType: TextInputType.multiline,
               minLines: 1, //Normal textInputField will be displayed

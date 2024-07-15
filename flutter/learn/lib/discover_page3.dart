@@ -68,6 +68,7 @@ class DiscoverPageState3 extends State<DiscoverPage3> {
             itemBuilder: (context, pageIndex) {
               debugPrint("hello build inner pag ${pageIndex}");
               return CustomScrollView(
+                physics: const ClampingScrollPhysics(),
                 key: PageStorageKey<String>(
                     "discover_customScroll_${pageIndex}"),
                 // scroll controll
@@ -94,7 +95,7 @@ class DiscoverPageState3 extends State<DiscoverPage3> {
   // 构建固定高度的SliverList，count为列表项属相
   Widget buildSliverList(int pageIndex, int count) {
     return SliverFixedExtentList(
-      itemExtent: 50,
+      itemExtent: 100,
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           return Container(

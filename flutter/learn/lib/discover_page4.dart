@@ -66,16 +66,17 @@ class DiscoverPageState4 extends State<DiscoverPage4> {
             controller: controllerPage,
             onPageChanged: (int value) {},
             itemBuilder: (context, pageIndex) {
-              debugPrint("hello build inner pag ${pageIndex}");
+              debugPrint("inner build inner pag ${pageIndex}");
               return Column(
                 children: [
                   Container(
                     height: 50,
                     color: Colors.blue,
-                    child: Text("inner banner ${pageIndex}"),
+                    child: Text("4 inner banner ${pageIndex}"),
                   ),
                   Expanded(
                       child: CustomScrollView(
+                    physics: const ClampingScrollPhysics(),
                     key: PageStorageKey<String>(
                         "discover_customScroll_${pageIndex}"),
                     // scroll controll
@@ -104,7 +105,7 @@ class DiscoverPageState4 extends State<DiscoverPage4> {
   // 构建固定高度的SliverList，count为列表项属相
   Widget buildSliverList(int pageIndex, int count) {
     return SliverFixedExtentList(
-      itemExtent: 50,
+      itemExtent: 100,
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           return Container(

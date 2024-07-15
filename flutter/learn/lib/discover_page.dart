@@ -50,24 +50,22 @@ class DiscoverPageState extends State<DiscoverPage> {
       body: PageView.builder(
         controller: controllerPage,
         itemBuilder: (context, pageIndex) {
-          return WantKeepAlive(
-              key: PageStorageKey<String>("keep${pageIndex}"),
-              ListView.builder(
-                key: PageStorageKey<String>("list${pageIndex}"),
-                //controller: scrollController[pageIndex],
-                padding: const EdgeInsets.all(8),
-                physics: const ClampingScrollPhysics(),
-                //重要
-                itemCount: 50,
-                itemBuilder: (BuildContext context, int index) {
-                  return SizedBox(
-                    height: 100,
-                    child: Center(
-                        child: Text('page ${pageIndex} Item $index',
-                            style: TextStyle(fontSize: 24))),
-                  );
-                },
-              ));
+          return ListView.builder(
+            key: PageStorageKey<String>("list${pageIndex}"),
+            //controller: scrollController[pageIndex],
+            padding: const EdgeInsets.all(8),
+            physics: const ClampingScrollPhysics(),
+            //重要
+            itemCount: 50,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                height: 100,
+                child: Center(
+                    child: Text('page ${pageIndex} Item $index',
+                        style: TextStyle(fontSize: 24))),
+              );
+            },
+          );
         },
         itemCount: 4,
       ),
