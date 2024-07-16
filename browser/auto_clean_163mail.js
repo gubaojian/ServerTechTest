@@ -29,7 +29,7 @@ function autoDelete163Mail() {
         console.log("auto delete mail success");
         setTimeout(function(){ 
             autoDelete163Mail();
-        }, 3000); //等待3秒删除下一页
+        }, 4000); //等待3秒删除下一页
     }, 300)
 }
 
