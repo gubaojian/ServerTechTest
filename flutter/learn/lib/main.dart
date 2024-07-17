@@ -3,6 +3,9 @@ import 'dart:isolate';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
+import 'package:learn/discover_inner_normal.dart';
+import 'package:learn/discover_inner_normal2.dart';
+import 'package:learn/discover_inner_normal3.dart';
 import 'package:learn/discover_page.dart';
 import 'package:learn/one_page.dart';
 import 'package:learn/provider_test.dart';
@@ -67,6 +70,9 @@ class MyApp extends StatelessWidget {
         "/discover4": (context) => DiscoverPage4(),
         "/discover5": (context) => DiscoverPage5(),
         "/discover6": (context) => DiscoverPage6(),
+        "/discovernormal": (context) => DiscoverPageInnerNormal(),
+        "/discovernormal2": (context) => DiscoverPageInnerNormal2(),
+        "/discovernormal3": (context) => DiscoverPageInnerNormal3(),
         "/home": (context) => MyHomePage(title: "测试"),
       },
     );
@@ -210,6 +216,21 @@ class _MyHomePageState extends State<MyHomePage> {
                   Navigator.of(context).pushNamed("/discover6");
                 },
                 child: Text("Discover6 Bugfix & Inner Banner Header")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/discovernormal");
+                },
+                child: Text("Discover No ViewPager")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/discovernormal2");
+                },
+                child: Text("Discover No ViewPager2")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/discovernormal3");
+                },
+                child: Text("Discover No ViewPager3")),
             TextField(
               keyboardType: TextInputType.multiline,
               minLines: 1, //Normal textInputField will be displayed
