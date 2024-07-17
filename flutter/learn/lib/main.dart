@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
+import 'package:learn/backdrop_page.dart';
 import 'package:learn/discover_inner_normal.dart';
 import 'package:learn/discover_inner_normal2.dart';
 import 'package:learn/discover_inner_normal3.dart';
@@ -73,6 +74,7 @@ class MyApp extends StatelessWidget {
         "/discovernormal": (context) => DiscoverPageInnerNormal(),
         "/discovernormal2": (context) => DiscoverPageInnerNormal2(),
         "/discovernormal3": (context) => DiscoverPageInnerNormal3(),
+        "/backgropPage": (context) => BackgropPage(),
         "/home": (context) => MyHomePage(title: "测试"),
       },
     );
@@ -124,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
+      body: SingleChildScrollView(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
@@ -231,6 +233,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   Navigator.of(context).pushNamed("/discovernormal3");
                 },
                 child: Text("Discover No ViewPager3")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("/backgropPage");
+                },
+                child: Text("BackgropPage")),
             TextField(
               keyboardType: TextInputType.multiline,
               minLines: 1, //Normal textInputField will be displayed
