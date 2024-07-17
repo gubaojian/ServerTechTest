@@ -29,7 +29,7 @@ function autoDelete163Mail() {
         console.log("auto delete mail success");
         setTimeout(function(){ 
             autoDelete163Mail();
-        }, 6500); //等待6秒删除下一页， 太短会弹出错误框， 无人看时候10秒比较保险
+        }, 6500); //等待6.5秒删除下一页， 太短会弹出错误框， 无人看时候10秒比较保险
     }, 500)
 }
 
@@ -70,7 +70,7 @@ function autoDelete163Mail() {
         console.log("auto delete mail success");
         setTimeout(function(){ 
             autoDelete163Mail();
-        }, 1000); //等待10秒删除下一页， 无人看时候10秒比较保险, 删除到最后时加载比较慢
+        }, 10*1000); //等待10秒删除下一页， 无人看时候10秒比较保险, 删除到最后时加载比较慢
     }, 500)
 }
 
