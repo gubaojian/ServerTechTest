@@ -42,3 +42,7 @@ json_test/yyjson-master/doc/
 
 json_test/rapidjson-master/doc/
 
+wss/test/target
+
+wss/test/.idea/
+
