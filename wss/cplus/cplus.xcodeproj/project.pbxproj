@@ -244,6 +244,7 @@
 		01881B0D2CA4FDE10038B323 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_X86_VECTOR_INSTRUCTIONS = default;
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = /user/local/include;
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;
@@ -256,6 +257,7 @@
 		01881B0E2CA4FDE10038B323 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_X86_VECTOR_INSTRUCTIONS = default;
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = /user/local/include;
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;

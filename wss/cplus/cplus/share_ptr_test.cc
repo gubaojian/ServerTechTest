@@ -10,6 +10,11 @@
 #include <string>
 #include <memory>
 
+/**
+ * map str size 1 capcity 2
+ * map shareptr size 2 capcity 2
+ *  同样内容key， share_ptr是两个不同的对象，key不同
+ */
 int share_ptr_test_main(int argc, const char * argv[]) {
     std::unordered_map<std::string, std::string> mapStrs;
     std::string hello1 = "hello";

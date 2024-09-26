@@ -10,6 +10,11 @@
 #include <chrono>
 
 
+
+/**
+ * uuid first used 325727723ns 325ms
+ *  uuid2 second used 332609046ns 332ms
+ */
 int string_memory_test_main(int argc, const char * argv[]) {
     std::string hello = "hello";
     std::string world = "hello world";

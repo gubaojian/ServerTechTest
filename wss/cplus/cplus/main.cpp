@@ -14,9 +14,10 @@ extern int share_ptr_test_main(int argc, const char * argv[]);
 extern int string_memory_test_main(int argc, const char * argv[]);
 extern int map_find_test_main(int argc, const char * argv[]);
 extern int map_find_test_int_main(int argc, const char * argv[]);
+extern int uuid_compare_test_main(int argc, const char * argv[]);
 
 int main(int argc, const char * argv[]) {
-    int run_program = 3;
+    int run_program = 4;
     switch (run_program) {
         case 1:
             share_ptr_test_main(argc, argv);
@@ -27,6 +28,9 @@ int main(int argc, const char * argv[]) {
         case 3:
             map_find_test_main(argc, argv);
             map_find_test_int_main(argc, argv);
+            break;
+        case 4:
+            uuid_compare_test_main(argc, argv);
             break;
         default:
             break;
