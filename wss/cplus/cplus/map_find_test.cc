@@ -11,23 +11,40 @@
 #include <chrono>
 #include <map>
 #include <set>
+#include <cstdlib>
+#include <unistd.h>
 
 // clang++ -E -v -x c++ /dev/null
 // see include path
 #include <xxhash.h>
 
 /**
- std::unordered_map find used 1089ms
- std::unordered_map miss key find used 988ms
- std::map find used 11009ms
- std::map miss key find used 4602ms
+ debug  mode
+ 
+ 
+ std::unordered_map find used 1145ms
+ std::unordered_map miss key find used 985ms
+ std::unordered_map xxhash find used 1118ms
+ std::unordered_map xxhash miss key find used 1045ms
+ 
+ std::map find used 11096ms
+ std::map miss key find used 5561ms
+ 
+ release mode
+ 
+ std::unordered_map find used 525ms
+ std::unordered_map miss key find used 526ms
+ std::unordered_map xxhash find used 527ms
+ std::unordered_map xxhash miss key find used 531ms
+ std::map find used 4815ms
+ std::map miss key find used 609ms
  
  https://github.com/Cyan4973/xxHash/releases/tag/v0.8.2
  */
 
 struct StringxxHash {
     std::size_t operator()(const std::string& key) const {
-        return XXH64(key.c_str(), key.size(), 37);
+        return XXH32(key.c_str(), key.size(), 0);
     }
 };
 
@@ -50,6 +67,7 @@ int map_find_test_main(int argc, const char * argv[]) {
         uuid_unparse(uuid, uuidStr);
         clients[uuidStr] = ptr;
         clients2[uuidStr] = ptr;
+        
         clientsX[uuidStr] = ptr;
         
         keys.emplace_back(uuidStr);
@@ -60,6 +78,9 @@ int map_find_test_main(int argc, const char * argv[]) {
     end = std::chrono::high_resolution_clock::now();
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "prepare data used " << used.count() << "ms" << std::endl;
+    std::cout << "clients " << clients.size()  << std::endl;
+    std::cout << "clients2 " << clients2.size() << std::endl;
+    std::cout << "clientsx " << clientsX.size() << std::endl;
   
     
     start = std::chrono::high_resolution_clock::now();
@@ -80,7 +101,7 @@ int map_find_test_main(int argc, const char * argv[]) {
     
     start = std::chrono::high_resolution_clock::now();
     for(const auto& key : keys) {
-        clients.find(key);
+        clientsX.find(key);
     }
     end = std::chrono::high_resolution_clock::now();
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -88,7 +109,7 @@ int map_find_test_main(int argc, const char * argv[]) {
   
     start = std::chrono::high_resolution_clock::now();
     for(const auto& key : missKeys) {
-        clients.find(key);
+        clientsX.find(key);
     }
     end = std::chrono::high_resolution_clock::now();
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -111,6 +132,6 @@ int map_find_test_main(int argc, const char * argv[]) {
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "std::map miss key find used " << used.count() << "ms" << std::endl;
   
-    
+
     return 0;
 }
