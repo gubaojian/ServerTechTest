@@ -35,6 +35,10 @@
 
 #include "lib/base64.hpp"
 
+#include "lib/base64pp.h"
+
+#include "lib/modp_b64/modp_b64.h"
+
 /**
  *
  * debug mode:
@@ -88,6 +92,16 @@ int base64_usage_test_main(int argc, const char * argv[]) {
         std::cout << "base64 header " << std::endl << buffer << " " << buffer.capacity()  << std::endl;
     }
     
+    {
+        std::string_view data(bts, 1024);
+        std::cout << "base64pp base64 " << used.count() << "ms " << base64pp::encode_str(data) << std::endl;
+    }
+    
+    
+    {
+        std::string str(bts, 1024);
+        std::cout << "mod base64 " << used.count() << "ms " << modp_b64_encode(str) << std::endl;
+    }
     
    
    

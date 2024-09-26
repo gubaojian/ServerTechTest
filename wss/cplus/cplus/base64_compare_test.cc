@@ -12,6 +12,10 @@
  *
  * https://github.com/aklomp/base64
  *
+ * https://github.com/tobiaslocker/base64
+ *
+ * https://github.com/matheusgomes28/base64pp
+ *
  install:
  cp libtb64.so /usr/local/lib/
  cp libtb64.a /usr/local/lib/
@@ -37,6 +41,13 @@
 
 #include "lib/base64.hpp"
 
+
+#include "lib/base64pp.h"
+
+#include "lib/modp_b64/modp_b64.h"
+
+
+
 /**
  *
  * debug mode:
@@ -46,7 +57,9 @@
  boost with share buffer base64 1911ms
  libbase64 base64 397ms
  libbase64 base64 share buffer 307ms
- * base64 header base64 4046ms 
+ * base64 header base64 4046ms
+ *
+ *
  *
  * release mode
  *  turbo base64 142ms
@@ -56,6 +69,8 @@
  *  libbase64 base64 362ms
  *  libbase64 base64 share buffer 296ms
  *  base64 header base64 578ms
+ *   mod base64 723ms
+ *  base64pp base64 4419ms （数据减小10倍）
  */
 int base64_compare_test_main(int argc, const char * argv[]) {
     auto start = std::chrono::high_resolution_clock::now();
@@ -149,6 +164,28 @@ int base64_compare_test_main(int argc, const char * argv[]) {
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "base64 header base64 " << used.count() << "ms " << std::endl;
     
+    
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*100; i++) {
+        std::string data(bts, 1024);
+        std::string r = modp_b64_encode(data);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::string str(bts, 1024);
+    std::cout << "mod base64 " << used.count() << "ms " << std::endl;
+    
+    /** too slow
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*10; i++) {
+        base64pp::encode_str(data);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "base64pp base64 " << used.count() << "ms " << base64pp::encode_str(data) << std::endl;
+     */
+  
+   
     
     return 0;
 }
