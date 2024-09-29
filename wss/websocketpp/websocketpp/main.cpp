@@ -33,5 +33,4 @@ int main(int argc, const char * argv[]) {
     }
     std::cout << "run program " << run_program << " success " << std::endl;
     return 0;
-    return 0;
 }
