@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXCopyFilesBuildPhase section */
-		0115916F2CA581CA00C61C49 /* Embed Libraries */ = {
+		0115C9182CA92AE5004DADBF /* Embed Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -29,19 +29,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		011591552CA5801B00C61C49 /* libtb64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtb64.a; path = ../../../../../../usr/local/lib/libtb64.a; sourceTree = "<group>"; };
-		011591562CA5804C00C61C49 /* libtb64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtb64.a; path = "../../../../Downloads/Turbo-Base64-master/libtb64.a"; sourceTree = "<group>"; };
-		011591572CA5806000C61C49 /* libtb64.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtb64.so; path = ../../../../../../usr/local/lib/libtb64.so; sourceTree = "<group>"; };
 		01881B052CA4FDE10038B323 /* cplus */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = cplus; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		011591702CA581CA00C61C49 /* Exceptions for "cplus" folder in "Embed Libraries" phase from "cplus" target */ = {
+		0115C9192CA92AE5004DADBF /* Exceptions for "cplus" folder in "Embed Libraries" phase from "cplus" target */ = {
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			attributesByRelativePath = {
 				lib/libtb64.so = (CodeSignOnCopy, );
 			};
-			buildPhase = 0115916F2CA581CA00C61C49 /* Embed Libraries */;
+			buildPhase = 0115C9182CA92AE5004DADBF /* Embed Libraries */;
 			membershipExceptions = (
 				lib/libtb64.so,
 			);
@@ -52,7 +49,7 @@
 		01881B072CA4FDE10038B323 /* cplus */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				011591702CA581CA00C61C49 /* Exceptions for "cplus" folder in "Embed Libraries" phase from "cplus" target */,
+				0115C9192CA92AE5004DADBF /* Exceptions for "cplus" folder in "Embed Libraries" phase from "cplus" target */,
 			);
 			path = cplus;
 			sourceTree = "<group>";
@@ -73,9 +70,6 @@
 		011591542CA5801B00C61C49 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				011591572CA5806000C61C49 /* libtb64.so */,
-				011591562CA5804C00C61C49 /* libtb64.a */,
-				011591552CA5801B00C61C49 /* libtb64.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -107,7 +101,7 @@
 				01881B012CA4FDE10038B323 /* Sources */,
 				01881B022CA4FDE10038B323 /* Frameworks */,
 				01881B032CA4FDE10038B323 /* CopyFiles */,
-				0115916F2CA581CA00C61C49 /* Embed Libraries */,
+				0115C9182CA92AE5004DADBF /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -287,7 +281,10 @@
 			buildSettings = {
 				CLANG_X86_VECTOR_INSTRUCTIONS = default;
 				CODE_SIGN_STYLE = Automatic;
-				HEADER_SEARCH_PATHS = /user/local/include;
+				HEADER_SEARCH_PATHS = (
+					/user/local/include,
+					/Users/efurture/code/ServerTechTest/wss/cplus/cplus/include,
+				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
 					"$(PROJECT_DIR)/cplus/lib",
@@ -295,6 +292,7 @@
 				OTHER_LDFLAGS = (
 					"-lxxhash",
 					"-ltb64",
+					"-lfolly",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYSTEM_HEADER_SEARCH_PATHS = /usr/local/include/;
@@ -306,7 +304,10 @@
 			buildSettings = {
 				CLANG_X86_VECTOR_INSTRUCTIONS = default;
 				CODE_SIGN_STYLE = Automatic;
-				HEADER_SEARCH_PATHS = /user/local/include;
+				HEADER_SEARCH_PATHS = (
+					/user/local/include,
+					/Users/efurture/code/ServerTechTest/wss/cplus/cplus/include,
+				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
 					"$(PROJECT_DIR)/cplus/lib",
@@ -314,6 +315,7 @@
 				OTHER_LDFLAGS = (
 					"-lxxhash",
 					"-ltb64",
+					"-lfolly",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYSTEM_HEADER_SEARCH_PATHS = /usr/local/include/;

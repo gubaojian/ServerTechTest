@@ -17,6 +17,7 @@ import org.java_websocket.protocols.IProtocol;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.*;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -44,6 +45,8 @@ public abstract class WebSocketClient2 extends AbstractWebSocket implements Runn
     private CountDownLatch closeLatch;
     private int connectTimeout;
     private DnsResolver dnsResolver;
+
+    public static long start = System.currentTimeMillis();
 
     public WebSocketClient2(URI serverUri) {
         this(serverUri, (Draft)(new Draft_6455()));
@@ -89,7 +92,7 @@ public abstract class WebSocketClient2 extends AbstractWebSocket implements Runn
             }
 
             this.connectTimeout = connectTimeout;
-            this.setTcpNoDelay(false);
+            this.setTcpNoDelay(true);
             this.setReuseAddr(false);
             this.engine = new WebSocketImpl(this, protocolDraft);
         }
@@ -247,6 +250,7 @@ public abstract class WebSocketClient2 extends AbstractWebSocket implements Runn
             boolean upgradeSocketToSSLSocket = this.prepareSocket();
             this.socket.setTcpNoDelay(this.isTcpNoDelay());
             this.socket.setReuseAddress(this.isReuseAddr());
+            //this.socket.setSendBufferSize(1024*1024);
             int receiveBufferSize = this.getReceiveBufferSize();
             if (receiveBufferSize > 0) {
                 this.socket.setReceiveBufferSize(receiveBufferSize);
@@ -597,12 +601,21 @@ public abstract class WebSocketClient2 extends AbstractWebSocket implements Runn
         }
 
         private void runWriteData() throws IOException {
+            int i = 0;
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(ostream);
             while(true) {
                 try {
                     if (!Thread.interrupted()) {
                         ByteBuffer bufferx = (ByteBuffer)WebSocketClient2.this.engine.outQueue.take();
-                        WebSocketClient2.this.ostream.write(bufferx.array(), 0, bufferx.limit());
+                        bufferedOutputStream.write(bufferx.array(), 0, bufferx.limit());
+                        i++;
                         //WebSocketClient2.this.ostream.flush();
+                        if (engine.outQueue.isEmpty() || i > 1024) {
+                            System.out.println("queue end " + (System.currentTimeMillis() - start));
+                            bufferedOutputStream.flush();
+                            ostream.flush();
+                            i = 0;
+                        }
                         continue;
                     }
                 } catch (InterruptedException var4) {

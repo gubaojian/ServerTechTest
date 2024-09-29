@@ -89,7 +89,181 @@ import java.util.UUID;
  *
  * 66万每秒。
  *
- * wss加密不加密ws区别不大， 说明限制在网卡。数据小QPS提升明显，说明限制在网卡。
+ * wss加密不加密ws区别不大， 说明限制在网卡。数据小QPS提升明显，
+ * 说明限制在包处理，及数据加密解密？限制在发送端？
+ * 用 iperf3 测试本地tcp速度。
+ *  iperf3 -s
+ * iperf3 -c 192.168.1.66
+ *
+ * Connecting to host 192.168.1.66, port 5201
+ * [  5] local 192.168.1.66 port 53380 connected to 192.168.1.66 port 5201
+ * [ ID] Interval           Transfer     Bitrate
+ * [  5]   0.00-1.00   sec  8.42 GBytes  72.3 Gbits/sec
+ * [  5]   1.00-2.00   sec  8.42 GBytes  72.3 Gbits/sec
+ * [  5]   2.00-3.00   sec  8.50 GBytes  73.1 Gbits/sec
+ * [  5]   3.00-4.00   sec  8.62 GBytes  74.0 Gbits/sec
+ * [  5]   4.00-5.00   sec  8.61 GBytes  74.0 Gbits/sec
+ * [  5]   5.00-6.00   sec  7.66 GBytes  65.6 Gbits/sec
+ * [  5]   6.00-7.00   sec  8.47 GBytes  72.9 Gbits/sec
+ * [  5]   7.00-8.00   sec  8.54 GBytes  73.4 Gbits/sec
+ * [  5]   8.00-9.00   sec  8.51 GBytes  72.9 Gbits/sec
+ * [  5]   9.00-10.00  sec  8.49 GBytes  73.0 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [ ID] Interval           Transfer     Bitrate
+ * [  5]   0.00-10.00  sec  84.3 GBytes  72.3 Gbits/sec                  sender
+ * [  5]   0.00-10.00  sec  84.3 GBytes  72.3 Gbits/sec
+ *
+ * iperf3 -c 127.0.0.1
+ * Connecting to host 127.0.0.1, port 5201
+ * [  5] local 127.0.0.1 port 53710 connected to 127.0.0.1 port 5201
+ * [ ID] Interval           Transfer     Bitrate
+ * [  5]   0.00-1.00   sec  7.29 GBytes  62.4 Gbits/sec
+ * [  5]   1.00-2.00   sec  6.83 GBytes  58.9 Gbits/sec
+ * [  5]   2.00-3.00   sec  7.41 GBytes  63.7 Gbits/sec
+ * [  5]   3.00-4.00   sec  7.37 GBytes  63.3 Gbits/sec
+ * [  5]   4.00-5.00   sec  7.49 GBytes  64.1 Gbits/sec
+ * [  5]   5.00-6.00   sec  7.36 GBytes  63.2 Gbits/sec
+ * [  5]   6.00-7.00   sec  7.41 GBytes  63.6 Gbits/sec
+ * [  5]   7.00-8.00   sec  7.39 GBytes  63.7 Gbits/sec
+ * [  5]   8.00-9.00   sec  7.38 GBytes  63.4 Gbits/sec
+ * [  5]   9.00-10.00  sec  7.45 GBytes  64.0 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [ ID] Interval           Transfer     Bitrate
+ * [  5]   0.00-10.00  sec  73.4 GBytes  63.0 Gbits/sec                  sender
+ * [  5]   0.00-10.00  sec  73.4 GBytes  63.0 Gbits/sec
+ *
+ * 多线程反而增加切换开销：
+ * iperf3 -c 192.168.1.66 -P 4
+ * Connecting to host 192.168.1.66, port 5201
+ * [  5] local 192.168.1.66 port 53980 connected to 192.168.1.66 port 5201
+ * [  8] local 192.168.1.66 port 53981 connected to 192.168.1.66 port 5201
+ * [ 10] local 192.168.1.66 port 53982 connected to 192.168.1.66 port 5201
+ * [ 12] local 192.168.1.66 port 53983 connected to 192.168.1.66 port 5201
+ * [ ID] Interval           Transfer     Bitrate
+ * [  5]   0.00-1.00   sec  1.22 GBytes  10.5 Gbits/sec
+ * [  8]   0.00-1.00   sec  1.06 GBytes  9.08 Gbits/sec
+ * [ 10]   0.00-1.00   sec  1.22 GBytes  10.5 Gbits/sec
+ * [ 12]   0.00-1.00   sec  1.06 GBytes  9.08 Gbits/sec
+ * [SUM]   0.00-1.00   sec  4.56 GBytes  39.2 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   1.00-2.00   sec  1.19 GBytes  10.2 Gbits/sec
+ * [  8]   1.00-2.00   sec  1.19 GBytes  10.2 Gbits/sec
+ * [ 10]   1.00-2.00   sec  1.19 GBytes  10.2 Gbits/sec
+ * [ 12]   1.00-2.00   sec  1.19 GBytes  10.2 Gbits/sec
+ * [SUM]   1.00-2.00   sec  4.77 GBytes  40.9 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   2.00-3.00   sec  1.19 GBytes  10.3 Gbits/sec
+ * [  8]   2.00-3.00   sec  1.19 GBytes  10.3 Gbits/sec
+ * [ 10]   2.00-3.00   sec  1.19 GBytes  10.3 Gbits/sec
+ * [ 12]   2.00-3.00   sec  1.19 GBytes  10.3 Gbits/sec
+ * [SUM]   2.00-3.00   sec  4.78 GBytes  41.0 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   3.00-4.00   sec  1.22 GBytes  10.5 Gbits/sec
+ * [  8]   3.00-4.00   sec  1.22 GBytes  10.5 Gbits/sec
+ * [ 10]   3.00-4.00   sec  1.22 GBytes  10.5 Gbits/sec
+ * [ 12]   3.00-4.00   sec  1.22 GBytes  10.5 Gbits/sec
+ * [SUM]   3.00-4.00   sec  4.89 GBytes  42.1 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   4.00-5.00   sec  1.19 GBytes  10.2 Gbits/sec
+ * [  8]   4.00-5.00   sec  1.18 GBytes  10.2 Gbits/sec
+ * [ 10]   4.00-5.00   sec  1.19 GBytes  10.2 Gbits/sec
+ * [ 12]   4.00-5.00   sec  1.19 GBytes  10.2 Gbits/sec
+ * [SUM]   4.00-5.00   sec  4.74 GBytes  40.7 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   5.00-6.00   sec  1.18 GBytes  10.1 Gbits/sec
+ * [  8]   5.00-6.00   sec  1.18 GBytes  10.1 Gbits/sec
+ * [ 10]   5.00-6.00   sec  1.18 GBytes  10.1 Gbits/sec
+ * [ 12]   5.00-6.00   sec  1.18 GBytes  10.1 Gbits/sec
+ * [SUM]   5.00-6.00   sec  4.70 GBytes  40.4 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   6.00-7.00   sec  1.21 GBytes  10.4 Gbits/sec
+ * [  8]   6.00-7.00   sec  1.21 GBytes  10.4 Gbits/sec
+ * [ 10]   6.00-7.00   sec  1.21 GBytes  10.4 Gbits/sec
+ * [ 12]   6.00-7.00   sec  1.21 GBytes  10.4 Gbits/sec
+ * [SUM]   6.00-7.00   sec  4.83 GBytes  41.4 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   7.00-8.00   sec  1.22 GBytes  10.5 Gbits/sec
+ * [  8]   7.00-8.00   sec  1.22 GBytes  10.5 Gbits/sec
+ * [ 10]   7.00-8.00   sec  1.22 GBytes  10.5 Gbits/sec
+ * [ 12]   7.00-8.00   sec  1.22 GBytes  10.5 Gbits/sec
+ * [SUM]   7.00-8.00   sec  4.88 GBytes  41.9 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   8.00-9.00   sec  1.25 GBytes  10.7 Gbits/sec
+ * [  8]   8.00-9.00   sec  1.25 GBytes  10.7 Gbits/sec
+ * [ 10]   8.00-9.00   sec  1.25 GBytes  10.7 Gbits/sec
+ * [ 12]   8.00-9.00   sec  1.25 GBytes  10.7 Gbits/sec
+ * [SUM]   8.00-9.00   sec  4.99 GBytes  42.8 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   9.00-10.00  sec  1.21 GBytes  10.4 Gbits/sec
+ * [  8]   9.00-10.00  sec  1.21 GBytes  10.4 Gbits/sec
+ * [ 10]   9.00-10.00  sec  1.21 GBytes  10.4 Gbits/sec
+ * [ 12]   9.00-10.00  sec  1.21 GBytes  10.4 Gbits/sec
+ * [SUM]   9.00-10.00  sec  4.85 GBytes  41.8 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [ ID] Interval           Transfer     Bitrate
+ * [  5]   0.00-10.00  sec  12.1 GBytes  10.4 Gbits/sec                  sender
+ * [  5]   0.00-10.00  sec  12.1 GBytes  10.4 Gbits/sec                  receiver
+ * [  8]   0.00-10.00  sec  11.9 GBytes  10.2 Gbits/sec                  sender
+ * [  8]   0.00-10.00  sec  11.9 GBytes  10.2 Gbits/sec                  receiver
+ * [ 10]   0.00-10.00  sec  12.1 GBytes  10.4 Gbits/sec                  sender
+ * [ 10]   0.00-10.00  sec  12.1 GBytes  10.4 Gbits/sec                  receiver
+ * [ 12]   0.00-10.00  sec  11.9 GBytes  10.2 Gbits/sec                  sender
+ * [ 12]   0.00-10.00  sec  11.9 GBytes  10.2 Gbits/sec                  receiver
+ * [SUM]   0.00-10.00  sec  48.0 GBytes  41.2 Gbits/sec                  sender
+ * [SUM]   0.00-10.00  sec  48.0 GBytes  41.2 Gbits/sec                  receiver
+ *
+ *iperf3 -c 192.168.1.66 -P 2
+ * Connecting to host 192.168.1.66, port 5201
+ * [  5] local 192.168.1.66 port 54063 connected to 192.168.1.66 port 5201
+ * [  8] local 192.168.1.66 port 54064 connected to 192.168.1.66 port 5201
+ * [ ID] Interval           Transfer     Bitrate
+ * [  5]   0.00-1.00   sec  4.99 GBytes  42.7 Gbits/sec
+ * [  8]   0.00-1.00   sec  5.00 GBytes  42.8 Gbits/sec
+ * [SUM]   0.00-1.00   sec  9.99 GBytes  85.5 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   1.00-2.00   sec  5.19 GBytes  44.6 Gbits/sec
+ * [  8]   1.00-2.00   sec  5.20 GBytes  44.7 Gbits/sec
+ * [SUM]   1.00-2.00   sec  10.4 GBytes  89.2 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   2.00-3.00   sec  5.30 GBytes  45.6 Gbits/sec
+ * [  8]   2.00-3.00   sec  5.30 GBytes  45.6 Gbits/sec
+ * [SUM]   2.00-3.00   sec  10.6 GBytes  91.2 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   3.00-4.00   sec  5.02 GBytes  43.2 Gbits/sec
+ * [  8]   3.00-4.00   sec  5.01 GBytes  43.1 Gbits/sec
+ * [SUM]   3.00-4.00   sec  10.0 GBytes  86.3 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   4.00-5.00   sec  4.51 GBytes  38.6 Gbits/sec
+ * [  8]   4.00-5.00   sec  4.51 GBytes  38.6 Gbits/sec
+ * [SUM]   4.00-5.00   sec  9.02 GBytes  77.2 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   5.00-6.00   sec  4.80 GBytes  41.2 Gbits/sec
+ * [  8]   5.00-6.00   sec  4.79 GBytes  41.2 Gbits/sec
+ * [SUM]   5.00-6.00   sec  9.59 GBytes  82.4 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   6.00-7.00   sec  4.84 GBytes  41.5 Gbits/sec
+ * [  8]   6.00-7.00   sec  4.84 GBytes  41.5 Gbits/sec
+ * [SUM]   6.00-7.00   sec  9.67 GBytes  83.0 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   7.00-8.00   sec  4.83 GBytes  41.5 Gbits/sec
+ * [  8]   7.00-8.00   sec  4.83 GBytes  41.6 Gbits/sec
+ * [SUM]   7.00-8.00   sec  9.65 GBytes  83.1 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   8.00-9.00   sec  5.24 GBytes  45.1 Gbits/sec
+ * [  8]   8.00-9.00   sec  5.24 GBytes  45.1 Gbits/sec
+ * [SUM]   8.00-9.00   sec  10.5 GBytes  90.1 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [  5]   9.00-10.00  sec  5.52 GBytes  47.2 Gbits/sec
+ * [  8]   9.00-10.00  sec  5.52 GBytes  47.2 Gbits/sec
+ * [SUM]   9.00-10.00  sec  11.0 GBytes  94.5 Gbits/sec
+ * - - - - - - - - - - - - - - - - - - - - - - - - -
+ * [ ID] Interval           Transfer     Bitrate
+ * [  5]   0.00-10.00  sec  50.2 GBytes  43.1 Gbits/sec                  sender
+ * [  5]   0.00-10.00  sec  50.2 GBytes  43.1 Gbits/sec                  receiver
+ * [  8]   0.00-10.00  sec  50.2 GBytes  43.1 Gbits/sec                  sender
+ * [  8]   0.00-10.00  sec  50.2 GBytes  43.1 Gbits/sec                  receiver
+ * [SUM]   0.00-10.00  sec   100 GBytes  86.3 Gbits/sec                  sender
+ * [SUM]   0.00-10.00  sec   100 GBytes  86.3 Gbits/sec                  receiver
  *
  * */
 public class MessageBenchMultiPlainClient extends WebSocketClient {
