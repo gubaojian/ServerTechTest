@@ -57,7 +57,7 @@ static void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr m
  start new turn total message 4000002
  receive used 11824.5ms
  send message speed 3906.25 mb
- 
+ 400-500mb/s
  
  
  4096
@@ -65,19 +65,27 @@ static void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr m
  receive used 6941.19ms
  send message speed 7812 mb
  
+ 1.13gb / s
+ 
  start new turn total message 4000002
  receive used 19493.1ms
  send message speed  15625 mb
+ 0.78 gb/s
+ 
  
  4096*2
  start new turn total message 2000002
  receive used 9383.77ms
  send message speed 15625 mb
+ 1.61gb/s
+ 
  
  4096*4
  start new turn total message 2000002
  receive used 32324.3ms
  send message speed 31250 mb
+ 
+ 1gb/s
  
   */
 

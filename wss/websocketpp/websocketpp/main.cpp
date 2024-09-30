@@ -17,7 +17,7 @@ extern int websocket_pp_tts_test_main(int argc, const char * argv[]);
 extern int websocket_pp_tts_test_multi_client_main(int argc, const char * argv[]);
 
 int main(int argc, const char * argv[]) {
-    int run_program = 12;
+    int run_program = 1;
     switch (run_program) {
         case 1:
             websocket_pp_tts_test_main(argc, argv);

@@ -66,7 +66,7 @@ static void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr m
  start new turn total message 2000002
  receive used 28912.2ms
  
- send message done 11649ms
+ send message done 11649ms (只是调用结束)
  send message speed 7812.5 mb
  
  280-300mb，性能卡在openssl加密上，aes加密就这速度。
@@ -97,6 +97,11 @@ static void send_message_bench(const boost::system::error_code&) {
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    
+    if (mainClient == nullptr) {
+        std::cout << "send message bench connect failed " << std::endl;
+        return;
+    }
    
     std::cout << "send message bench start " << std::endl;
    
@@ -138,7 +143,7 @@ int websocket_pp_tts_test_main(int argc, const char * argv[]) {
 
     try {
         // Set logging to be pretty verbose (everything except message payloads)
-        client.set_access_channels(websocketpp::log::alevel::none);
+        client.set_access_channels(websocketpp::log::alevel::all);
         //c.clear_access_channels(websocketpp::log::alevel::frame_payload);
 
         
@@ -177,6 +182,7 @@ int websocket_pp_tts_test_main(int argc, const char * argv[]) {
         con->set_fail_handler([](websocketpp::connection_hdl hdl) {
             std::cout << "client failed connect " << std::endl;
             mainClient = nullptr;
+            mainConn = nullptr;
         });
         con->set_close_handler([](websocketpp::connection_hdl hdl){
             std::cout << "client be closed " << std::endl;
@@ -196,12 +202,17 @@ int websocket_pp_tts_test_main(int argc, const char * argv[]) {
         // Start the ASIO io_service run loop
         // this will cause a single connection to be made to the server. c.run()
         // will exit when this connection is closed.
-        
+        //client.set_fail_handler(<#fail_handler h#>)
         client.run();
+        
     } catch (websocketpp::exception const & e) {
         std::cout << "websocket exception " << e.what() << std::endl;
     }
     
+    usleep(1000);
+    
+    std::cout << "client run end end "  << std::endl;
+
     
     return 0;
 }
