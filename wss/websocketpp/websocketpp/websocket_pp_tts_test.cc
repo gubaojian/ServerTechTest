@@ -69,7 +69,8 @@ static void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr m
  send message done 11649ms (只是调用结束)
  send message speed 7812.5 mb
  
- 280-300mb，性能卡在openssl加密上，aes加密就这速度。
+ 280-300mb，性能卡在客户端的openssl加密及实现上。
+ 
  
  start new turn total message 4000002
  receive used 19493.1ms

@@ -253,6 +253,8 @@
 				OTHER_LDFLAGS = (
 					"-lfolly",
 					"-lglog",
+					"-lzstd",
+					"-llz4",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -270,6 +272,8 @@
 				OTHER_LDFLAGS = (
 					"-lfolly",
 					"-lglog",
+					"-lzstd",
+					"-llz4",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

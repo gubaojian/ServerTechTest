@@ -42,6 +42,7 @@ static std::string genUUID() {
 }
 
 /**
+ eventbus send event used 1656ms (json parse)
  eventbus send event used 3013ms
  eventbus reveive message 2000000
  eventbus thread handle essage used 3013ms
@@ -91,11 +92,12 @@ int event_bus_json_test2_main(int argc, const char * argv[]) {
         yyjson_mut_obj_add_strn(doc, root, "hwssId", hwssId.data(), hwssId.length());
         size_t len;
         const char *json = yyjson_mut_write(doc, 0, &len);
+        /**
         bus->postpone(event::ClientMessage2{
             .type  = 5,
             .msg = std::make_shared<std::string>(json, len),
             .adminId = std::make_shared<std::string>(connId)
-        });
+        }); */
         
         if (json) {
             free((void *)json);
