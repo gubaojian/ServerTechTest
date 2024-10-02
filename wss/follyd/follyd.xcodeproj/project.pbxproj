@@ -255,6 +255,7 @@
 					"-lglog",
 					"-lzstd",
 					"-llz4",
+					"-lsnappy",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -274,6 +275,7 @@
 					"-lglog",
 					"-lzstd",
 					"-llz4",
+					"-lsnappy",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

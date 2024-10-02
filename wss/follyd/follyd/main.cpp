@@ -15,9 +15,10 @@ extern int event_bus_json_test_main(int argc, const char * argv[]);
 extern int event_bus_json_router_test_main(int argc, const char * argv[]);
 extern int event_bus_json_test2_main(int argc, const char * argv[]);
 extern int event_bus_json_zstd_test_main(int argc, const char * argv[]);
+extern int event_bus_json_zstd_multi_thread_test_main(int argc, const char * argv[]);
 
 int main(int argc, const char * argv[]) {
-    int run_program = 7;
+    int run_program = 8;
     switch (run_program) {
         case 1:
             folly_executor_test_main(argc, argv);
@@ -39,6 +40,9 @@ int main(int argc, const char * argv[]) {
             break;
         case 7:
             event_bus_json_zstd_test_main(argc, argv);
+            break;
+        case 8:
+            event_bus_json_zstd_multi_thread_test_main(argc, argv);
             break;
         default:
             break;
