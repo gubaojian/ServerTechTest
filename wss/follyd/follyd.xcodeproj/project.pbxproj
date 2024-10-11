@@ -20,11 +20,26 @@
 
 /* Begin PBXFileReference section */
 		0115C9E72CA99D8B004DADBF /* follyd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = follyd; sourceTree = BUILT_PRODUCTS_DIR; };
+		01F431AA2CB4D1BF000B8574 /* libtbb.12.14.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtbb.12.14.dylib; path = ../../../../../../usr/local/lib/libtbb.12.14.dylib; sourceTree = "<group>"; };
+		01F431B12CB4D30B000B8574 /* libtbb.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libtbb.tbd; path = usr/lib/usd/libtbb.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		0167FFC82CB8FD40001FBD5C /* Exceptions for "follyd" folder in "follyd" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				lib/libtbb.12.14.dylib,
+			);
+			target = 0115C9E62CA99D8B004DADBF /* follyd */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0115C9E92CA99D8B004DADBF /* follyd */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0167FFC82CB8FD40001FBD5C /* Exceptions for "follyd" folder in "follyd" target */,
+			);
 			path = follyd;
 			sourceTree = "<group>";
 		};
@@ -45,6 +60,7 @@
 			isa = PBXGroup;
 			children = (
 				0115C9E92CA99D8B004DADBF /* follyd */,
+				01F431A92CB4D1BF000B8574 /* Frameworks */,
 				0115C9E82CA99D8B004DADBF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -55,6 +71,15 @@
 				0115C9E72CA99D8B004DADBF /* follyd */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		01F431A92CB4D1BF000B8574 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				01F431B12CB4D30B000B8574 /* libtbb.tbd */,
+				01F431AA2CB4D1BF000B8574 /* libtbb.12.14.dylib */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -249,13 +274,19 @@
 					/usr/local/include,
 					/Users/efurture/code/ServerTechTest/wss/follyd/follyd/include,
 				);
-				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					"$(PROJECT_DIR)/follyd/lib",
+				);
 				OTHER_LDFLAGS = (
 					"-lfolly",
 					"-lglog",
 					"-lzstd",
 					"-llz4",
 					"-lsnappy",
+					"-lzmq",
+					"-lboost_system",
+					"-lboost_thread-mt",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -269,13 +300,19 @@
 					/usr/local/include,
 					/Users/efurture/code/ServerTechTest/wss/follyd/follyd/include,
 				);
-				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					"$(PROJECT_DIR)/follyd/lib",
+				);
 				OTHER_LDFLAGS = (
 					"-lfolly",
 					"-lglog",
 					"-lzstd",
 					"-llz4",
 					"-lsnappy",
+					"-lzmq",
+					"-lboost_system",
+					"-lboost_thread-mt",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

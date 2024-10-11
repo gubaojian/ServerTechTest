@@ -24,6 +24,12 @@
 std::atomic<int> taskNum;
 std::atomic<int> futureNum;
 
+/**
+ 10000*200
+ send fun done task message done 640ms
+ 10000*300
+ send fun done task message done 976ms
+ */
 int folly_executor_test_main(int argc, const char * argv[]) {
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
@@ -44,7 +50,7 @@ int folly_executor_test_main(int argc, const char * argv[]) {
     start = std::chrono::high_resolution_clock::now();
     // 100万 send fun done task message done 348ms
     // 200万 send fun done task message done 348*2ms
-    size_t length = 10000*100;
+    size_t length = 10000*300;
     for(int i=0; i<length; i++) {
         folly::getGlobalCPUExecutor()->add([length, start]{
             taskNum++;
@@ -60,9 +66,6 @@ int folly_executor_test_main(int argc, const char * argv[]) {
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "send fun done " << used.count() << "ms "  << std::endl;
     usleep(1000);
-    
-    
-    
     
     return 0;
 }
