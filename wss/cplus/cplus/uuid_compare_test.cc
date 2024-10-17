@@ -60,7 +60,7 @@
  *system uuid 373ms
  system uuid share buffer 297ms
  std uuid share buffer 114ms
- uuidv4 uuid 71ms 
+ uuidv4 uuid 71ms
  boost uuid random 1572ms
  boost with share buffer uuid 1477ms
  boost 19937 uuid 163ms
@@ -102,7 +102,11 @@ int uuid_compare_test_main(int argc, const char * argv[]) {
     
     
     start = std::chrono::high_resolution_clock::now();
-    static std::mt19937 engine;
+    std::random_device rd;
+    auto seed_data = std::array<int, std::mt19937::state_size> {};
+    std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+    std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+    std::mt19937 engine(seq);
     static uuids::uuid_random_generator stdGen(engine);
     std::string stdUuid;
     for(int i=0; i<10000*100; i++) {
