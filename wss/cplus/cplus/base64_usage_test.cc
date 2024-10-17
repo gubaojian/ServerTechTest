@@ -11,7 +11,6 @@
  * https://github.com/powturbo/Turbo-Base64?tab=readme-ov-file
  *
  install:
- cp libtb64.so /usr/local/lib/
  cp libtb64.a /usr/local/lib/
  cp turbob64.h /usr/local/include
  *

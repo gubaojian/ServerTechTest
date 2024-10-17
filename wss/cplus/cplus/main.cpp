@@ -22,7 +22,7 @@ extern int uuid_int128_map_test_main(int argc, const char * argv[]);
 extern int json_test_main(int argc, const char * argv[]);
 
 int main(int argc, const char * argv[]) {
-    int run_program = 11;
+    int run_program = 4;
     switch (run_program) {
         case 1:
             share_ptr_test_main(argc, argv);

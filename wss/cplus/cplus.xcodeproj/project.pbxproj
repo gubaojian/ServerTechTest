@@ -7,16 +7,6 @@
 	objects = {
 
 /* Begin PBXCopyFilesBuildPhase section */
-		0115C9182CA92AE5004DADBF /* Embed Libraries */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			name = "Embed Libraries";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		01881B032CA4FDE10038B323 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -32,25 +22,9 @@
 		01881B052CA4FDE10038B323 /* cplus */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = cplus; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		0115C9192CA92AE5004DADBF /* Exceptions for "cplus" folder in "Embed Libraries" phase from "cplus" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			attributesByRelativePath = {
-				lib/libtb64.so = (CodeSignOnCopy, );
-			};
-			buildPhase = 0115C9182CA92AE5004DADBF /* Embed Libraries */;
-			membershipExceptions = (
-				lib/libtb64.so,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		01881B072CA4FDE10038B323 /* cplus */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				0115C9192CA92AE5004DADBF /* Exceptions for "cplus" folder in "Embed Libraries" phase from "cplus" target */,
-			);
 			path = cplus;
 			sourceTree = "<group>";
 		};
@@ -101,7 +75,6 @@
 				01881B012CA4FDE10038B323 /* Sources */,
 				01881B022CA4FDE10038B323 /* Frameworks */,
 				01881B032CA4FDE10038B323 /* CopyFiles */,
-				0115C9182CA92AE5004DADBF /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -279,7 +252,7 @@
 		01881B0D2CA4FDE10038B323 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_X86_VECTOR_INSTRUCTIONS = default;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = (
 					/user/local/include,
@@ -288,6 +261,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
 					"$(PROJECT_DIR)/cplus/lib",
+					"$(PROJECT_DIR)/lib",
 				);
 				OTHER_LDFLAGS = (
 					"-lxxhash",
@@ -302,7 +276,7 @@
 		01881B0E2CA4FDE10038B323 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_X86_VECTOR_INSTRUCTIONS = default;
+				CLANG_X86_VECTOR_INSTRUCTIONS = avx2;
 				CODE_SIGN_STYLE = Automatic;
 				HEADER_SEARCH_PATHS = (
 					/user/local/include,
@@ -311,6 +285,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/lib,
 					"$(PROJECT_DIR)/cplus/lib",
+					"$(PROJECT_DIR)/lib",
 				);
 				OTHER_LDFLAGS = (
 					"-lxxhash",

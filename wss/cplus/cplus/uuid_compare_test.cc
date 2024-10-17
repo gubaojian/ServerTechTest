@@ -14,11 +14,12 @@
 
 #undef HAS_UUID_V4
 
-//#define HAS_UUID_V4
+#define HAS_UUID_V4
 
 #include <string>
 #include <iostream>
 #include <uuid/uuid.h>
+#include <folly/Random.h>
 #include <chrono>
 #include <map>
 #include <set>
@@ -30,6 +31,7 @@
 #endif
 
 
+#include "std_uuid.h"
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -45,10 +47,25 @@
  * boost uuid 256ms
  *
  * release mode
- * system uuid 370ms
- * system uuid share buffer 374ms
- * boost uuid 1562ms
- * boost with share buffer uuid 1434ms
+
+ system uuid 363ms
+ system uuid share buffer 303ms
+ std uuid share buffer 111ms
+ uuidv4 uuid 70ms
+ boost uuid random 1566ms
+ boost with share buffer uuid 1455ms
+ boost 19937 uuid 202ms
+ boost rand48 uuid 227ms
+ *
+ *system uuid 373ms
+ system uuid share buffer 297ms
+ std uuid share buffer 114ms
+ uuidv4 uuid 71ms 
+ boost uuid random 1572ms
+ boost with share buffer uuid 1477ms
+ boost 19937 uuid 163ms
+ boost rand48 uuid 224ms
+ 
  */
 int uuid_compare_test_main(int argc, const char * argv[]) {
     auto start = std::chrono::high_resolution_clock::now();
@@ -72,14 +89,29 @@ int uuid_compare_test_main(int argc, const char * argv[]) {
     static char uuidShareBuffer[37];
     uuid_t uuid_share;
     for(int i=0; i<10000*100; i++) {
-        uuid_generate_random(uuid_share);
+        uuid_t uuid_share2;
+        uuid_generate_random(uuid_share2);
         char uuidShareBuffer2[37];
-        uuid_unparse(uuid_share, uuidShareBuffer2);
+        uuid_unparse_lower(uuid_share2, uuidShareBuffer2);
         std::string (uuidShareBuffer2, 36);
     }
     end = std::chrono::high_resolution_clock::now();
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "system uuid share buffer " << used.count() << "ms " << std::endl;
+  
+    
+    
+    start = std::chrono::high_resolution_clock::now();
+    static std::mt19937 engine;
+    static uuids::uuid_random_generator stdGen(engine);
+    std::string stdUuid;
+    for(int i=0; i<10000*100; i++) {
+        auto uuid = stdGen();
+        stdUuid = uuids::to_string(uuid);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "std uuid share buffer " << used.count() << "ms " << std::endl;
   
   
 #ifdef HAS_UUID_V4
@@ -87,8 +119,7 @@ int uuid_compare_test_main(int argc, const char * argv[]) {
     start = std::chrono::high_resolution_clock::now();
     for(int i=0; i<10000*100; i++) {
         UUIDv4::UUID uuid = uuidGenerator.getUUID();
-        std::string str;
-        uuid.str(str);
+        std::string str = uuid.str();
     }
     end = std::chrono::high_resolution_clock::now();
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -123,7 +154,11 @@ int uuid_compare_test_main(int argc, const char * argv[]) {
      start = std::chrono::high_resolution_clock::now();
      for(int i=0; i<10000*100; i++) {
          boost::uuids::uuid u = gen_mt();
-         std::string str = boost::uuids::to_string(u);
+         //std::string str = boost::uuids::to_string(u);
+         char uuidShareBuffer2[37];
+         uuid_unparse(uuid_share, uuidShareBuffer2);
+         boost::uuids::to_chars(u, uuidShareBuffer2);
+         std::string str(uuidShareBuffer2, 36);
      }
      end = std::chrono::high_resolution_clock::now();
      used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -178,7 +213,24 @@ int uuid_compare_test_main(int argc, const char * argv[]) {
         std::string str =  boost::uuids::to_string(u);
         std::cout << "boost uuid 19937 useage " << str << " " << std::endl;
     }
+    
+    {
+        uuid_generate_random(uuid_share);
+        char uuidShareBuffer2[37];
+        uuid_unparse_lower(uuid_share, uuidShareBuffer2);
+        std::string str(uuidShareBuffer2, 36);
+        std::cout << "system uuid useage " << str << " " << std::endl;
+    }
+    
+    {
+        for(int i=0; i<10; i++) {
+            std::cout << uuids::to_string(stdGen()) << std::endl;
+        }
+        std::cout << "std uuid useage " << stdUuid << " " << std::endl;
+    }
 
+    
+    
     
     return 0;
 }
