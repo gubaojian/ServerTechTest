@@ -36,6 +36,7 @@ int folly_circular_buffer_test_main(int argc, const char * argv[]) {
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     
     
+    folly::detail::hextab
     std::shared_ptr<folly::LockFreeRingBuffer<int>> buffer = std::make_shared<folly::LockFreeRingBuffer<int>>(1024);
     
     std::thread consumer([buffer] {
