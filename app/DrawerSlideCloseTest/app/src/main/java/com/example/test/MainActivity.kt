@@ -30,17 +30,21 @@ class MainActivity : AppCompatActivity() {
 
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
-        binding.contentView.setOnClickListener {
+        binding.openDrawer.setOnClickListener {
             drawerLayout.openDrawer(Gravity.LEFT);
-            Toast.makeText(baseContext, "hello world", Toast.LENGTH_SHORT).show();
+            Toast.makeText(baseContext, "hello worldxx", Toast.LENGTH_SHORT).show();
         }
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         drawerLayout.setDrawerListener(object : SimpleDrawerListener (){
             override fun onDrawerOpened(drawerView: View) {
                 super.onDrawerOpened(drawerView)
-                //drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN)
+                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+                Toast.makeText(baseContext, "change mode", Toast.LENGTH_SHORT).show();
+
             }
 
             override fun onDrawerClosed(drawerView: View) {
+                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
                 super.onDrawerClosed(drawerView)
             }
 

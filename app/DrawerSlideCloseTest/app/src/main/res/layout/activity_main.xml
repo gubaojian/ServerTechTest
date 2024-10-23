@@ -13,7 +13,16 @@
         android:id="@+id/content_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/design_default_color_primary"/>
+        android:background="@color/design_default_color_primary">
+
+        <TextView
+            android:id="@+id/open_drawer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="hello world"/>
+
+
+    </FrameLayout>
 
     <!--必须放到最后，不然滑动后不能滑动关闭 -->
     <FrameLayout
