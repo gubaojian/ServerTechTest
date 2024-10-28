@@ -1,0 +1,59 @@
+2024-10-28 17:31:08.367 19810-19810 AndroidRuntime          com.zhenxiang.rushi                  D  Shutting down VM
+2024-10-28 17:31:08.368 19810-19810 AndroidRuntime          com.zhenxiang.rushi                  E  FATAL EXCEPTION: main
+                                                                                                    Process: com.zhenxiang.rushi, PID: 19810
+                                                                                                    java.lang.RuntimeException: hello world
+                                                                                                    	at com.rushi.module_mine.v1.MineV1Fragment.setStaticClick$lambda-27$lambda-26(MineV1Fragment.kt:260)
+                                                                                                    	at com.rushi.module_mine.v1.MineV1Fragment.lambda$c_CAqa61o0IFjjhI2Te9gkUfc7w(Unknown Source:0)
+                                                                                                    	at com.rushi.module_mine.v1.-$$Lambda$MineV1Fragment$c_CAqa61o0IFjjhI2Te9gkUfc7w.onClick(Unknown Source:0)
+                                                                                                    	at android.view.View.performClick(View.java:7441)
+                                                                                                    	at android.view.View.performClickInternal(View.java:7418)
+                                                                                                    	at android.view.View.access$3700(View.java:835)
+                                                                                                    	at android.view.View$PerformClick.run(View.java:28676)
+                                                                                                    	at android.os.Handler.handleCallback(Handler.java:938)
+                                                                                                    	at android.os.Handler.dispatchMessage(Handler.java:99)
+                                                                                                    	at android.os.Looper.loopOnce(Looper.java:201)
+                                                                                                    	at android.os.Looper.loop(Looper.java:288)
+                                                                                                    	at android.app.ActivityThread.main(ActivityThread.java:7842)
+                                                                                                    	at java.lang.reflect.Method.invoke(Native Method)
+                                                                                                    	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:548)
+                                                                                                    	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1003)
+2024-10-28 17:31:08.369 19810-19810 CrashReport             com.zhenxiang.rushi                  E  Java Crash Happen cause by main(2)
+2024-10-28 17:31:08.448 19810-19810 CrashReport             com.zhenxiang.rushi                  I  user log size:0
+2024-10-28 17:31:08.469 19810-19810 CrashReport             com.zhenxiang.rushi                  D  isAppForeground:true
+2024-10-28 17:31:08.469 19810-19810 CrashReport             com.zhenxiang.rushi                  E  stack frame :15, has cause false
+2024-10-28 17:31:08.471 19810-19810 CrashReport             com.zhenxiang.rushi                  E  #++++++++++Record By Bugly++++++++++#
+2024-10-28 17:31:08.471 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # You can use Bugly(http:\\bugly.qq.com) to get more Crash Detail!
+2024-10-28 17:31:08.471 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # PKG NAME: com.zhenxiang.rushi
+2024-10-28 17:31:08.471 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # APP VER: 1.0.0
+2024-10-28 17:31:08.472 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # SDK VER: 4.1.9.3-4.1.9.3
+2024-10-28 17:31:08.472 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # LAUNCH TIME: 2024-10-28 17:30:47
+2024-10-28 17:31:08.472 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # CRASH TYPE: JAVA_CRASH
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # CRASH TIME: 2024-10-28 17:31:08
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # CRASH PROCESS: com.zhenxiang.rushi
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  D  isAppForeground:true
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # CRASH FOREGROUND: true
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # CRASH THREAD: main
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # REPORT ID: 4da484ae-f11a-4a71-8822-954e3085dee5
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  D  not allow collect device model
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # CRASH DEVICE: fail UNROOT
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # RUNTIME AVAIL RAM:1275359232 ROM:106573717504 SD:106573717504
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # RUNTIME TOTAL RAM:3753299968 ROM:119359385600 SD:119359385600
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  E  # CRASH STACK: 
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  E  java.lang.RuntimeException: hello world
+                                                                                                    	at com.rushi.module_mine.v1.MineV1Fragment.setStaticClick$lambda-27$lambda-26(MineV1Fragment.kt:260)
+                                                                                                    	at com.rushi.module_mine.v1.MineV1Fragment.lambda$c_CAqa61o0IFjjhI2Te9gkUfc7w(Unknown Source:0)
+                                                                                                    	at com.rushi.module_mine.v1.-$$Lambda$MineV1Fragment$c_CAqa61o0IFjjhI2Te9gkUfc7w.onClick(Unknown Source:0)
+                                                                                                    	at android.view.View.performClick(View.java:7441)
+                                                                                                    	at android.view.View.performClickInternal(View.java:7418)
+                                                                                                    	at android.view.View.access$3700(View.java:835)
+                                                                                                    	at android.view.View$PerformClick.run(View.java:28676)
+                                                                                                    	at android.os.Handler.handleCallback(Handler.java:938)
+                                                                                                    	at android.os.Handler.dispatchMessage(Handler.java:99)
+                                                                                                    	at android.os.Looper.loopOnce(Looper.java:201)
+                                                                                                    	at android.os.Looper.loop(Looper.java:288)
+                                                                                                    	at android.app.ActivityThread.main(ActivityThread.java:7842)
+                                                                                                    	at java.lang.reflect.Method.invoke(Native Method)
+                                                                                                    	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:548)
+                                                                                                    	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1003)
+2024-10-28 17:31:08.473 19810-19810 CrashReport             com.zhenxiang.rushi                  E  #++++++++++++++++++++++++++++++++++++++++++#
+2024-10-28 17:31:08.478 19810-19810 CrashReport             com.zhenxiang.rushi                  D  [Database] insert t_cr success.
