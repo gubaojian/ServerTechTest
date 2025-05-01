@@ -1,4 +1,4 @@
-package org.hwss.test.bench.single;
+package org.hwss.test.bench.server;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -6,7 +6,6 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * send message end 12972
@@ -54,7 +53,7 @@ public class MessageBenchMultiClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        System.out.println("received message: " + message);
+        //System.out.println("received message: " + message);
     }
 
     @Override
@@ -69,7 +68,7 @@ public class MessageBenchMultiClient extends WebSocketClient {
 
     public static void main(String[] args) throws Exception {
 
-        WebSocketClient mainClient = new MessageBenchMultiClient(new URI("ws://127.0.0.1:9001/wsg?role=client&appId=434608808308&appToken=mtnXNik41BYaUSNgLDxWmxoDCmUyl9El"));
+        WebSocketClient mainClient = new MessageBenchMultiClient(new URI("ws://127.0.0.1:8889/wsg?role=client&appId=434608808308&appToken=mtnXNik41BYaUSNgLDxWmxoDCmUyl9El"));
         mainClient.setConnectionLostTimeout(120);
         mainClient.connectBlocking();
         mainClient.getConnection();
@@ -82,7 +81,7 @@ public class MessageBenchMultiClient extends WebSocketClient {
             public void run() {
                 // Create all-trusting host name verifier
                  try {
-                     WebSocketClient client = new MessageBenchMultiClient(new URI("ws://127.0.0.1:9001/wsg?role=client&appId=434608808308&appToken=mtnXNik41BYaUSNgLDxWmxoDCmUyl9El"));
+                     WebSocketClient client = new MessageBenchMultiClient(new URI("ws://127.0.0.1:8889/wsg?role=client&appId=434608808308&appToken=mtnXNik41BYaUSNgLDxWmxoDCmUyl9El"));
                      client.connectBlocking();
                      for(int i=0; i < 10000*200; i++) {
                          client.send(UUID.randomUUID().toString());

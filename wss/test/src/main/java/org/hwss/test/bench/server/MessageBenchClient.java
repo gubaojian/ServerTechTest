@@ -1,6 +1,7 @@
-package org.hwss.test.bench.single;
+package org.hwss.test.bench.server;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -50,7 +51,7 @@ public class MessageBenchClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        System.out.println("received message: " + message);
+        //System.out.println("received message: " + message);
     }
 
     @Override
@@ -66,7 +67,7 @@ public class MessageBenchClient extends WebSocketClient {
 
     public static void main(String[] args) throws Exception {
         // Create all-trusting host name verifier
-        WebSocketClient client = new MessageBenchClient(new URI("ws://127.0.0.1:9001/wsg?role=client&appId=434608808308&appToken=mtnXNik41BYaUSNgLDxWmxoDCmUyl9El"));
+        WebSocketClient client = new MessageBenchClient(new URI("ws://127.0.0.1:8889/wsg?role=client&appId=434608808308&appToken=mtnXNik41BYaUSNgLDxWmxoDCmUyl9El"));
         client.setConnectionLostTimeout(120);
         client.connectBlocking();
         client.getConnection();

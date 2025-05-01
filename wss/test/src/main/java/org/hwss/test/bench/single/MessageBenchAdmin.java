@@ -32,13 +32,13 @@ public class MessageBenchAdmin extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        if (message.startsWith("start_")) {
+        if (message.contains("start_")) {
             messages.clear();
             startTime = System.currentTimeMillis();
             System.out.println("start new turn received message size : " + messages.size());
         }
         messages.add(message);
-        if (message.startsWith("end_")) {
+        if (message.contains("end_")) {
             System.out.println("received message size : " + messages.size());
             System.out.println("received message used : " + (System.currentTimeMillis() - startTime));
         }
@@ -56,7 +56,8 @@ public class MessageBenchAdmin extends WebSocketClient {
 
     public static void main(String[] args) throws Exception {
         // Create all-trusting host name verifier
-        WebSocketClient client = new MessageBenchAdmin(new URI("wss://127.0.0.1:9001/wss/?app_id=434&group=admin"));
+        WebSocketClient client = new MessageBenchAdmin(new URI("ws://127.0.0.1:9001/wsg?role=server&serverAppId=081713074824&serverAppToken=Y8FG0tbs7pgujQccNcEABIuW1it2Rhfw"));
+        client.setConnectionLostTimeout(120);
         client.connect();
     }
 }
