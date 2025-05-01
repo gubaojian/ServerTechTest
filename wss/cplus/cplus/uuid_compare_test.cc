@@ -154,7 +154,8 @@ int uuid_compare_test_main(int argc, const char * argv[]) {
     
     
     
-     boost::uuids::basic_random_generator<boost::mt19937> gen_mt;
+    
+     boost::uuids::basic_random_generator<std::mt19937> gen_mt;
      start = std::chrono::high_resolution_clock::now();
      for(int i=0; i<10000*100; i++) {
          boost::uuids::uuid u = gen_mt();

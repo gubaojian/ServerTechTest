@@ -263,10 +263,12 @@
 					"$(PROJECT_DIR)/cplus/lib",
 					"$(PROJECT_DIR)/lib",
 				);
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-lxxhash",
 					"-ltb64",
 					"-lfolly",
+					"-lcrypto",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYSTEM_HEADER_SEARCH_PATHS = /usr/local/include/;
@@ -287,10 +289,12 @@
 					"$(PROJECT_DIR)/cplus/lib",
 					"$(PROJECT_DIR)/lib",
 				);
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-lxxhash",
 					"-ltb64",
 					"-lfolly",
+					"-lcrypto",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYSTEM_HEADER_SEARCH_PATHS = /usr/local/include/;

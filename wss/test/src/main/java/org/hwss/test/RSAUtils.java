@@ -41,6 +41,7 @@ public class RSAUtils {
             }
             long end = System.currentTimeMillis();
             System.out.println("used " + (end - start));
+            System.out.println("公钥：" + publicKey.getEncoded().length + " " + publicKey.getFormat() + " " + publicKey.getAlgorithm());
             System.out.println("公钥：" + byteArrayToHex(publicKey.getEncoded()));
             System.out.println("私钥：" + byteArrayToHex(privateKey.getEncoded()));
             System.out.println("加密后的文本：" + encryptString);
