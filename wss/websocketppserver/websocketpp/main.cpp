@@ -16,8 +16,10 @@ extern int websocket_pp_no_tts_test_main(int argc, const char * argv[]);
 extern int websocket_pp_tts_test_main(int argc, const char * argv[]);
 extern int websocket_pp_tts_test_multi_client_main(int argc, const char * argv[]);
 
+extern int websocket_router_no_tts_test_main(int argc, const char * argv[]);
+
 int main(int argc, const char * argv[]) {
-    int run_program = 11;
+    int run_program = 13;
     switch (run_program) {
         case 1:
             websocket_pp_tts_test_main(argc, argv);
@@ -27,6 +29,9 @@ int main(int argc, const char * argv[]) {
             break;
         case 12:
             websocket_pp_tts_test_multi_client_main(argc, argv);
+            break;
+        case 13:
+            websocket_router_no_tts_test_main(argc, argv);
             break;
         default:
             break;

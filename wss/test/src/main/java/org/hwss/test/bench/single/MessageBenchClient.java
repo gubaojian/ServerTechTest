@@ -73,7 +73,7 @@ public class MessageBenchClient extends WebSocketClient {
         long start = System.currentTimeMillis();
 
         client.send("start_" + UUID.randomUUID().toString());
-        String message = RandomStringUtils.randomAlphabetic(512);
+        String message = RandomStringUtils.randomAlphabetic(1024);
         System.out.println(message);
         for(int i=0; i < 10000*200; i++) {
             client.send(message);
