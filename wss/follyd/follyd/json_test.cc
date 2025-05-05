@@ -208,6 +208,7 @@ int json_test_main(int argc, const char * argv[]) {
     for(int i=0; i<length; i++) {
     
         simdjson::ondemand::document  doc;
+        simdjson::padded_string paddedJson(msgJson);
         auto error = parser.iterate(msgJson).get(doc);
         if(error) {
             std::cout << "parse error " << std::endl;
