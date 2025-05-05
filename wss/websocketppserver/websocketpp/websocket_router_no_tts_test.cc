@@ -132,9 +132,12 @@ void connect_plain(const std::string hwssId) {
             }
             //转发到wss协议的处理线程
             std::shared_ptr<std::string> cpMsg = std::make_shared<std::string>(msg->get_payload());
-            boost::asio::post(serverFinder->tlsClient->get_io_service(), [cpMsg] {
-                handleMsgFromWsRouter(cpMsg);
-            });
+            std::shared_ptr<tls_client> tlsClient = serverFinder->tlsClient;
+            if (tlsClient) {
+                boost::asio::post(tlsClient->get_io_service(), [cpMsg] {
+                    handleMsgFromWsRouter(cpMsg);
+                });
+            }
         }
         
     });
@@ -252,9 +255,12 @@ void connect_tls(const std::string hwssId) {
             }
             //转发到ws协议的处理线程
             std::shared_ptr<std::string> cpMsg = std::make_shared<std::string>(msg->get_payload());
-            boost::asio::post(serverFinder->plainClient->get_io_service(), [cpMsg] {
-                handleMsgFromWssRouter(cpMsg);
-            });
+            std::shared_ptr<plain_client> plainClient = serverFinder->plainClient;
+            if (plainClient) {
+                boost::asio::post(->get_io_service(), [cpMsg] {
+                    handleMsgFromWssRouter(cpMsg);
+                });
+            }
         }
         
     });
