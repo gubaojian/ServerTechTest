@@ -314,7 +314,8 @@ void runWSRouter() {
         }
         client->run();
     } catch (websocketpp::exception const & e) {
-        std::cout << "router connect websocket exception " << e.what() << std::endl;
+        std::cout << "router connect websocket exception " << e.what()
+        << e.code() << std::endl;
     }
     serverFinder->plainClient = nullptr;
     
@@ -349,7 +350,8 @@ void runWSSRouter() {
         
         client->run();
     } catch (websocketpp::exception const & e) {
-        std::cout << "wss router connect websocket exception " << e.what() << std::endl;
+        std::cout << "wss router connect websocket exception " << e.what()
+        << e.code() << std::endl;
     }
     serverFinder->tlsClient = nullptr;
 }
