@@ -99,7 +99,8 @@ void connect_plain(const std::string hwssId) {
     
     con->set_message_handler([hwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
         //router current only handle json text
-        if(msg->get_opcode() == websocketpp::frame::opcode::value::TEXT) {
+        if(msg->get_opcode() == websocketpp::frame::opcode::value::TEXT
+           || msg->get_opcode() == websocketpp::frame::opcode::value::BINARY) {
             simdjson::ondemand::document  doc;
             simdjson::padded_string paddedJson = simdjson::padded_string(msg->get_payload());
             auto error = serverFinder->plainParser.iterate(paddedJson).get(doc);
@@ -206,7 +207,8 @@ void connect_tls(const std::string hwssId) {
     
     con->set_message_handler([hwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
         //router current only handle json text
-        if(msg->get_opcode() == websocketpp::frame::opcode::value::TEXT) {
+        if(msg->get_opcode() == websocketpp::frame::opcode::value::TEXT
+           || msg->get_opcode() == websocketpp::frame::opcode::value::BINARY) {
             simdjson::ondemand::document  doc;
             simdjson::padded_string paddedJson = simdjson::padded_string(msg->get_payload());
             auto error = serverFinder->tlsParser.iterate(paddedJson).get(doc);
