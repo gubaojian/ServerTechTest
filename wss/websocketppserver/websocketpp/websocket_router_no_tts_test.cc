@@ -117,7 +117,7 @@ void connect_plain(const std::string hwssId) {
             std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
             auto connIt = serverFinder->wsConnMap.find(hwssIdStr);
             if (connIt != serverFinder->wsConnMap.end()) {
-                serverFinder->plainClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::TEXT);
+                serverFinder->plainClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY);
                 return;
             }
            
@@ -178,7 +178,7 @@ void handleMsgFromWssRouter(std::shared_ptr<std::string> msg) {
     std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
     auto connIt = serverFinder->wsConnMap.find(hwssIdStr);
     if (connIt != serverFinder->wsConnMap.end()) {
-        serverFinder->plainClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::TEXT);
+        serverFinder->plainClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::BINARY);
         return;
     }
     std::cout << "hwssId " << hwssIdStr << " none config for router "<< std::endl;
@@ -224,7 +224,7 @@ void connect_tls(const std::string hwssId) {
             std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
             auto connIt = serverFinder->wssConnMap.find(hwssIdStr);
             if (connIt != serverFinder->wssConnMap.end()) {
-                serverFinder->tlsClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::TEXT);
+                serverFinder->tlsClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY);
                 return;
             }
            
@@ -286,7 +286,7 @@ void handleMsgFromWsRouter(std::shared_ptr<std::string> msg) {
     std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
     auto connIt = serverFinder->wssConnMap.find(hwssIdStr);
     if (connIt != serverFinder->wssConnMap.end()) {
-        serverFinder->tlsClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::TEXT);
+        serverFinder->tlsClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::BINARY);
         return;
     }
     std::cout << "hwssId " << hwssIdStr << " none config for router "<< std::endl;
