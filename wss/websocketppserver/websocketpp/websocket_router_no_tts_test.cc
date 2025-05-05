@@ -135,7 +135,7 @@ void connect_plain(const std::string hwssId) {
     
     con->set_fail_handler([con, hwssId](websocketpp::connection_hdl hdl) {
         //connect will be free in inner
-        std::cout << " router failed connect try reconnect " << hwssId << std::endl;
+        std::cout << "router failed connect try reconnect " << hwssId << std::endl;
         try_connect_plain_later(hwssId);
         serverFinder->wsConnMap.erase(hwssId);
        
@@ -241,14 +241,14 @@ void connect_tls(const std::string hwssId) {
     
     con->set_fail_handler([con, hwssId](websocketpp::connection_hdl hdl) {
         //connect will be free in inner
-        std::cout << "router failed connect try reconnect wss " << hwssId << std::endl;
+        std::cout << "router failed connect try reconnect tls " << hwssId << std::endl;
         try_connect_tls_later(hwssId);
         serverFinder->wsConnMap.erase(hwssId);
        
     });
     con->set_close_handler([con, hwssId](websocketpp::connection_hdl hdl){
         //connect will be free in inner
-        std::cout << "router closed connect, try reconnect wss "  << hwssId << std::endl;
+        std::cout << "router closed connect, try reconnect tls "  << hwssId << std::endl;
         try_connect_tls_later(hwssId);
         serverFinder->wsConnMap.erase(hwssId);
         
@@ -355,18 +355,40 @@ void runWSSRouter() {
 int websocket_router_no_tts_test_main(int argc, const char * argv[]) {
     serverFinder = std::make_shared<ServerFinder>();
     
+    {
+        
+        HwssServer wsServer2;
+        wsServer2.url = "ws://127.0.0.1:9001/wsg?role=router&routerAppId=162374203942&routerAppToken=ZnPMZ3Wv8GR5ofP3LdNYHFIT3eNGcApg";
+        wsServer2.hwssId = "ws_685208380980";
+        std::string wsHwssId2 = "ws_685208380980";
+        serverFinder->wsServerMap[wsHwssId2] = wsServer2;
+    }
  
-    HwssServer wsServer2;
-    wsServer2.url = "ws://127.0.0.1:9002/wsg?role=router&routerAppId=162374203942&routerAppToken=ZnPMZ3Wv8GR5ofP3LdNYHFIT3eNGcApg";
-    wsServer2.hwssId = "hwss_685208380981";
-    std::string wsHwssId2 = "hwss_685208380981";
-    serverFinder->wsServerMap[wsHwssId2] = wsServer2;
+    {
+        
+        HwssServer wsServer2;
+        wsServer2.url = "ws://127.0.0.1:9002/wsg?role=router&routerAppId=162374203942&routerAppToken=ZnPMZ3Wv8GR5ofP3LdNYHFIT3eNGcApg";
+        wsServer2.hwssId = "ws_685208380981";
+        std::string wsHwssId2 = "ws_685208380981";
+        serverFinder->wsServerMap[wsHwssId2] = wsServer2;
+    }
     
-    HwssServer wsServer;
-    wsServer.url = "wss://127.0.0.1:9001/wsg?role=router&routerAppId=162374203942&routerAppToken=ZnPMZ3Wv8GR5ofP3LdNYHFIT3eNGcApg";
-    wsServer.hwssId = "hwss_685208380980";
-    std::string wsHwssId = "hwss_685208380980";
-    serverFinder->wssServerMap[wsHwssId] = wsServer;
+    {
+        
+        HwssServer wsServer;
+        wsServer.url = "wss://127.0.0.1:8001/wsg?role=router&routerAppId=162374203942&routerAppToken=ZnPMZ3Wv8GR5ofP3LdNYHFIT3eNGcApg";
+        wsServer.hwssId = "wss_685208380980";
+        std::string wsHwssId = "wss_685208380980";
+        serverFinder->wssServerMap[wsHwssId] = wsServer;
+    }
+    
+    {
+        HwssServer wsServer;
+        wsServer.url = "wss://127.0.0.1:8002/wsg?role=router&routerAppId=162374203942&routerAppToken=ZnPMZ3Wv8GR5ofP3LdNYHFIT3eNGcApg";
+        wsServer.hwssId = "wss_685208380981";
+        std::string wsHwssId = "wss_685208380981";
+        serverFinder->wssServerMap[wsHwssId] = wsServer;
+    }
     
     
     if(serverFinder->wsServerMap.empty() && serverFinder->wssServerMap.empty()) {
