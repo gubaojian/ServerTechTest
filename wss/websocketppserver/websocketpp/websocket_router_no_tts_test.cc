@@ -117,7 +117,12 @@ void connect_plain(const std::string hwssId) {
             std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
             auto connIt = serverFinder->wsConnMap.find(hwssIdStr);
             if (connIt != serverFinder->wsConnMap.end()) {
-                serverFinder->plainClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY);
+                websocketpp::lib::error_code send_error;
+                serverFinder->plainClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY, send_error);
+                if (send_error) {
+                    std::cout << "hwssId " << hwssIdStr << " send error "<< send_error << std::endl;
+                  
+                }
                 return;
             }
            
@@ -165,6 +170,9 @@ void try_connect_plain_later(const std::string hwssId) {
 }
 
 void handleMsgFromWssRouter(std::shared_ptr<std::string> msg) {
+    if (!serverFinder->plainClient) {
+        return;
+    }
     simdjson::ondemand::document  doc;
     simdjson::padded_string paddedJson = simdjson::padded_string(*msg);
     auto error = serverFinder->plainParser.iterate(paddedJson).get(doc);
@@ -178,7 +186,12 @@ void handleMsgFromWssRouter(std::shared_ptr<std::string> msg) {
     std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
     auto connIt = serverFinder->wsConnMap.find(hwssIdStr);
     if (connIt != serverFinder->wsConnMap.end()) {
-        serverFinder->plainClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::BINARY);
+        websocketpp::lib::error_code send_error;
+        serverFinder->plainClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::BINARY, send_error);
+        if (send_error) {
+            std::cout << "hwssId " << hwssIdStr << " send error "<< send_error << std::endl;
+          
+        }
         return;
     }
     std::cout << "hwssId " << hwssIdStr << " none config for router "<< std::endl;
@@ -224,7 +237,12 @@ void connect_tls(const std::string hwssId) {
             std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
             auto connIt = serverFinder->wssConnMap.find(hwssIdStr);
             if (connIt != serverFinder->wssConnMap.end()) {
-                serverFinder->tlsClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY);
+                websocketpp::lib::error_code send_error;
+                serverFinder->tlsClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY, send_error);
+                if (send_error) {
+                    std::cout << "hwssId " << hwssIdStr << " send error "<< send_error << std::endl;
+                  
+                }
                 return;
             }
            
@@ -273,6 +291,9 @@ void try_connect_tls_later(const std::string hwssId) {
 }
 
 void handleMsgFromWsRouter(std::shared_ptr<std::string> msg) {
+    if (!serverFinder->tlsClient) {
+        return;
+    }
     simdjson::ondemand::document  doc;
     simdjson::padded_string paddedJson = simdjson::padded_string(*msg);
     auto error = serverFinder->tlsParser.iterate(paddedJson).get(doc);
@@ -286,7 +307,12 @@ void handleMsgFromWsRouter(std::shared_ptr<std::string> msg) {
     std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
     auto connIt = serverFinder->wssConnMap.find(hwssIdStr);
     if (connIt != serverFinder->wssConnMap.end()) {
-        serverFinder->tlsClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::BINARY);
+        websocketpp::lib::error_code send_error;
+        serverFinder->tlsClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::BINARY, send_error);
+        if (send_error) {
+            std::cout << "hwssId " << hwssIdStr << " send error "<< send_error << std::endl;
+          
+        }
         return;
     }
     std::cout << "hwssId " << hwssIdStr << " none config for router "<< std::endl;
@@ -330,8 +356,6 @@ void runWSSRouter() {
         client->set_access_channels(websocketpp::log::alevel::none);
         client->clear_access_channels(websocketpp::log::alevel::none);
         client->set_error_channels(websocketpp::log::elevel::none);
-        
-
         
         // Initialize ASIO
         client->init_asio();
