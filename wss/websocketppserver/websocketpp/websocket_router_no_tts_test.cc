@@ -21,11 +21,18 @@
 #include <websocketpp/config/asio_client.hpp>
 #include "websocketpp/client.hpp"
 
+#include "simdjson/simdjson.h"
+
 
 
 typedef websocketpp::client<websocketpp::config::asio_client> plain_client;
 typedef websocketpp::client<websocketpp::config::asio_tls_client> tls_client;
 typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
+
+struct HwssServer {
+    std::string hwssId;
+    std::string url;
+};
 
 struct plain_connection{
     plain_client::connection_ptr conn = nullptr;
@@ -39,160 +46,322 @@ struct tls_connection{
     int64_t sendMessageCount = 0;
 };
 
-void connect_plain(plain_client* client, const std::string uri) {
-    websocketpp::lib::error_code ec;
-    plain_client::connection_ptr con =  client->get_connection(uri, ec);
-    if (ec) {
-        std::cout << "could not create connection because: " << ec.message() << std::endl;
+struct ServerFinder {
+    //ws协议hwss服务器id映射
+    std::unordered_map<std::string,HwssServer> wsServerMap;
+    //wss协议hwss服务器id映射
+    std::unordered_map<std::string,HwssServer> wssServerMap;
+    
+    //ws协议asio的执行线程及相关信息：。仅在支持对应线程访问
+    std::shared_ptr<plain_client> plainClient;
+    std::unordered_map<std::string, plain_client::connection_ptr> wsConnMap;
+    
+    //wss协议asio的执行线程及相关信息：。仅在支持对应线程访问
+    std::shared_ptr<tls_client> tlsClient;
+    std::unordered_map<std::string, tls_client::connection_ptr> wssConnMap;
+    
+    //ws和wss两个线程分别对应两个parser。仅在支持对应线程访问
+    simdjson::ondemand::parser plainParser;
+    simdjson::ondemand::parser tlsParser;
+    
+};
+
+std::shared_ptr<ServerFinder> serverFinder;
+
+void try_connect_plain_later(const std::string hwssId);
+void handleMsgFromWssRouter(std::shared_ptr<std::string> msg);
+
+void try_connect_tls_later(const std::string hwssId);
+void handleMsgFromWsRouter(std::shared_ptr<std::string> msg);
+
+void connect_plain(const std::string hwssId) {
+    auto findIt = serverFinder->wsServerMap.find(hwssId);
+    if (findIt == serverFinder->wsServerMap.end()) {
         return;
     }
+    const HwssServer& server = findIt->second;
+    std::shared_ptr<plain_client> client = serverFinder->plainClient;
+    websocketpp::lib::error_code ec;
+    plain_client::connection_ptr con =  client->get_connection(server.url, ec);
+    if (ec) {
+        std::cout << "could not get_connection because: " << ec.message() << std::endl;
+        try_connect_plain_later(hwssId);
+        return;
+    }
+    con->set_pong_timeout(120*1000);
     con->set_open_handler([](websocketpp::connection_hdl hdl){
-        std::cout << "client connect open " << &hdl << std::endl;
-       
-    });
-    
-    con->set_fail_handler([=](websocketpp::connection_hdl hdl) {
-        std::cout << "client failed connect " << &hdl << std::endl;
-        std::cout << "client failed connect try reconnect " << std::endl;
-        //https://stackoverflow.com/questions/76819327/asio-async-wait-gives-operation-canceled
-        std::shared_ptr<boost::asio::steady_timer> timer = std::make_shared<boost::asio::steady_timer>(client->get_io_service());
-        timer->expires_after(std::chrono::seconds(30 + std::rand()%30));
-        timer->async_wait([timer, client, uri] (const boost::system::error_code& error_code){
-            if (error_code) {
-                std::cout << "error code " << error_code.message()
-                << " " << " " << error_code.location() << std::endl;
-                return ;
-            }
-            std::cout << "client failed connect reconnect " << error_code << std::endl;
-            connect_plain(client, uri);
-            std::cout << "client failed connect connect again " << std::endl;
-            
-        });
-        con->set_fail_handler(nullptr);
-    });
-    con->set_close_handler([=](websocketpp::connection_hdl hdl){
-        std::cout << "client be closed " << &hdl << std::endl;
-        //timer
-        std::shared_ptr<boost::asio::steady_timer> timer = std::make_shared<boost::asio::steady_timer>(client->get_io_service());
-        timer->expires_after(std::chrono::seconds(30 + std::rand()%30));
-        timer->async_wait([timer, client, uri] (const boost::system::error_code& error_code){
-            if (error_code) {
-                std::cout << "error code " << error_code.message()
-                << " " << " " << error_code.location() << std::endl;
-                return ;
-            }
-            std::cout << "client failed connect reconnect " << error_code << std::endl;
-            connect_plain(client, uri);
-            std::cout << "client failed connect connect again " << std::endl;
-            
-        });
-        con->set_close_handler(nullptr);
-    });
-    con->set_message_handler([](websocketpp::connection_hdl hdl, message_ptr msg){
-        std::cout << "on message client" << &hdl << " " << msg->get_payload() << std::endl;
         
     });
-   plain_client::connection_ptr mainConn = client->connect(con);
-  
-    mainConn = nullptr;
-   
+    
+    con->set_message_handler([hwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
+        //router current only handle json text
+        if(msg->get_opcode() == websocketpp::frame::opcode::value::TEXT) {
+            simdjson::ondemand::document  doc;
+            auto error = serverFinder->plainParser.iterate(msg->get_payload()).get(doc);
+            if (error) {
+                return;
+            }
+            auto hwssId = doc["hwssId"].get_string();
+            if (hwssId.error()) {
+                std::cout << hwssId << " send wrong format message" << std::endl;
+                return;
+            }
+            //默认到ws协议的处理
+            std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
+            auto connIt = serverFinder->wsConnMap.find(hwssIdStr);
+            if (connIt != serverFinder->wsConnMap.end()) {
+                serverFinder->plainClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::TEXT);
+                return;
+            }
+           
+            if (serverFinder->wssServerMap.empty()) {
+                std::cout << "hwssId " << hwssIdStr << " none config for router "<< std::endl;
+                return;
+            }
+            //转发到wss协议的处理线程
+            std::shared_ptr<std::string> cpMsg = std::make_shared<std::string>(msg->get_payload());
+            boost::asio::post(serverFinder->tlsClient->get_io_service(), [cpMsg] {
+                handleMsgFromWsRouter(cpMsg);
+            });
+        }
+        
+    });
+    
+    con->set_fail_handler([con, hwssId](websocketpp::connection_hdl hdl) {
+        //connect will be free in inner
+        serverFinder->wsConnMap.erase(hwssId);
+        con->set_message_handler(nullptr);
+        con->set_close_handler(nullptr);
+        con->set_fail_handler(nullptr);
+        std::cout << "client failed connect try reconnect " << std::endl;
+        try_connect_plain_later(hwssId);
+    });
+    con->set_close_handler([con, hwssId](websocketpp::connection_hdl hdl){
+        //connect will be free in inner
+        serverFinder->wsConnMap.erase(hwssId);
+        con->set_message_handler(nullptr);
+        con->set_close_handler(nullptr);
+        con->set_fail_handler(nullptr);
+        std::cout << "client closed connect, try reconnect " << std::endl;
+        try_connect_plain_later(hwssId);
+    });
+    
+    serverFinder->wsConnMap[hwssId] = client->connect(con);
 }
 
-void connect_tls(const tls_client* client, const std::string uri) {
-    
+void try_connect_plain_later(const std::string hwssId) {
+    std::shared_ptr<boost::asio::steady_timer> timer = std::make_shared<boost::asio::steady_timer>(serverFinder->plainClient->get_io_service());
+    timer->expires_after(std::chrono::seconds(30 + std::rand()%30));
+    timer->async_wait([timer, hwssId] (const boost::system::error_code& error_code){
+        if (error_code) {
+            std::cout << hwssId << " reconnect error code " << error_code.message() << std::endl;
+            return ;
+        }
+        connect_plain(hwssId);
+    });
 }
+
+void handleMsgFromWssRouter(std::shared_ptr<std::string> msg) {
+    simdjson::ondemand::document  doc;
+    auto error = serverFinder->plainParser.iterate(*msg).get(doc);
+    if (error) {
+        return;
+    }
+    auto hwssId = doc["hwssId"].get_string();
+    if (hwssId.error()) {
+        return;
+    }
+    std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
+    auto connIt = serverFinder->wsConnMap.find(hwssIdStr);
+    if (connIt != serverFinder->wsConnMap.end()) {
+        serverFinder->plainClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::TEXT);
+        return;
+    }
+    std::cout << "hwssId " << hwssIdStr << " none config for router "<< std::endl;
+}
+
+
+
+void connect_tls(const std::string hwssId) {
+    auto findIt = serverFinder->wssServerMap.find(hwssId);
+    if (findIt == serverFinder->wssServerMap.end()) {
+        return;
+    }
+    const HwssServer& server = findIt->second;
+    std::shared_ptr<tls_client> client = serverFinder->tlsClient;
+    websocketpp::lib::error_code ec;
+    tls_client::connection_ptr con =  client->get_connection(server.url, ec);
+    if (ec) {
+        std::cout << "could not get_connection because: " << ec.message() << std::endl;
+        try_connect_tls_later(hwssId);
+        return;
+    }
+    con->set_pong_timeout(120*1000);
+    con->set_open_handler([](websocketpp::connection_hdl hdl){
+        
+    });
+    
+    con->set_message_handler([hwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
+        //router current only handle json text
+        if(msg->get_opcode() == websocketpp::frame::opcode::value::TEXT) {
+            simdjson::ondemand::document  doc;
+            auto error = serverFinder->tlsParser.iterate(msg->get_payload()).get(doc);
+            if (error) {
+                return;
+            }
+            auto hwssId = doc["hwssId"].get_string();
+            if (hwssId.error()) {
+                std::cout << hwssId << " send wrong format message" << std::endl;
+                return;
+            }
+            //默认到ws协议的处理
+            std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
+            auto connIt = serverFinder->wssConnMap.find(hwssIdStr);
+            if (connIt != serverFinder->wssConnMap.end()) {
+                serverFinder->tlsClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::TEXT);
+                return;
+            }
+           
+            if (serverFinder->wsServerMap.empty()) {
+                std::cout << "hwssId " << hwssIdStr << " none config for router "<< std::endl;
+                return;
+            }
+            //转发到ws协议的处理线程
+            std::shared_ptr<std::string> cpMsg = std::make_shared<std::string>(msg->get_payload());
+            boost::asio::post(serverFinder->plainClient->get_io_service(), [cpMsg] {
+                handleMsgFromWssRouter(cpMsg);
+            });
+        }
+        
+    });
+    
+    con->set_fail_handler([con, hwssId](websocketpp::connection_hdl hdl) {
+        //connect will be free in inner
+        serverFinder->wsConnMap.erase(hwssId);
+        con->set_message_handler(nullptr);
+        con->set_close_handler(nullptr);
+        con->set_fail_handler(nullptr);
+        std::cout << "client failed connect try reconnect wss " << std::endl;
+        try_connect_tls_later(hwssId);
+    });
+    con->set_close_handler([con, hwssId](websocketpp::connection_hdl hdl){
+        //connect will be free in inner
+        serverFinder->wsConnMap.erase(hwssId);
+        con->set_message_handler(nullptr);
+        con->set_close_handler(nullptr);
+        con->set_fail_handler(nullptr);
+        std::cout << "client closed connect, try reconnect wss" << std::endl;
+        try_connect_tls_later(hwssId);
+    });
+    
+    serverFinder->wssConnMap[hwssId] = client->connect(con);
+}
+
+
+void try_connect_tls_later(const std::string hwssId) {
+    std::shared_ptr<boost::asio::steady_timer> timer = std::make_shared<boost::asio::steady_timer>(serverFinder->tlsClient->get_io_service());
+    timer->expires_after(std::chrono::seconds(30 + std::rand()%30));
+    timer->async_wait([timer, hwssId] (const boost::system::error_code& error_code){
+        if (error_code) {
+            std::cout << hwssId << " reconnect error code " << error_code.message() << std::endl;
+            return ;
+        }
+        connect_tls(hwssId);
+    });
+}
+
+void handleMsgFromWsRouter(std::shared_ptr<std::string> msg) {
+    simdjson::ondemand::document  doc;
+    auto error = serverFinder->tlsParser.iterate(*msg).get(doc);
+    if (error) {
+        return;
+    }
+    auto hwssId = doc["hwssId"].get_string();
+    if (hwssId.error()) {
+        return;
+    }
+    std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
+    auto connIt = serverFinder->wssConnMap.find(hwssIdStr);
+    if (connIt != serverFinder->wssConnMap.end()) {
+        serverFinder->tlsClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::TEXT);
+        return;
+    }
+    std::cout << "hwssId " << hwssIdStr << " none config for router "<< std::endl;
+}
+
+
 
 void runWSRouter() {
-    auto start = std::chrono::high_resolution_clock::now();
-    auto end = std::chrono::high_resolution_clock::now();
-    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    
-    
-    plain_client client;
-    std::string uri = "ws://127.0.0.1:9001/wsg?role=server&serverAppId=081713074824&serverAppToken=Y8FG0tbs7pgujQccNcEABIuW1it2Rhfw";
+    std::shared_ptr<plain_client> client = std::make_shared<plain_client>();
+    serverFinder->plainClient = client;
 
     try {
         // Set logging to be pretty verbose (everything except message payloads)
-        client.set_access_channels(websocketpp::log::alevel::none);
-        client.set_error_channels(websocketpp::log::elevel::none);
+        client->set_access_channels(websocketpp::log::alevel::none);
+        client->clear_access_channels(websocketpp::log::alevel::none);
+        client->set_error_channels(websocketpp::log::elevel::none);
         
         // Initialize ASIO
-        client.init_asio();
-        // Register our message handler
-        connect_plain(&client, uri);
-        connect_plain(&client, uri);
-       //boost::asio::steady_timer timer(client.get_io_service());
-       //timer.expires_after(std::chrono::seconds(1));
-       //timer.async_wait(send_message_bench);
-
-        // Start the ASIO io_service run loop
-        // this will cause a single connection to be made to the server. c.run()
-        // will exit when this connection is closed.
-        plain_client* ptr = &client;
-        std::thread background([ptr] {
-            auto start = std::chrono::high_resolution_clock::now();
-            for(int i=0; i<10000*200; i++) {
-                boost::asio::post(ptr->get_io_service(), [] {
-                    //std::cout << "post execute command";
-                });
-            }
-            auto end = std::chrono::high_resolution_clock::now();
-            auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-            std::cout << "post message done " << used.count() << "ms "  << std::endl;
-           
-        });
+        client->init_asio();
         
-        client.run();
+        const auto& wsServerMap = serverFinder->wsServerMap;
+        auto wsIt = wsServerMap.begin();
+        for(auto wsIt = wsServerMap.begin(); wsIt != wsServerMap.end(); wsIt++) {
+            connect_plain(wsIt->first);
+        }
+        client->run();
     } catch (websocketpp::exception const & e) {
         std::cout << "router connect websocket exception " << e.what() << std::endl;
     }
+    serverFinder->plainClient = nullptr;
+    
 }
 
 void runWSSRouter() {
-    auto start = std::chrono::high_resolution_clock::now();
-    auto end = std::chrono::high_resolution_clock::now();
-    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    
-    
-    tls_client client;
+    std::shared_ptr<tls_client> client = std::make_shared<tls_client>();
     websocketpp::lib::shared_ptr<boost::asio::ssl::context> ctx;
-   
-    std::string uri = "ws://127.0.0.1:9001/wsg?role=server&serverAppId=081713074824&serverAppToken=Y8FG0tbs7pgujQccNcEABIuW1it2Rhfw";
-
+    serverFinder->tlsClient = client;
     try {
         // Set logging to be pretty verbose (everything except message payloads)
-        client.set_access_channels(websocketpp::log::alevel::all);
-        client.set_error_channels(websocketpp::log::elevel::all);
-        //c.clear_access_channels(websocketpp::log::alevel::frame_payload);
+        client->set_access_channels(websocketpp::log::alevel::none);
+        client->clear_access_channels(websocketpp::log::alevel::none);
+        client->set_error_channels(websocketpp::log::elevel::none);
+        
 
         
         // Initialize ASIO
-        client.init_asio();
+        client->init_asio();
         
         ctx = websocketpp::lib::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv13_client);
-         client.set_tls_init_handler([=](websocketpp::connection_hdl hdl) {
+         client->set_tls_init_handler([=](websocketpp::connection_hdl hdl) {
              return ctx;
           });
 
-        // Register our message handler
-        connect_tls(&client, uri);
-        connect_tls(&client, uri);
-       //boost::asio::steady_timer timer(client.get_io_service());
-       //timer.expires_after(std::chrono::seconds(1));
-       //timer.async_wait(send_message_bench);
+        const auto& wssServerMap = serverFinder->wssServerMap;
+        auto wssIt = wssServerMap.begin();
+        for(auto wssIt = wssServerMap.begin(); wssIt != wssServerMap.end(); wssIt++) {
+            connect_tls(wssIt->first);
+        }
 
-        // Start the ASIO io_service run loop
-        // this will cause a single connection to be made to the server. c.run()
-        // will exit when this connection is closed.
         
-        client.run();
+        client->run();
     } catch (websocketpp::exception const & e) {
-        std::cout << "router connect websocket exception " << e.what() << std::endl;
+        std::cout << "wss router connect websocket exception " << e.what() << std::endl;
     }
+    serverFinder->tlsClient = nullptr;
 }
 
 int websocket_router_no_tts_test_main(int argc, const char * argv[]) {
+    serverFinder = std::make_shared<ServerFinder>();
+    
+    HwssServer wsServer;
+    wsServer.url = "ws://127.0.0.1:9001/wsg?role=server&serverAppId=081713074824&serverAppToken=Y8FG0tbs7pgujQccNcEABIuW1it2Rhfw";
+    wsServer.hwssId = "hwss_685208380980";
+    std::string wsHwssId = "hwss_685208380980";
+    serverFinder->wsServerMap[wsHwssId] = wsServer;
+    
     runWSRouter();
+    
     
     return 0;
 }

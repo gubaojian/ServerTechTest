@@ -46,73 +46,57 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "54"
-            endingLineNumber = "54"
-            landmarkName = "connect_plain(client, uri)"
+            startingLineNumber = "130"
+            endingLineNumber = "130"
+            landmarkName = "connect_plain(hwssId)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "4226A92B-FD8B-4380-B4C4-0B560BC6F9A9"
+            uuid = "8D6E0437-90A2-4ECC-9AE4-C08927D101E6"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "55"
-            endingLineNumber = "55"
-            landmarkName = "connect_plain(client, uri)"
+            startingLineNumber = "295"
+            endingLineNumber = "295"
+            landmarkName = "runWSRouter()"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "8AA4B053-E960-40D2-9A9E-3635E1E9A23A"
+            uuid = "056CA975-A801-4070-B02C-B8AC5FC61122"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "67"
-            endingLineNumber = "67"
-            landmarkName = "connect_plain(client, uri)"
+            startingLineNumber = "153"
+            endingLineNumber = "153"
+            landmarkName = "try_connect_plain_later(hwssId)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "0C219924-A110-4976-AEB2-0A0BECF4C183"
-            shouldBeEnabled = "No"
+            uuid = "C9D90305-2ECB-4B0D-A0F7-75E2AF099908"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "75"
-            endingLineNumber = "75"
-            landmarkName = "connect_plain(client, uri)"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "64C7DFE3-98C1-4BE8-89F7-AD9DE61B729E"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "websocketpp/websocket_router_no_tts_test.cc"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "61"
-            endingLineNumber = "61"
-            landmarkName = "connect_plain(client, uri)"
+            startingLineNumber = "132"
+            endingLineNumber = "132"
+            landmarkName = "connect_plain(hwssId)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
