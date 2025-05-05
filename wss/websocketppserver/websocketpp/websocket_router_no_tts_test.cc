@@ -75,6 +75,10 @@ void try_connect_tls_later(const std::string hwssId);
 void handleMsgFromWsRouter(std::shared_ptr<std::string> msg);
 
 void connect_plain(const std::string hwssId) {
+    if (hwssId.empty()) {
+        std::cout << "illegal hwssId, is empty " << hwssId << std::endl;
+        return;
+    }
     auto findIt = serverFinder->wsServerMap.find(hwssId);
     if (findIt == serverFinder->wsServerMap.end()) {
         return;
@@ -89,16 +93,18 @@ void connect_plain(const std::string hwssId) {
         return;
     }
     con->set_pong_timeout(120*1000);
-    con->set_open_handler([](websocketpp::connection_hdl hdl){
-        
+    con->set_open_handler([hwssId](websocketpp::connection_hdl hdl){
+        std::cout << "router connect success " << hwssId << std::endl;
     });
     
     con->set_message_handler([hwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
         //router current only handle json text
         if(msg->get_opcode() == websocketpp::frame::opcode::value::TEXT) {
             simdjson::ondemand::document  doc;
-            auto error = serverFinder->plainParser.iterate(msg->get_payload()).get(doc);
+            simdjson::padded_string paddedJson = simdjson::padded_string(msg->get_payload());
+            auto error = serverFinder->plainParser.iterate(paddedJson).get(doc);
             if (error) {
+                std::cout << hwssId << " send wrong format message" << msg->get_payload() << std::endl;
                 return;
             }
             auto hwssId = doc["hwssId"].get_string();
@@ -129,21 +135,17 @@ void connect_plain(const std::string hwssId) {
     
     con->set_fail_handler([con, hwssId](websocketpp::connection_hdl hdl) {
         //connect will be free in inner
-        serverFinder->wsConnMap.erase(hwssId);
-        con->set_message_handler(nullptr);
-        con->set_close_handler(nullptr);
-        con->set_fail_handler(nullptr);
-        std::cout << "client failed connect try reconnect " << std::endl;
+        std::cout << " router failed connect try reconnect " << hwssId << std::endl;
         try_connect_plain_later(hwssId);
+        serverFinder->wsConnMap.erase(hwssId);
+       
     });
     con->set_close_handler([con, hwssId](websocketpp::connection_hdl hdl){
         //connect will be free in inner
-        serverFinder->wsConnMap.erase(hwssId);
-        con->set_message_handler(nullptr);
-        con->set_close_handler(nullptr);
-        con->set_fail_handler(nullptr);
-        std::cout << "client closed connect, try reconnect " << std::endl;
+        std::cout << "router closed connect, try reconnect " << hwssId << std::endl;
         try_connect_plain_later(hwssId);
+        serverFinder->wsConnMap.erase(hwssId);
+        
     });
     
     serverFinder->wsConnMap[hwssId] = client->connect(con);
@@ -163,7 +165,8 @@ void try_connect_plain_later(const std::string hwssId) {
 
 void handleMsgFromWssRouter(std::shared_ptr<std::string> msg) {
     simdjson::ondemand::document  doc;
-    auto error = serverFinder->plainParser.iterate(*msg).get(doc);
+    simdjson::padded_string paddedJson = simdjson::padded_string(*msg);
+    auto error = serverFinder->plainParser.iterate(paddedJson).get(doc);
     if (error) {
         return;
     }
@@ -197,15 +200,16 @@ void connect_tls(const std::string hwssId) {
         return;
     }
     con->set_pong_timeout(120*1000);
-    con->set_open_handler([](websocketpp::connection_hdl hdl){
-        
+    con->set_open_handler([hwssId](websocketpp::connection_hdl hdl){
+        std::cout << "router connect success wss " << hwssId << std::endl;
     });
     
     con->set_message_handler([hwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
         //router current only handle json text
         if(msg->get_opcode() == websocketpp::frame::opcode::value::TEXT) {
             simdjson::ondemand::document  doc;
-            auto error = serverFinder->tlsParser.iterate(msg->get_payload()).get(doc);
+            simdjson::padded_string paddedJson = simdjson::padded_string(msg->get_payload());
+            auto error = serverFinder->tlsParser.iterate(paddedJson).get(doc);
             if (error) {
                 return;
             }
@@ -237,21 +241,17 @@ void connect_tls(const std::string hwssId) {
     
     con->set_fail_handler([con, hwssId](websocketpp::connection_hdl hdl) {
         //connect will be free in inner
-        serverFinder->wsConnMap.erase(hwssId);
-        con->set_message_handler(nullptr);
-        con->set_close_handler(nullptr);
-        con->set_fail_handler(nullptr);
-        std::cout << "client failed connect try reconnect wss " << std::endl;
+        std::cout << "router failed connect try reconnect wss " << hwssId << std::endl;
         try_connect_tls_later(hwssId);
+        serverFinder->wsConnMap.erase(hwssId);
+       
     });
     con->set_close_handler([con, hwssId](websocketpp::connection_hdl hdl){
         //connect will be free in inner
-        serverFinder->wsConnMap.erase(hwssId);
-        con->set_message_handler(nullptr);
-        con->set_close_handler(nullptr);
-        con->set_fail_handler(nullptr);
-        std::cout << "client closed connect, try reconnect wss" << std::endl;
+        std::cout << "router closed connect, try reconnect wss "  << hwssId << std::endl;
         try_connect_tls_later(hwssId);
+        serverFinder->wsConnMap.erase(hwssId);
+        
     });
     
     serverFinder->wssConnMap[hwssId] = client->connect(con);
@@ -272,7 +272,8 @@ void try_connect_tls_later(const std::string hwssId) {
 
 void handleMsgFromWsRouter(std::shared_ptr<std::string> msg) {
     simdjson::ondemand::document  doc;
-    auto error = serverFinder->tlsParser.iterate(*msg).get(doc);
+    simdjson::padded_string paddedJson = simdjson::padded_string(*msg);
+    auto error = serverFinder->tlsParser.iterate(paddedJson).get(doc);
     if (error) {
         return;
     }
@@ -354,14 +355,42 @@ void runWSSRouter() {
 int websocket_router_no_tts_test_main(int argc, const char * argv[]) {
     serverFinder = std::make_shared<ServerFinder>();
     
+ 
+    HwssServer wsServer2;
+    wsServer2.url = "ws://127.0.0.1:9002/wsg?role=router&routerAppId=162374203942&routerAppToken=ZnPMZ3Wv8GR5ofP3LdNYHFIT3eNGcApg";
+    wsServer2.hwssId = "hwss_685208380981";
+    std::string wsHwssId2 = "hwss_685208380981";
+    serverFinder->wsServerMap[wsHwssId2] = wsServer2;
+    
     HwssServer wsServer;
-    wsServer.url = "ws://127.0.0.1:9001/wsg?role=server&serverAppId=081713074824&serverAppToken=Y8FG0tbs7pgujQccNcEABIuW1it2Rhfw";
+    wsServer.url = "wss://127.0.0.1:9001/wsg?role=router&routerAppId=162374203942&routerAppToken=ZnPMZ3Wv8GR5ofP3LdNYHFIT3eNGcApg";
     wsServer.hwssId = "hwss_685208380980";
     std::string wsHwssId = "hwss_685208380980";
-    serverFinder->wsServerMap[wsHwssId] = wsServer;
+    serverFinder->wssServerMap[wsHwssId] = wsServer;
     
-    runWSRouter();
     
+    if(serverFinder->wsServerMap.empty() && serverFinder->wssServerMap.empty()) {
+        std::cout << "non config hwss servers for router " << std::endl;
+        return 0;
+    }
+    if (!serverFinder->wsServerMap.empty() && !serverFinder->wssServerMap.empty()) {
+        std::thread wssThread([]{
+            runWSSRouter();
+        });
+        runWSRouter();
+        wssThread.join();
+        return 0;
+    }
+    
+    if (!serverFinder->wsServerMap.empty()) {
+        runWSRouter();
+        return 0;
+    }
+    
+    if (!serverFinder->wssServerMap.empty()) {
+        runWSSRouter();
+        return 0;
+    }
     
     return 0;
 }
