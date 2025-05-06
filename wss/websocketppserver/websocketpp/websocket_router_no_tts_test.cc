@@ -74,12 +74,12 @@ void handleMsgFromWssRouter(std::shared_ptr<std::string> msg);
 void try_connect_tls_later(const std::string hwssId);
 void handleMsgFromWsRouter(std::shared_ptr<std::string> msg);
 
-void connect_plain(const std::string hwssId) {
-    if (hwssId.empty()) {
-        std::cout << "illegal hwssId, is empty " << hwssId << std::endl;
+void connect_plain(const std::string connHwssId) {
+    if (connHwssId.empty()) {
+        std::cout << "illegal hwssId, is empty " << connHwssId << std::endl;
         return;
     }
-    auto findIt = serverFinder->wsServerMap.find(hwssId);
+    auto findIt = serverFinder->wsServerMap.find(connHwssId);
     if (findIt == serverFinder->wsServerMap.end()) {
         return;
     }
@@ -89,15 +89,15 @@ void connect_plain(const std::string hwssId) {
     plain_client::connection_ptr con =  client->get_connection(server.url, ec);
     if (ec) {
         std::cout << "could not get_connection because: " << ec.message() << std::endl;
-        try_connect_plain_later(hwssId);
+        try_connect_plain_later(connHwssId);
         return;
     }
-    con->set_pong_timeout(120*1000);
-    con->set_open_handler([hwssId](websocketpp::connection_hdl hdl){
-        std::cout << "router connect success " << hwssId << std::endl;
+    con->set_pong_timeout(480*1000);
+    con->set_open_handler([connHwssId](websocketpp::connection_hdl hdl){
+        std::cout << "router connect success " << connHwssId << std::endl;
     });
     
-    con->set_message_handler([hwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
+    con->set_message_handler([connHwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
         //router current only handle json text
         if(msg->get_opcode() == websocketpp::frame::opcode::value::TEXT
            || msg->get_opcode() == websocketpp::frame::opcode::value::BINARY) {
@@ -105,7 +105,7 @@ void connect_plain(const std::string hwssId) {
             simdjson::padded_string paddedJson = simdjson::padded_string(msg->get_payload());
             auto error = serverFinder->plainParser.iterate(paddedJson).get(doc);
             if (error) {
-                std::cout << hwssId << " send wrong format message" << msg->get_payload() << std::endl;
+                std::cout << connHwssId << " send wrong format message" << msg->get_payload() << std::endl;
                 return;
             }
             auto hwssId = doc["hwssId"].get_string();
@@ -114,13 +114,16 @@ void connect_plain(const std::string hwssId) {
                 return;
             }
             //默认到ws协议的处理
-            std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
-            auto connIt = serverFinder->wsConnMap.find(hwssIdStr);
+            std::string toHwssId(hwssId.value().data(), hwssId.value().size());
+            if (connHwssId == toHwssId) {
+                return;
+            }
+            auto connIt = serverFinder->wsConnMap.find(toHwssId);
             if (connIt != serverFinder->wsConnMap.end()) {
                 websocketpp::lib::error_code send_error;
                 serverFinder->plainClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY, send_error);
                 if (send_error) {
-                    std::cout << "hwssId ws " << hwssIdStr << " send error "<< send_error << std::endl;
+                    std::cout << "hwssId ws " << toHwssId << " send error "<< send_error << std::endl;
                   
                 }
                 return;
@@ -141,27 +144,27 @@ void connect_plain(const std::string hwssId) {
         
     });
     
-    con->set_fail_handler([con, hwssId](websocketpp::connection_hdl hdl) {
+    con->set_fail_handler([connHwssId](websocketpp::connection_hdl hdl) {
         //connect will be free in inner
-        std::cout << "router failed ws connect try reconnect " << hwssId << std::endl;
-        serverFinder->wsConnMap.erase(hwssId);
-        try_connect_plain_later(hwssId);
+        std::cout << "router failed ws connect try reconnect " << connHwssId << std::endl;
+        serverFinder->wsConnMap.erase(connHwssId);
+        try_connect_plain_later(connHwssId);
        
     });
-    con->set_close_handler([con, hwssId](websocketpp::connection_hdl hdl){
+    con->set_close_handler([connHwssId](websocketpp::connection_hdl hdl){
         //connect will be free in inner
-        std::cout << "router closed ws connect, try reconnect " << hwssId << std::endl;
-        serverFinder->wsConnMap.erase(hwssId);
-        try_connect_plain_later(hwssId);
+        std::cout << "router closed ws connect, try reconnect " << connHwssId << std::endl;
+        serverFinder->wsConnMap.erase(connHwssId);
+        try_connect_plain_later(connHwssId);
         
     });
     
-    serverFinder->wsConnMap[hwssId] = client->connect(con);
+    serverFinder->wsConnMap[connHwssId] = client->connect(con);
 }
 
 void try_connect_plain_later(const std::string hwssId) {
     std::shared_ptr<boost::asio::steady_timer> timer = std::make_shared<boost::asio::steady_timer>(serverFinder->plainClient->get_io_service());
-    timer->expires_after(std::chrono::seconds(30 + std::rand()%30));
+    timer->expires_after(std::chrono::seconds(10 + std::rand()%20));
     timer->async_wait([timer, hwssId] (const boost::system::error_code& error_code){
         if (error_code) {
             std::cout << hwssId << " reconnect error code " << error_code.message() << std::endl;
@@ -200,8 +203,8 @@ void handleMsgFromWssRouter(std::shared_ptr<std::string> msg) {
 
 
 
-void connect_tls(const std::string hwssId) {
-    auto findIt = serverFinder->wssServerMap.find(hwssId);
+void connect_tls(const std::string connHwssId) {
+    auto findIt = serverFinder->wssServerMap.find(connHwssId);
     if (findIt == serverFinder->wssServerMap.end()) {
         return;
     }
@@ -211,15 +214,16 @@ void connect_tls(const std::string hwssId) {
     tls_client::connection_ptr con =  client->get_connection(server.url, ec);
     if (ec) {
         std::cout << "could not get_connection because: " << ec.message() << std::endl;
-        try_connect_tls_later(hwssId);
+        try_connect_tls_later(connHwssId);
         return;
     }
-    con->set_pong_timeout(120*1000);
-    con->set_open_handler([hwssId](websocketpp::connection_hdl hdl){
-        std::cout << "router connect success wss " << hwssId << std::endl;
+
+    con->set_pong_timeout(480*1000);
+    con->set_open_handler([connHwssId](websocketpp::connection_hdl hdl){
+        std::cout << "router connect success wss " << connHwssId << std::endl;
     });
     
-    con->set_message_handler([hwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
+    con->set_message_handler([connHwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
         //router current only handle json text
         if(msg->get_opcode() == websocketpp::frame::opcode::value::TEXT
            || msg->get_opcode() == websocketpp::frame::opcode::value::BINARY) {
@@ -231,17 +235,20 @@ void connect_tls(const std::string hwssId) {
             }
             auto hwssId = doc["hwssId"].get_string();
             if (hwssId.error()) {
-                std::cout << hwssId << " send wrong format message" << std::endl;
+                std::cout << connHwssId << " send wrong format message" << std::endl;
                 return;
             }
             //默认到ws协议的处理
-            std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
-            auto connIt = serverFinder->wssConnMap.find(hwssIdStr);
+            std::string toHwssId(hwssId.value().data(), hwssId.value().size());
+            if (toHwssId == connHwssId) {
+                return;
+            }
+            auto connIt = serverFinder->wssConnMap.find(toHwssId);
             if (connIt != serverFinder->wssConnMap.end()) {
                 websocketpp::lib::error_code send_error;
                 serverFinder->tlsClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY, send_error);
                 if (send_error) {
-                    std::cout << "hwssId wss " << hwssIdStr << " send error "<< send_error << std::endl;
+                    std::cout << "hwssId wss " << toHwssId << " send error "<< send_error << std::endl;
                   
                 }
                 return;
@@ -262,28 +269,30 @@ void connect_tls(const std::string hwssId) {
         
     });
     
-    con->set_fail_handler([con, hwssId](websocketpp::connection_hdl hdl) {
+    con->set_fail_handler([connHwssId](websocketpp::connection_hdl hdl) {
         //connect will be free in inner
-        std::cout << "router failed wss connect try reconnect tls " << hwssId << std::endl;
-        serverFinder->wssConnMap.erase(hwssId);
-        try_connect_tls_later(hwssId);
+        std::cout << "router failed wss connect try reconnect tls " << connHwssId << std::endl;
+        serverFinder->wssConnMap.erase(connHwssId);
+        try_connect_tls_later(connHwssId);
        
     });
-    con->set_close_handler([con, hwssId](websocketpp::connection_hdl hdl){
+    con->set_close_handler([connHwssId](websocketpp::connection_hdl hdl){
         //connect will be free in inner
-        std::cout << "router closed wss connect, try reconnect tls "  << hwssId << std::endl;
-        serverFinder->wssConnMap.erase(hwssId);
-        try_connect_tls_later(hwssId);
+        serverFinder->wssConnMap.erase(connHwssId);
+        try_connect_tls_later(connHwssId);
+        std::cout << "router closed wss connect, try reconnect tls "  << connHwssId <<
+         (serverFinder->wssConnMap.find(connHwssId) == serverFinder->wssConnMap.end())
+        std::endl;
         
     });
     
-    serverFinder->wssConnMap[hwssId] = client->connect(con);
+    serverFinder->wssConnMap[connHwssId] = client->connect(con);
 }
 
 
 void try_connect_tls_later(const std::string hwssId) {
     std::shared_ptr<boost::asio::steady_timer> timer = std::make_shared<boost::asio::steady_timer>(serverFinder->tlsClient->get_io_service());
-    timer->expires_after(std::chrono::seconds(30 + std::rand()%30));
+    timer->expires_after(std::chrono::seconds(10 + std::rand()%20));
     timer->async_wait([timer, hwssId] (const boost::system::error_code& error_code){
         if (error_code) {
             std::cout << hwssId << " reconnect error code " << error_code.message() << std::endl;
