@@ -120,14 +120,13 @@ void connect_plain(const std::string hwssId) {
                 websocketpp::lib::error_code send_error;
                 serverFinder->plainClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY, send_error);
                 if (send_error) {
-                    std::cout << "hwssId " << hwssIdStr << " send error "<< send_error << std::endl;
+                    std::cout << "hwssId ws " << hwssIdStr << " send error "<< send_error << std::endl;
                   
                 }
                 return;
             }
            
             if (serverFinder->wssServerMap.empty()) {
-                std::cout << "hwssId " << hwssIdStr << " none config for router "<< std::endl;
                 return;
             }
             //转发到wss协议的处理线程
@@ -144,16 +143,16 @@ void connect_plain(const std::string hwssId) {
     
     con->set_fail_handler([con, hwssId](websocketpp::connection_hdl hdl) {
         //connect will be free in inner
-        std::cout << "router failed connect try reconnect " << hwssId << std::endl;
-        try_connect_plain_later(hwssId);
+        std::cout << "router failed ws connect try reconnect " << hwssId << std::endl;
         serverFinder->wsConnMap.erase(hwssId);
+        try_connect_plain_later(hwssId);
        
     });
     con->set_close_handler([con, hwssId](websocketpp::connection_hdl hdl){
         //connect will be free in inner
-        std::cout << "router closed connect, try reconnect " << hwssId << std::endl;
-        try_connect_plain_later(hwssId);
+        std::cout << "router closed ws connect, try reconnect " << hwssId << std::endl;
         serverFinder->wsConnMap.erase(hwssId);
+        try_connect_plain_later(hwssId);
         
     });
     
@@ -192,12 +191,11 @@ void handleMsgFromWssRouter(std::shared_ptr<std::string> msg) {
         websocketpp::lib::error_code send_error;
         serverFinder->plainClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::BINARY, send_error);
         if (send_error) {
-            std::cout << "hwssId " << hwssIdStr << " send error "<< send_error << std::endl;
+            std::cout << "hwssId ws " << hwssIdStr << " send error "<< send_error << std::endl;
           
         }
         return;
     }
-    std::cout << "hwssId " << hwssIdStr << " none config for router "<< std::endl;
 }
 
 
@@ -243,21 +241,20 @@ void connect_tls(const std::string hwssId) {
                 websocketpp::lib::error_code send_error;
                 serverFinder->tlsClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY, send_error);
                 if (send_error) {
-                    std::cout << "hwssId " << hwssIdStr << " send error "<< send_error << std::endl;
+                    std::cout << "hwssId wss " << hwssIdStr << " send error "<< send_error << std::endl;
                   
                 }
                 return;
             }
            
             if (serverFinder->wsServerMap.empty()) {
-                std::cout << "hwssId " << hwssIdStr << " none config for router "<< std::endl;
                 return;
             }
             //转发到ws协议的处理线程
             std::shared_ptr<std::string> cpMsg = std::make_shared<std::string>(msg->get_payload());
             std::shared_ptr<plain_client> plainClient = serverFinder->plainClient;
             if (plainClient) {
-                boost::asio::post(->get_io_service(), [cpMsg] {
+                boost::asio::post(plainClient->get_io_service(), [cpMsg] {
                     handleMsgFromWssRouter(cpMsg);
                 });
             }
@@ -267,16 +264,16 @@ void connect_tls(const std::string hwssId) {
     
     con->set_fail_handler([con, hwssId](websocketpp::connection_hdl hdl) {
         //connect will be free in inner
-        std::cout << "router failed connect try reconnect tls " << hwssId << std::endl;
+        std::cout << "router failed wss connect try reconnect tls " << hwssId << std::endl;
+        serverFinder->wssConnMap.erase(hwssId);
         try_connect_tls_later(hwssId);
-        serverFinder->wsConnMap.erase(hwssId);
        
     });
     con->set_close_handler([con, hwssId](websocketpp::connection_hdl hdl){
         //connect will be free in inner
-        std::cout << "router closed connect, try reconnect tls "  << hwssId << std::endl;
+        std::cout << "router closed wss connect, try reconnect tls "  << hwssId << std::endl;
+        serverFinder->wssConnMap.erase(hwssId);
         try_connect_tls_later(hwssId);
-        serverFinder->wsConnMap.erase(hwssId);
         
     });
     
@@ -316,12 +313,11 @@ void handleMsgFromWsRouter(std::shared_ptr<std::string> msg) {
         websocketpp::lib::error_code send_error;
         serverFinder->tlsClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::BINARY, send_error);
         if (send_error) {
-            std::cout << "hwssId " << hwssIdStr << " send error "<< send_error << std::endl;
+            std::cout << "hwssId wss " << hwssIdStr << " send error  "<< send_error << send_error.message() << std::endl;
           
         }
         return;
     }
-    std::cout << "hwssId " << hwssIdStr << " none config for router "<< std::endl;
 }
 
 
