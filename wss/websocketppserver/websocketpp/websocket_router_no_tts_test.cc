@@ -93,6 +93,8 @@ void connect_plain(const std::string connHwssId) {
         try_connect_plain_later(connHwssId);
         return;
     }
+    conn->set_open_handshake_timeout(240*1000);
+    conn->set_close_handshake_timeout(240*1000);
     conn->set_pong_timeout(480*1000);
     conn->set_ping_handler([](websocketpp::connection_hdl hdl, const std::string msg){
         return true; //send pong response
@@ -131,7 +133,10 @@ void connect_plain(const std::string connHwssId) {
             auto connIt = serverFinder->wsConnMap.find(toHwssId);
             if (connIt != serverFinder->wsConnMap.end()) {
                 websocketpp::lib::error_code send_error;
-                serverFinder->plainClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY, send_error);
+                auto sendMessage = connIt->second->get_message(websocketpp::frame::opcode::value::BINARY, msg->get_payload().size());
+                sendMessage->set_payload(msg->get_payload());
+                sendMessage->set_compressed(false); //disable compress, improve performance
+                serverFinder->plainClient->send(connIt->second, sendMessage send_error);
                 if (send_error) {
                     std::cout << "hwssId ws " << toHwssId << " send error "<< send_error
                       << "state " << connIt->second->get_state()<< std::endl;
@@ -203,7 +208,10 @@ void handleMsgFromWssRouter(std::shared_ptr<std::string> msg) {
     auto connIt = serverFinder->wsConnMap.find(hwssIdStr);
     if (connIt != serverFinder->wsConnMap.end()) {
         websocketpp::lib::error_code send_error;
-        serverFinder->plainClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::BINARY, send_error);
+        auto sendMessage = connIt->second->get_message(websocketpp::frame::opcode::value::BINARY, msg->size());
+        sendMessage->set_payload(*msg);
+        sendMessage->set_compressed(false);
+        serverFinder->plainClient->send(connIt->second, sendMessage, send_error);
         if (send_error) {
             std::cout << "hwssId ws " << hwssIdStr << " send error "<< send_error << std::endl;
           
@@ -252,7 +260,8 @@ void connect_tls(const std::string connHwssId) {
         try_connect_tls_later(connHwssId);
         return;
     }
-
+    conn->set_open_handshake_timeout(240*1000);
+    conn->set_close_handshake_timeout(240*1000);
     conn->set_pong_timeout(480*1000);
     conn->set_ping_handler([](websocketpp::connection_hdl hdl, const std::string msg){
         return true; //send pong response
@@ -294,15 +303,18 @@ void connect_tls(const std::string connHwssId) {
             }
             auto connIt = serverFinder->wssConnMap.find(toHwssId);
             if (connIt != serverFinder->wssConnMap.end()) {
-                if (connIt->second->get_state() == websocketpp::session::state::value::open) {
+                //if (connIt->second->get_state() == websocketpp::session::state::value::open) {
                     websocketpp::lib::error_code send_error;
-                    serverFinder->tlsClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY, send_error);
+                    auto sendMessage = connIt->second->get_message(websocketpp::frame::opcode::value::BINARY, msg->get_payload().size());
+                sendMessage->set_payload(msg->get_payload());
+                    sendMessage->set_compressed(false); //disable compress
+                    serverFinder->tlsClient->send(connIt->second,sendMessage, send_error);
                     if (send_error) {
                         std::cout << "hwssId wss " << toHwssId << " send error "<< send_error
                          << " state "<< connIt->second->get_state() << std::endl;
                       
                     }
-                }
+                //}
                 return;
             }
            
@@ -371,9 +383,12 @@ void handleMsgFromWsRouter(std::shared_ptr<std::string> msg) {
     std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
     auto connIt = serverFinder->wssConnMap.find(hwssIdStr);
     if (connIt != serverFinder->wssConnMap.end()) {
-        if (connIt->second->get_state() == websocketpp::session::state::value::open) {
+        //if (connIt->second->get_state() == websocketpp::session::state::value::open) {
             websocketpp::lib::error_code send_error;
-            serverFinder->tlsClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::BINARY, send_error);
+        auto sendMessage = connIt->second->get_message(websocketpp::frame::opcode::value::BINARY, msg->size());
+        sendMessage->set_payload(*msg);
+        sendMessage->set_compressed(false); //disable compress
+            serverFinder->tlsClient->send(connIt->second, sendMessage, send_error);
             if (send_error) {
                 std::cout << "hwssId wss " << hwssIdStr << " send error  "<< send_error << "state"
                 << connIt->second->get_state()
@@ -381,7 +396,7 @@ void handleMsgFromWsRouter(std::shared_ptr<std::string> msg) {
                 
             }
             return;
-        }
+        //}
     }
 }
 
@@ -460,7 +475,6 @@ void runWSSRouter() {
           });
 
         const auto& wssServerMap = serverFinder->wssServerMap;
-        auto wssIt = wssServerMap.begin();
         for(auto wssIt = wssServerMap.begin(); wssIt != wssServerMap.end(); wssIt++) {
             connect_tls(wssIt->first);
         }
