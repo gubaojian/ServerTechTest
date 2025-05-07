@@ -24,6 +24,7 @@
 #include "simdjson/simdjson.h"
 
 
+//enable_multithreading should be set to false
 
 typedef websocketpp::client<websocketpp::config::asio_client> plain_client;
 typedef websocketpp::client<websocketpp::config::asio_tls_client> tls_client;
@@ -93,8 +94,16 @@ void connect_plain(const std::string connHwssId) {
         return;
     }
     conn->set_pong_timeout(480*1000);
+    conn->set_ping_handler([](websocketpp::connection_hdl hdl, const std::string msg){
+        return true; //send pong response
+    });
+    
+    conn->set_pong_timeout_handler([connHwssId](websocketpp::connection_hdl hdl, const std::string msg){
+        std::cout << "router ws ping timeout " << connHwssId << std::endl;
+    });
+    
     conn->set_open_handler([conn, connHwssId](websocketpp::connection_hdl hdl){
-        std::cout << "router connect success " << connHwssId << std::endl;
+        std::cout << "router pong handler success " << connHwssId << std::endl;
         serverFinder->wsConnMap[connHwssId] = conn;
     });
     
@@ -124,7 +133,8 @@ void connect_plain(const std::string connHwssId) {
                 websocketpp::lib::error_code send_error;
                 serverFinder->plainClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY, send_error);
                 if (send_error) {
-                    std::cout << "hwssId ws " << toHwssId << " send error "<< send_error << std::endl;
+                    std::cout << "hwssId ws " << toHwssId << " send error "<< send_error
+                      << "state " << connIt->second->get_state()<< std::endl;
                   
                 }
                 return;
@@ -202,6 +212,30 @@ void handleMsgFromWssRouter(std::shared_ptr<std::string> msg) {
     }
 }
 
+void ping_connect_plain() {
+    std::shared_ptr<boost::asio::steady_timer> timer = std::make_shared<boost::asio::steady_timer>(serverFinder->plainClient->get_io_service());
+    timer->expires_after(std::chrono::seconds(60 + std::rand()%60));
+    timer->async_wait([timer] (const boost::system::error_code& error_code){
+        if (error_code) {
+            std::cout << "ping_connect_tls error code " << error_code.message() << std::endl;
+            return ;
+        }
+        for(auto wsIt = serverFinder->wsServerMap.begin();
+            wsIt != serverFinder->wsServerMap.end(); wsIt++) {
+           const auto& hwssId = wsIt->first;
+            auto connIt = serverFinder->wsConnMap.find(hwssId);
+            if (connIt != serverFinder->wsConnMap.end()) {
+                if (connIt->second->get_state() == websocketpp::session::state::value::open) {
+                    connIt->second->ping("");
+                    std::cout << "ping_connect_plain keep alive "<< hwssId << std::endl;
+                }
+            }
+        }
+        std::cout << "ping_connect_tls keep alive" << std::endl;
+        ping_connect_plain();
+    });
+}
+
 
 
 void connect_tls(const std::string connHwssId) {
@@ -220,6 +254,19 @@ void connect_tls(const std::string connHwssId) {
     }
 
     conn->set_pong_timeout(480*1000);
+    conn->set_ping_handler([](websocketpp::connection_hdl hdl, const std::string msg){
+        return true; //send pong response
+    });
+    
+    conn->set_pong_timeout_handler([connHwssId](websocketpp::connection_hdl hdl, const std::string msg){
+        std::cout << "router wss ping timeout " << connHwssId << std::endl;
+    });
+
+    
+    conn->set_pong_handler([connHwssId](websocketpp::connection_hdl hdl, std::string msg){
+        std::cout << "router pong handler wss " << connHwssId << std::endl;
+    });
+    
     conn->set_open_handler([conn, connHwssId](websocketpp::connection_hdl hdl){
         std::cout << "router connect success wss " << connHwssId << std::endl;
         serverFinder->wssConnMap[connHwssId] = conn;
@@ -247,11 +294,14 @@ void connect_tls(const std::string connHwssId) {
             }
             auto connIt = serverFinder->wssConnMap.find(toHwssId);
             if (connIt != serverFinder->wssConnMap.end()) {
-                websocketpp::lib::error_code send_error;
-                serverFinder->tlsClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY, send_error);
-                if (send_error) {
-                    std::cout << "hwssId wss " << toHwssId << " send error "<< send_error << std::endl;
-                  
+                if (connIt->second->get_state() == websocketpp::session::state::value::open) {
+                    websocketpp::lib::error_code send_error;
+                    serverFinder->tlsClient->send(connIt->second, msg->get_payload(), websocketpp::frame::opcode::value::BINARY, send_error);
+                    if (send_error) {
+                        std::cout << "hwssId wss " << toHwssId << " send error "<< send_error
+                         << " state "<< connIt->second->get_state() << std::endl;
+                      
+                    }
                 }
                 return;
             }
@@ -283,10 +333,11 @@ void connect_tls(const std::string connHwssId) {
         serverFinder->wssConnMap.erase(connHwssId);
         try_connect_tls_later(connHwssId);
         std::cout << "router closed wss connect, try reconnect tls "  << connHwssId <<
-         (serverFinder->wssConnMap.find(connHwssId) == serverFinder->wssConnMap.end())
-        std::endl;
+         (serverFinder->wssConnMap.find(connHwssId) == serverFinder->wssConnMap.end()) << true
+         << false << " size " << serverFinder->wssConnMap.size() << std::endl;
         
-    })
+    });
+    client->connect(conn);
 }
 
 
@@ -298,6 +349,7 @@ void try_connect_tls_later(const std::string hwssId) {
             std::cout << hwssId << " reconnect error code " << error_code.message() << std::endl;
             return ;
         }
+        std::cout << "router try reconnect timer fired "  << std::endl;
         connect_tls(hwssId);
     });
 }
@@ -319,17 +371,44 @@ void handleMsgFromWsRouter(std::shared_ptr<std::string> msg) {
     std::string hwssIdStr(hwssId.value().data(), hwssId.value().size());
     auto connIt = serverFinder->wssConnMap.find(hwssIdStr);
     if (connIt != serverFinder->wssConnMap.end()) {
-        websocketpp::lib::error_code send_error;
-        serverFinder->tlsClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::BINARY, send_error);
-        if (send_error) {
-            std::cout << "hwssId wss " << hwssIdStr << " send error  "<< send_error << send_error.message() << std::endl;
-          
+        if (connIt->second->get_state() == websocketpp::session::state::value::open) {
+            websocketpp::lib::error_code send_error;
+            serverFinder->tlsClient->send(connIt->second, *msg, websocketpp::frame::opcode::value::BINARY, send_error);
+            if (send_error) {
+                std::cout << "hwssId wss " << hwssIdStr << " send error  "<< send_error << "state"
+                << connIt->second->get_state()
+                << std::endl;
+                
+            }
+            return;
         }
-        return;
     }
 }
 
 
+void ping_connect_tls() {
+    std::shared_ptr<boost::asio::steady_timer> timer = std::make_shared<boost::asio::steady_timer>(serverFinder->tlsClient->get_io_service());
+    timer->expires_after(std::chrono::seconds(60 + std::rand()%60));
+    timer->async_wait([timer] (const boost::system::error_code& error_code){
+        if (error_code) {
+            std::cout << "ping_connect_tls error code " << error_code.message() << std::endl;
+            return ;
+        }
+        for(auto wsIt = serverFinder->wssServerMap.begin();
+            wsIt != serverFinder->wssServerMap.end(); wsIt++) {
+           const auto& hwssId = wsIt->first;
+            auto connIt = serverFinder->wssConnMap.find(hwssId);
+            if (connIt != serverFinder->wssConnMap.end()) {
+                if (connIt->second->get_state() == websocketpp::session::state::value::open) {
+                    connIt->second->ping("");
+                    std::cout << "ping_connect_tls keep alive "<< hwssId << std::endl;
+                }
+            }
+        }
+        std::cout << "ping_connect_tls keep alive" << std::endl;
+        ping_connect_tls();
+    });
+}
 
 void runWSRouter() {
     std::shared_ptr<plain_client> client = std::make_shared<plain_client>();
@@ -344,11 +423,15 @@ void runWSRouter() {
         // Initialize ASIO
         client->init_asio();
         
+        
         const auto& wsServerMap = serverFinder->wsServerMap;
         auto wsIt = wsServerMap.begin();
         for(auto wsIt = wsServerMap.begin(); wsIt != wsServerMap.end(); wsIt++) {
             connect_plain(wsIt->first);
         }
+        
+        ping_connect_plain();
+        
         client->run();
     } catch (websocketpp::exception const & e) {
         std::cout << "router connect websocket exception " << e.what()
@@ -382,17 +465,22 @@ void runWSSRouter() {
             connect_tls(wssIt->first);
         }
 
+        ping_connect_tls();
+        
         
         client->run();
     } catch (websocketpp::exception const & e) {
         std::cout << "wss router connect websocket exception " << e.what()
         << e.code() << std::endl;
+    } catch (std::exception const & e) {
+        std::cout << "wss router connect websocket exception " << e.what() << std::endl;
     }
     serverFinder->tlsClient = nullptr;
 }
 
 int websocket_router_no_tts_test_main(int argc, const char * argv[]) {
     serverFinder = std::make_shared<ServerFinder>();
+    
     
     {
         
@@ -435,7 +523,7 @@ int websocket_router_no_tts_test_main(int argc, const char * argv[]) {
         return 0;
     }
     if (!serverFinder->wsServerMap.empty() && !serverFinder->wssServerMap.empty()) {
-        std::thread wssThread([]{
+        std::thread wssThread([] {
             runWSSRouter();
         });
         runWSRouter();

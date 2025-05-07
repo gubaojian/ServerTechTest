@@ -103,7 +103,7 @@ struct core_client {
     /// Controls compile time enabling/disabling of thread syncronization code
     /// Disabling can provide a minor performance improvement to single threaded
     /// applications
-    static bool const enable_multithreading = true;
+    static bool const enable_multithreading = false;
 
     struct transport_config {
         typedef type::concurrency_type concurrency_type;
