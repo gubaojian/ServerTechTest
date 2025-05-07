@@ -86,18 +86,19 @@ void connect_plain(const std::string connHwssId) {
     const HwssServer& server = findIt->second;
     std::shared_ptr<plain_client> client = serverFinder->plainClient;
     websocketpp::lib::error_code ec;
-    plain_client::connection_ptr con =  client->get_connection(server.url, ec);
+    plain_client::connection_ptr conn =  client->get_connection(server.url, ec);
     if (ec) {
         std::cout << "could not get_connection because: " << ec.message() << std::endl;
         try_connect_plain_later(connHwssId);
         return;
     }
-    con->set_pong_timeout(480*1000);
-    con->set_open_handler([connHwssId](websocketpp::connection_hdl hdl){
+    conn->set_pong_timeout(480*1000);
+    conn->set_open_handler([conn, connHwssId](websocketpp::connection_hdl hdl){
         std::cout << "router connect success " << connHwssId << std::endl;
+        serverFinder->wsConnMap[connHwssId] = conn;
     });
     
-    con->set_message_handler([connHwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
+    conn->set_message_handler([connHwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
         //router current only handle json text
         if(msg->get_opcode() == websocketpp::frame::opcode::value::TEXT
            || msg->get_opcode() == websocketpp::frame::opcode::value::BINARY) {
@@ -144,14 +145,14 @@ void connect_plain(const std::string connHwssId) {
         
     });
     
-    con->set_fail_handler([connHwssId](websocketpp::connection_hdl hdl) {
+    conn->set_fail_handler([connHwssId](websocketpp::connection_hdl hdl) {
         //connect will be free in inner
         std::cout << "router failed ws connect try reconnect " << connHwssId << std::endl;
         serverFinder->wsConnMap.erase(connHwssId);
         try_connect_plain_later(connHwssId);
        
     });
-    con->set_close_handler([connHwssId](websocketpp::connection_hdl hdl){
+    conn->set_close_handler([connHwssId](websocketpp::connection_hdl hdl){
         //connect will be free in inner
         std::cout << "router closed ws connect, try reconnect " << connHwssId << std::endl;
         serverFinder->wsConnMap.erase(connHwssId);
@@ -159,7 +160,7 @@ void connect_plain(const std::string connHwssId) {
         
     });
     
-    serverFinder->wsConnMap[connHwssId] = client->connect(con);
+    client->connect(conn);
 }
 
 void try_connect_plain_later(const std::string hwssId) {
@@ -211,19 +212,20 @@ void connect_tls(const std::string connHwssId) {
     const HwssServer& server = findIt->second;
     std::shared_ptr<tls_client> client = serverFinder->tlsClient;
     websocketpp::lib::error_code ec;
-    tls_client::connection_ptr con =  client->get_connection(server.url, ec);
+    tls_client::connection_ptr conn =  client->get_connection(server.url, ec);
     if (ec) {
         std::cout << "could not get_connection because: " << ec.message() << std::endl;
         try_connect_tls_later(connHwssId);
         return;
     }
 
-    con->set_pong_timeout(480*1000);
-    con->set_open_handler([connHwssId](websocketpp::connection_hdl hdl){
+    conn->set_pong_timeout(480*1000);
+    conn->set_open_handler([conn, connHwssId](websocketpp::connection_hdl hdl){
         std::cout << "router connect success wss " << connHwssId << std::endl;
+        serverFinder->wssConnMap[connHwssId] = conn;
     });
     
-    con->set_message_handler([connHwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
+    conn->set_message_handler([connHwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
         //router current only handle json text
         if(msg->get_opcode() == websocketpp::frame::opcode::value::TEXT
            || msg->get_opcode() == websocketpp::frame::opcode::value::BINARY) {
@@ -269,14 +271,14 @@ void connect_tls(const std::string connHwssId) {
         
     });
     
-    con->set_fail_handler([connHwssId](websocketpp::connection_hdl hdl) {
+    conn->set_fail_handler([connHwssId](websocketpp::connection_hdl hdl) {
         //connect will be free in inner
         std::cout << "router failed wss connect try reconnect tls " << connHwssId << std::endl;
         serverFinder->wssConnMap.erase(connHwssId);
         try_connect_tls_later(connHwssId);
        
     });
-    con->set_close_handler([connHwssId](websocketpp::connection_hdl hdl){
+    conn->set_close_handler([connHwssId](websocketpp::connection_hdl hdl){
         //connect will be free in inner
         serverFinder->wssConnMap.erase(connHwssId);
         try_connect_tls_later(connHwssId);
@@ -284,9 +286,7 @@ void connect_tls(const std::string connHwssId) {
          (serverFinder->wssConnMap.find(connHwssId) == serverFinder->wssConnMap.end())
         std::endl;
         
-    });
-    
-    serverFinder->wssConnMap[connHwssId] = client->connect(con);
+    })
 }
 
 
