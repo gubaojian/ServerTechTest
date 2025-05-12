@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXCopyFilesBuildPhase section */
-		0115C9212CA95EF1004DADBF /* CopyFiles */ = {
+		01725DF62DCF797F00975F5E /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
@@ -19,19 +19,19 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0115C9232CA95EF1004DADBF /* websocketpp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = websocketpp; sourceTree = BUILT_PRODUCTS_DIR; };
+		01725DF82DCF797F00975F5E /* CrowTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CrowTest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		0115C9252CA95EF1004DADBF /* websocketpp */ = {
+		01725DFA2DCF797F00975F5E /* CrowTest */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = websocketpp;
+			path = CrowTest;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		0115C9202CA95EF1004DADBF /* Frameworks */ = {
+		01725DF52DCF797F00975F5E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -41,18 +41,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0115C91A2CA95EF1004DADBF = {
+		01725DEF2DCF797F00975F5E = {
 			isa = PBXGroup;
 			children = (
-				0115C9252CA95EF1004DADBF /* websocketpp */,
-				0115C9242CA95EF1004DADBF /* Products */,
+				01725DFA2DCF797F00975F5E /* CrowTest */,
+				01725DF92DCF797F00975F5E /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		0115C9242CA95EF1004DADBF /* Products */ = {
+		01725DF92DCF797F00975F5E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				0115C9232CA95EF1004DADBF /* websocketpp */,
+				01725DF82DCF797F00975F5E /* CrowTest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -60,63 +60,63 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		0115C9222CA95EF1004DADBF /* websocketpp */ = {
+		01725DF72DCF797F00975F5E /* CrowTest */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0115C92A2CA95EF1004DADBF /* Build configuration list for PBXNativeTarget "websocketpp" */;
+			buildConfigurationList = 01725DFF2DCF797F00975F5E /* Build configuration list for PBXNativeTarget "CrowTest" */;
 			buildPhases = (
-				0115C91F2CA95EF1004DADBF /* Sources */,
-				0115C9202CA95EF1004DADBF /* Frameworks */,
-				0115C9212CA95EF1004DADBF /* CopyFiles */,
+				01725DF42DCF797F00975F5E /* Sources */,
+				01725DF52DCF797F00975F5E /* Frameworks */,
+				01725DF62DCF797F00975F5E /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				0115C9252CA95EF1004DADBF /* websocketpp */,
+				01725DFA2DCF797F00975F5E /* CrowTest */,
 			);
-			name = websocketpp;
+			name = CrowTest;
 			packageProductDependencies = (
 			);
-			productName = websocketpp;
-			productReference = 0115C9232CA95EF1004DADBF /* websocketpp */;
+			productName = CrowTest;
+			productReference = 01725DF82DCF797F00975F5E /* CrowTest */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		0115C91B2CA95EF1004DADBF /* Project object */ = {
+		01725DF02DCF797F00975F5E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastUpgradeCheck = 1600;
+				LastUpgradeCheck = 1630;
 				TargetAttributes = {
-					0115C9222CA95EF1004DADBF = {
-						CreatedOnToolsVersion = 16.0;
+					01725DF72DCF797F00975F5E = {
+						CreatedOnToolsVersion = 16.3;
 					};
 				};
 			};
-			buildConfigurationList = 0115C91E2CA95EF1004DADBF /* Build configuration list for PBXProject "websocketpp" */;
+			buildConfigurationList = 01725DF32DCF797F00975F5E /* Build configuration list for PBXProject "CrowTest" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 0115C91A2CA95EF1004DADBF;
+			mainGroup = 01725DEF2DCF797F00975F5E;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 0115C9242CA95EF1004DADBF /* Products */;
+			productRefGroup = 01725DF92DCF797F00975F5E /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				0115C9222CA95EF1004DADBF /* websocketpp */,
+				01725DF72DCF797F00975F5E /* CrowTest */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		0115C91F2CA95EF1004DADBF /* Sources */ = {
+		01725DF42DCF797F00975F5E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -126,7 +126,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		0115C9282CA95EF1004DADBF /* Debug */ = {
+		01725DFD2DCF797F00975F5E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -179,7 +179,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -187,7 +187,7 @@
 			};
 			name = Debug;
 		};
-		0115C9292CA95EF1004DADBF /* Release */ = {
+		01725DFE2DCF797F00975F5E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -234,57 +234,29 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
 			};
 			name = Release;
 		};
-		0115C92B2CA95EF1004DADBF /* Debug */ = {
+		01725E002DCF797F00975F5E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CODE_SIGN_STYLE = Automatic;
-				GCC_C_LANGUAGE_STANDARD = c11;
-				HEADER_SEARCH_PATHS = (
-					/Users/efurture/code/ServerTechTest/wss/websocketppserver/websocketpp/include,
-					"/usr/local/Cellar/openssl@3/3.5.0/include",
-					/Users/efurture/Downloads/boost_1_79_0/pp/include,
-				);
-				LIBRARY_SEARCH_PATHS = (
-					"/usr/local/Cellar/openssl@3/3.5.0/lib",
-					/usr/local/lib,
-					"$(PROJECT_DIR)/websocketpp/include/boost_1_79_0/lib",
-				);
-				OTHER_LDFLAGS = (
-					"-lssl",
-					"-lcrypto",
-				);
+				HEADER_SEARCH_PATHS = /usr/local/include/;
+				LIBRARY_SEARCH_PATHS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
-		0115C92C2CA95EF1004DADBF /* Release */ = {
+		01725E012DCF797F00975F5E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CODE_SIGN_STYLE = Automatic;
-				GCC_C_LANGUAGE_STANDARD = c11;
-				HEADER_SEARCH_PATHS = (
-					/Users/efurture/code/ServerTechTest/wss/websocketppserver/websocketpp/include,
-					"/usr/local/Cellar/openssl@3/3.5.0/include",
-					/Users/efurture/Downloads/boost_1_79_0/pp/include,
-				);
-				LIBRARY_SEARCH_PATHS = (
-					"/usr/local/Cellar/openssl@3/3.5.0/lib",
-					/usr/local/lib,
-					"$(PROJECT_DIR)/websocketpp/include/boost_1_79_0/lib",
-				);
-				OTHER_LDFLAGS = (
-					"-lssl",
-					"-lcrypto",
-				);
+				HEADER_SEARCH_PATHS = /usr/local/include/;
+				LIBRARY_SEARCH_PATHS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -292,25 +264,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		0115C91E2CA95EF1004DADBF /* Build configuration list for PBXProject "websocketpp" */ = {
+		01725DF32DCF797F00975F5E /* Build configuration list for PBXProject "CrowTest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0115C9282CA95EF1004DADBF /* Debug */,
-				0115C9292CA95EF1004DADBF /* Release */,
+				01725DFD2DCF797F00975F5E /* Debug */,
+				01725DFE2DCF797F00975F5E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0115C92A2CA95EF1004DADBF /* Build configuration list for PBXNativeTarget "websocketpp" */ = {
+		01725DFF2DCF797F00975F5E /* Build configuration list for PBXNativeTarget "CrowTest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0115C92B2CA95EF1004DADBF /* Debug */,
-				0115C92C2CA95EF1004DADBF /* Release */,
+				01725E002DCF797F00975F5E /* Debug */,
+				01725E012DCF797F00975F5E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 0115C91B2CA95EF1004DADBF /* Project object */;
+	rootObject = 01725DF02DCF797F00975F5E /* Project object */;
 }

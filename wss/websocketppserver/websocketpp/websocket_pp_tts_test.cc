@@ -16,11 +16,23 @@
 #include <set>
 #include <cstdlib>
 #include <unistd.h>
+
+// See https://github.com/bitcoin/bitcoin/issues/30751.
+// https://github.com/bitcoin/bitcoin/pull/30821/files
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wenum-constexpr-conversion"
+#endif
+
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <websocketpp/config/asio_client.hpp>
 #include "websocketpp/client.hpp"
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
 
@@ -195,10 +207,11 @@ int websocket_pp_tts_test_main(int argc, const char * argv[]) {
         mainConn = client.connect(con);
         mainClient = &client;
     
+        /**
     
        boost::asio::steady_timer timer(client.get_io_service());
        timer.expires_after(std::chrono::seconds(1));
-       timer.async_wait(send_message_bench);
+       timer.async_wait(send_message_bench); */
 
         // Start the ASIO io_service run loop
         // this will cause a single connection to be made to the server. c.run()

@@ -15,11 +15,24 @@
 #include <set>
 #include <cstdlib>
 #include <unistd.h>
+
+// See https://github.com/bitcoin/bitcoin/issues/30751.
+// https://github.com/bitcoin/bitcoin/pull/30821/files
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wenum-constexpr-conversion"
+#endif
+
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <websocketpp/config/asio_client.hpp>
 #include "websocketpp/client.hpp"
+
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 typedef websocketpp::client<websocketpp::config::asio_client> client;
 
@@ -40,6 +53,7 @@ static int64_t receive_count = 0;
 // This message handler will be invoked once for each incoming message. It
 // prints the message and then sends a copy of the message back to the server.
 static void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr msg) {
+    /*
     if (msg->get_payload().starts_with("start_")) {
         receive_start = std::chrono::high_resolution_clock::now();
         std::cout << "receive message start " << std::endl;
@@ -50,7 +64,7 @@ static void on_message(client* c, websocketpp::connection_hdl hdl, message_ptr m
         auto end = std::chrono::high_resolution_clock::now();
         auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - receive_start);
         std::cout << "receive message " << used.count() << "ms " << receive_count  << std::endl;
-    }
+    } */
 }
 
 

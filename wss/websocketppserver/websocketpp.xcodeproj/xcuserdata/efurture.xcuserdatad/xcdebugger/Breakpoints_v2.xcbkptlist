@@ -14,8 +14,8 @@
             filePath = "websocketpp/websocket_pp_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "43"
-            endingLineNumber = "43"
+            startingLineNumber = "57"
+            endingLineNumber = "57"
             landmarkName = "on_message(c, hdl, msg)"
             landmarkType = "9">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "websocketpp/websocket_pp_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "42"
-            endingLineNumber = "42"
+            startingLineNumber = "55"
+            endingLineNumber = "55"
             landmarkName = "on_message(c, hdl, msg)"
             landmarkType = "9">
          </BreakpointContent>
@@ -46,8 +46,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "163"
-            endingLineNumber = "163"
+            startingLineNumber = "301"
+            endingLineNumber = "301"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -62,8 +62,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "429"
-            endingLineNumber = "429"
+            startingLineNumber = "737"
+            endingLineNumber = "737"
             landmarkName = "runWSRouter()"
             landmarkType = "9">
          </BreakpointContent>
@@ -78,8 +78,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "182"
-            endingLineNumber = "182"
+            startingLineNumber = "330"
+            endingLineNumber = "330"
             landmarkName = "try_connect_plain_later(hwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -94,8 +94,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "165"
-            endingLineNumber = "165"
+            startingLineNumber = "303"
+            endingLineNumber = "303"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -110,8 +110,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "83"
-            endingLineNumber = "83"
+            startingLineNumber = "211"
+            endingLineNumber = "211"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -126,8 +126,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "445"
-            endingLineNumber = "445"
+            startingLineNumber = "755"
+            endingLineNumber = "755"
             landmarkName = "runWSRouter()"
             landmarkType = "9">
          </BreakpointContent>
@@ -136,14 +136,14 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "FD62628A-33E4-47A1-8422-373D2CFF05B1"
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "114"
-            endingLineNumber = "114"
+            startingLineNumber = "262"
+            endingLineNumber = "262"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -158,8 +158,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "124"
-            endingLineNumber = "124"
+            startingLineNumber = "272"
+            endingLineNumber = "272"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -174,8 +174,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "123"
-            endingLineNumber = "123"
+            startingLineNumber = "271"
+            endingLineNumber = "271"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -190,8 +190,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "117"
-            endingLineNumber = "117"
+            startingLineNumber = "265"
+            endingLineNumber = "265"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -206,8 +206,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "189"
-            endingLineNumber = "189"
+            startingLineNumber = "337"
+            endingLineNumber = "337"
             landmarkName = "try_connect_plain_later(hwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -222,8 +222,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "185"
-            endingLineNumber = "185"
+            startingLineNumber = "333"
+            endingLineNumber = "333"
             landmarkName = "try_connect_plain_later(hwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -238,8 +238,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "174"
-            endingLineNumber = "174"
+            startingLineNumber = "322"
+            endingLineNumber = "322"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -254,8 +254,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "172"
-            endingLineNumber = "172"
+            startingLineNumber = "315"
+            endingLineNumber = "315"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -270,8 +270,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "171"
-            endingLineNumber = "171"
+            startingLineNumber = "314"
+            endingLineNumber = "314"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -286,8 +286,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "286"
-            endingLineNumber = "286"
+            startingLineNumber = "607"
+            endingLineNumber = "607"
             landmarkName = "connect_tls(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -302,8 +302,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "148"
-            endingLineNumber = "148"
+            startingLineNumber = "286"
+            endingLineNumber = "286"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -318,8 +318,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "374"
-            endingLineNumber = "374"
+            startingLineNumber = "696"
+            endingLineNumber = "696"
             landmarkName = "handleMsgFromWsRouter(msg)"
             landmarkType = "9">
          </BreakpointContent>
@@ -334,8 +334,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "346"
-            endingLineNumber = "346"
+            startingLineNumber = "664"
+            endingLineNumber = "664"
             landmarkName = "connect_tls(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -356,32 +356,32 @@
             landmarkType = "9">
             <Locations>
                <Location
-                  uuid = "B4CB3F5A-2B14-43FF-BE77-21F45BC53167 - 6de96b9db410a2c2"
+                  uuid = "B4CB3F5A-2B14-43FF-BE77-21F45BC53167 - 8f79ab53ebe0891d"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "websocketpp::connection&lt;websocketpp::config::asio_tls_client&gt;::pong(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt; const&amp;, std::__1::error_code&amp;)"
+                  symbolName = "websocketpp::connection&lt;websocketpp::config::asio_client&gt;::ping(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt; const&amp;, std::__1::error_code&amp;)"
                   moduleName = "websocketpp"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/efurture/code/ServerTechTest/wss/websocketpp/websocketpp/include/websocketpp/impl/connection_impl.hpp"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "253"
-                  endingLineNumber = "253">
+                  startingLineNumber = "156"
+                  endingLineNumber = "156">
                </Location>
                <Location
-                  uuid = "B4CB3F5A-2B14-43FF-BE77-21F45BC53167 - 8f79ab53ebe0869e"
+                  uuid = "B4CB3F5A-2B14-43FF-BE77-21F45BC53167 - 6de96b9db410ad41"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "websocketpp::connection&lt;websocketpp::config::asio_client&gt;::pong(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt; const&amp;, std::__1::error_code&amp;)"
+                  symbolName = "websocketpp::connection&lt;websocketpp::config::asio_tls_client&gt;::ping(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt;&gt; const&amp;, std::__1::error_code&amp;)"
                   moduleName = "websocketpp"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/efurture/code/ServerTechTest/wss/websocketpp/websocketpp/include/websocketpp/impl/connection_impl.hpp"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "253"
-                  endingLineNumber = "253">
+                  startingLineNumber = "156"
+                  endingLineNumber = "156">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -390,14 +390,14 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "5F0B9C06-7A80-4A5E-8AC6-1B746BA66381"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "271"
-            endingLineNumber = "271"
+            startingLineNumber = "587"
+            endingLineNumber = "587"
             landmarkName = "connect_tls(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -406,14 +406,14 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "B0C00DE7-9DD2-48B8-B0F4-E904502EBAB8"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "267"
-            endingLineNumber = "267"
+            startingLineNumber = "583"
+            endingLineNumber = "583"
             landmarkName = "connect_tls(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -422,14 +422,14 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "0CADAFC0-69E8-4C9E-834B-AECB3029A578"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "100"
-            endingLineNumber = "100"
+            startingLineNumber = "243"
+            endingLineNumber = "243"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -438,14 +438,14 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "841C6D2E-AEAF-47FF-80A7-D843ED922F33"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "104"
-            endingLineNumber = "104"
+            startingLineNumber = "247"
+            endingLineNumber = "247"
             landmarkName = "connect_plain(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -460,8 +460,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "265"
-            endingLineNumber = "265"
+            startingLineNumber = "562"
+            endingLineNumber = "562"
             landmarkName = "connect_tls(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -476,8 +476,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "254"
-            endingLineNumber = "254"
+            startingLineNumber = "551"
+            endingLineNumber = "551"
             landmarkName = "connect_tls(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -492,8 +492,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "485"
-            endingLineNumber = "485"
+            startingLineNumber = "804"
+            endingLineNumber = "804"
             landmarkName = "runWSSRouter()"
             landmarkType = "9">
          </BreakpointContent>
@@ -508,8 +508,8 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "492"
-            endingLineNumber = "492"
+            startingLineNumber = "811"
+            endingLineNumber = "811"
             landmarkName = "runWSSRouter()"
             landmarkType = "9">
          </BreakpointContent>
@@ -566,14 +566,14 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "1963CE39-4ED0-42FE-9CD9-D80DD57361CB"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "276"
-            endingLineNumber = "276"
+            startingLineNumber = "592"
+            endingLineNumber = "592"
             landmarkName = "connect_tls(connHwssId)"
             landmarkType = "9">
          </BreakpointContent>
@@ -588,9 +588,25 @@
             filePath = "websocketpp/websocket_router_no_tts_test.cc"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "280"
-            endingLineNumber = "280"
+            startingLineNumber = "596"
+            endingLineNumber = "596"
             landmarkName = "connect_tls(connHwssId)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "1FF2AF61-66E1-4528-AC6D-EBF19CBC48CA"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "websocketpp/include/websocketpp/impl/connection_impl.hpp"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1700"
+            endingLineNumber = "1700"
+            landmarkName = "terminate(ec)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
