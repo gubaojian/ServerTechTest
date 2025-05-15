@@ -43,8 +43,8 @@ typedef websocketpp::client<websocketpp::config::asio_client> plain_client;
 typedef websocketpp::client<websocketpp::config::asio_tls_client> tls_client;
 typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
 
-struct HwssServer {
-    std::string hwssId;
+struct WsgGateway {
+    std::string wsgId;
     std::string url;
 };
 
@@ -66,9 +66,9 @@ struct tls_connection_info{
 
 struct ServerFinder {
     //ws协议hwss服务器id映射
-    std::unordered_map<std::string,HwssServer> wsServerMap;
+    std::unordered_map<std::string,WsgGateway> wsServerMap;
     //wss协议hwss服务器id映射
-    std::unordered_map<std::string,HwssServer> wssServerMap;
+    std::unordered_map<std::string,WsgGateway> wssServerMap;
     
     //ws协议asio的执行线程及相关信息：。仅在支持对应线程访问
     std::shared_ptr<plain_client> plainClient;
@@ -81,6 +81,7 @@ struct ServerFinder {
     //ws和wss两个线程分别对应两个parser。仅在支持对应线程访问
     simdjson::ondemand::parser plainParser;
     simdjson::ondemand::parser tlsParser;
+    std::shared_ptr<boost::asio::steady_timer> tlsFlushTimer;
     
 };
 
@@ -88,14 +89,14 @@ std::shared_ptr<ServerFinder> serverFinder;
 
 void try_connect_plain_later(const std::string hwssId);
 void handleMsgFromWssRouter(std::shared_ptr<std::string> msg);
-void flushToWsHwssId(const std::string& toHwssId);
+void flushTowsWsgId(const std::string& toWsgId);
 
 void try_connect_tls_later(const std::string hwssId);
 void handleMsgFromWsRouter(std::shared_ptr<std::string> msg);
-void flushToWssHwssId(const std::string& toHwssId);
+void flushToWssWsgId(const std::string& toWsgId);
 
-bool sendMessageToWsHwssId(const std::string& toHwssId, const std::string& playload) {
-    auto connIt = serverFinder->wsConnMap.find(toHwssId);
+bool sendMessageTowsWsgId(const std::string& toWsgId, const std::string& playload) {
+    auto connIt = serverFinder->wsConnMap.find(toWsgId);
     if (connIt == serverFinder->wsConnMap.end()) {
         return  false;
     }
@@ -127,7 +128,7 @@ bool sendMessageToWsHwssId(const std::string& toHwssId, const std::string& playl
         sendMessage->set_compressed(false); //disable compress
         websocketpp::lib::error_code send_error = connIt->second->conn->send(sendMessage);
         if (send_error) {
-            std::cout << "hwssId ws " << toHwssId << " send error "<< send_error
+            std::cout << "hwssId ws " << toWsgId << " send error "<< send_error
              << " state "<< connIt->second->conn->get_state() << std::endl;
             break;
         } else {
@@ -139,8 +140,8 @@ bool sendMessageToWsHwssId(const std::string& toHwssId, const std::string& playl
     //队列非空的话，再次发送
     if (!connIt->second->messageQueue->empty()) {
         if (connIt->second->conn->get_state() == websocketpp::session::state::value::open) {
-            boost::asio::post(serverFinder->plainClient->get_io_service(), [toHwssId] {
-                flushToWsHwssId(toHwssId);
+            boost::asio::post(serverFinder->plainClient->get_io_service(), [toWsgId] {
+                flushTowsWsgId(toWsgId);
             });
         }
     }
@@ -148,8 +149,8 @@ bool sendMessageToWsHwssId(const std::string& toHwssId, const std::string& playl
     return true;
 }
 
-void flushToWsHwssId(const std::string& toHwssId) {
-    auto connIt = serverFinder->wsConnMap.find(toHwssId);
+void flushTowsWsgId(const std::string& toWsgId) {
+    auto connIt = serverFinder->wsConnMap.find(toWsgId);
     if (connIt == serverFinder->wsConnMap.end()) {
         return;
     }
@@ -159,7 +160,7 @@ void flushToWsHwssId(const std::string& toHwssId) {
     }
     
     if (!connIt->second->conn) {
-        std::cout << "flushToWsHwssId wss conn empty" << std::endl;
+        std::cout << "flushTowsWsgId wss conn empty" << std::endl;
         return;
     }
     
@@ -170,7 +171,7 @@ void flushToWsHwssId(const std::string& toHwssId) {
         return;
     }
     
-    std::cout << "flushToWsHwssId ws " << connIt->second->messageQueue->size() << std::endl;
+    std::cout << "flushTowsWsgId ws " << connIt->second->messageQueue->size() << std::endl;
     
     //batch提交会不会更好，降低流量压力
     for(int i=0; i<2048; i++) {
@@ -183,7 +184,7 @@ void flushToWsHwssId(const std::string& toHwssId) {
         sendMessage->set_compressed(false); //disable compress
         websocketpp::lib::error_code send_error = connIt->second->conn->send(sendMessage);
         if (send_error) {
-            std::cout << "hwssId wss " << toHwssId << " send error "<< send_error
+            std::cout << "hwssId wss " << toWsgId << " send error "<< send_error
              << " state "<< connIt->second->conn->get_state() << std::endl;
             break;
         } else {
@@ -195,30 +196,30 @@ void flushToWsHwssId(const std::string& toHwssId) {
     //没发送完成，下个周期发送
     if (!connIt->second->messageQueue->empty()) {
         if (connIt->second->conn->get_state() == websocketpp::session::state::value::open) {
-            boost::asio::post(serverFinder->plainClient->get_io_service(), [toHwssId] {
-                flushToWsHwssId(toHwssId);
+            boost::asio::post(serverFinder->plainClient->get_io_service(), [toWsgId] {
+                flushTowsWsgId(toWsgId);
             });
         }
     }
 }
 
 
-void connect_plain(const std::string connHwssId) {
-    if (connHwssId.empty()) {
-        std::cout << "illegal hwssId, is empty " << connHwssId << std::endl;
+void connect_plain(const std::string connWsgId) {
+    if (connWsgId.empty()) {
+        std::cout << "illegal wsgId, is empty " << connWsgId << std::endl;
         return;
     }
-    auto findIt = serverFinder->wsServerMap.find(connHwssId);
+    auto findIt = serverFinder->wsServerMap.find(connWsgId);
     if (findIt == serverFinder->wsServerMap.end()) {
         return;
     }
-    const HwssServer& server = findIt->second;
+    const WsgGateway& server = findIt->second;
     std::shared_ptr<plain_client> client = serverFinder->plainClient;
     websocketpp::lib::error_code ec;
     plain_client::connection_ptr conn =  client->get_connection(server.url, ec);
     if (ec) {
         std::cout << "could not get_connection because: " << ec.message() << std::endl;
-        try_connect_plain_later(connHwssId);
+        try_connect_plain_later(connWsgId);
         return;
     }
     conn->set_open_handshake_timeout(240*1000);
@@ -238,22 +239,22 @@ void connect_plain(const std::string connHwssId) {
         socket.set_option(send_size);
         
     });
-    conn->set_ping_handler([connHwssId](websocketpp::connection_hdl hdl, const std::string msg){
-        std::cout << "router ping handler ws " << connHwssId << std::endl;
+    conn->set_ping_handler([connWsgId](websocketpp::connection_hdl hdl, const std::string msg){
+        std::cout << "router ping handler ws " << connWsgId << std::endl;
         return true; //send pong response
     });
     
-    conn->set_pong_timeout_handler([connHwssId](websocketpp::connection_hdl hdl, const std::string msg){
-        std::cout << "router ws ping timeout " << connHwssId << std::endl;
+    conn->set_pong_timeout_handler([connWsgId](websocketpp::connection_hdl hdl, const std::string msg){
+        std::cout << "router ws ping timeout " << connWsgId << std::endl;
     });
     
-    conn->set_open_handler([conn, connHwssId](websocketpp::connection_hdl hdl){
-        std::cout << "router open handler success " << connHwssId << std::endl;
-        serverFinder->wsConnMap[connHwssId]->conn = conn;
-        flushToWsHwssId(connHwssId);
+    conn->set_open_handler([conn, connWsgId](websocketpp::connection_hdl hdl){
+        std::cout << "router open handler success " << connWsgId << std::endl;
+        serverFinder->wsConnMap[connWsgId]->conn = conn;
+        flushTowsWsgId(connWsgId);
     });
     
-    conn->set_message_handler([connHwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
+    conn->set_message_handler([connWsgId](websocketpp::connection_hdl hdl, message_ptr msg) {
         if(msg->get_payload().empty()
            || msg->get_payload().at(0) != '{') { //only handle valid json
             return ;
@@ -265,20 +266,20 @@ void connect_plain(const std::string connHwssId) {
             simdjson::padded_string paddedJson = simdjson::padded_string(msg->get_payload());
             auto error = serverFinder->plainParser.iterate(paddedJson).get(doc);
             if (error) {
-                std::cout << connHwssId << " send wrong format message" << msg->get_payload() << std::endl;
+                std::cout << connWsgId << " send wrong format message" << msg->get_payload() << std::endl;
                 return;
             }
-            auto hwssId = doc["hwssId"].get_string();
+            auto hwssId = doc["wsgId"].get_string();
             if (hwssId.error()) {
-                std::cout << hwssId << " send wrong format message" << std::endl;
+                std::cout << connWsgId << " send wrong format message, missing wsgId" << std::endl;
                 return;
             }
             //默认到ws协议的处理
-            std::string toHwssId(hwssId.value().data(), hwssId.value().size());
-            if (connHwssId == toHwssId) {
+            std::string toWsgId(hwssId.value().data(), hwssId.value().size());
+            if (connWsgId == toWsgId) {
                 return;
             }
-            bool hasEnterSendQueue = sendMessageToWsHwssId(toHwssId, msg->get_payload());
+            bool hasEnterSendQueue = sendMessageTowsWsgId(toWsgId, msg->get_payload());
             if (hasEnterSendQueue) {
                 return;
             }
@@ -298,28 +299,28 @@ void connect_plain(const std::string connHwssId) {
         
     });
     
-    conn->set_fail_handler([connHwssId](websocketpp::connection_hdl hdl) {
+    conn->set_fail_handler([connWsgId](websocketpp::connection_hdl hdl) {
         //connect will be free in inner
-        std::cout << "router failed ws connect try reconnect " << connHwssId << std::endl;
-        auto it = serverFinder->wsConnMap.find(connHwssId);
+        std::cout << "router failed ws connect try reconnect " << connWsgId << std::endl;
+        auto it = serverFinder->wsConnMap.find(connWsgId);
         if (it != serverFinder->wsConnMap.end()) {
             if (it->second->conn) {
                 it->second->conn = nullptr;
             }
         }
-        try_connect_plain_later(connHwssId);
+        try_connect_plain_later(connWsgId);
        
     });
-    conn->set_close_handler([connHwssId](websocketpp::connection_hdl hdl){
+    conn->set_close_handler([connWsgId](websocketpp::connection_hdl hdl){
         //connect will be free in inner
-        std::cout << "router closed ws connect, try reconnect " << connHwssId << std::endl;
-        auto it = serverFinder->wsConnMap.find(connHwssId);
+        std::cout << "router closed ws connect, try reconnect " << connWsgId << std::endl;
+        auto it = serverFinder->wsConnMap.find(connWsgId);
         if (it != serverFinder->wsConnMap.end()) {
             if (it->second->conn) {
                 it->second->conn = nullptr;
             }
         }
-        try_connect_plain_later(connHwssId);
+        try_connect_plain_later(connWsgId);
         
     });
     
@@ -348,12 +349,12 @@ void handleMsgFromWssRouter(std::shared_ptr<std::string> msg) {
     if (error) {
         return;
     }
-    auto hwssId = doc["hwssId"].get_string();
+    auto hwssId = doc["wsgId"].get_string();
     if (hwssId.error()) {
         return;
     }
-    std::string toHwssId(hwssId.value().data(), hwssId.value().size());
-    sendMessageToWsHwssId(toHwssId, *msg);
+    std::string toWsgId(hwssId.value().data(), hwssId.value().size());
+    sendMessageTowsWsgId(toWsgId, *msg);
 }
 
 void ping_connect_plain_timer() {
@@ -383,9 +384,9 @@ void ping_connect_plain_timer() {
 
 
 
-bool sendMessageToWssHwssId(const std::string& toHwssId,
+bool sendMessageToWssWsgId(const std::string& toWsgId,
                             const std::string& msg) {
-    auto connIt = serverFinder->wssConnMap.find(toHwssId);
+    auto connIt = serverFinder->wssConnMap.find(toWsgId);
     if (connIt == serverFinder->wssConnMap.end()) {
         return false;
     }
@@ -395,7 +396,6 @@ bool sendMessageToWssHwssId(const std::string& toHwssId,
     //缓存过大时丢弃之前消息
     while (connIt->second->messageQueue->size() >= 256*1024) {
         connIt->second->messageQueue->pop();
-        std::cout << "message be cropped " << std::endl;
     }
     
     if (!connIt->second->conn) {
@@ -408,17 +408,22 @@ bool sendMessageToWssHwssId(const std::string& toHwssId,
     }
     
     //超过速度限制，延迟30ms后再发送
-    if(connIt->second->outRate >= 20*1024) {
+    if(connIt->second->outRate >= 64*1024) {
+        if (serverFinder->tlsFlushTimer) {
+            return true;
+        }
         std::shared_ptr<boost::asio::steady_timer> timer = std::make_shared<boost::asio::steady_timer>(serverFinder->tlsClient->get_io_service());
         //router核心应用，ping保持连接,防止连接假死。可以多ping，保持连接。最好不超过30秒
         timer->expires_after(std::chrono::milliseconds(100));
-        timer->async_wait([timer, toHwssId] (const boost::system::error_code& error_code){
+        timer->async_wait([timer, toWsgId] (const boost::system::error_code& error_code){
             if (error_code) {
-                std::cout << "flushToWssHwssId timer error code " << error_code.message() << std::endl;
+                std::cout << "flushToWssWsgId timer error code " << error_code.message() << std::endl;
                 return;
             }
-            flushToWssHwssId(toHwssId);
+            flushToWssWsgId(toWsgId);
+            serverFinder->tlsFlushTimer = nullptr;
         });
+        serverFinder->tlsFlushTimer = timer;
         return true;
     }
     
@@ -433,7 +438,7 @@ bool sendMessageToWssHwssId(const std::string& toHwssId,
         sendMessage->set_compressed(false); //disable compress
         websocketpp::lib::error_code send_error = connIt->second->conn->send(sendMessage);
         if (send_error) {
-            std::cout << "hwssId wss " << toHwssId << " send error "<< send_error
+            std::cout << "hwssId wss " << toWsgId << " send error "<< send_error
              << " state "<< connIt->second->conn->get_state() << std::endl;
             break;
         } else {
@@ -446,8 +451,8 @@ bool sendMessageToWssHwssId(const std::string& toHwssId,
     //没有发送完成，下次继续调度发送。
     if (!connIt->second->messageQueue->empty()) {
         if (connIt->second->conn->get_state() == websocketpp::session::state::value::open) {
-            boost::asio::post(serverFinder->tlsClient->get_io_service(), [toHwssId] {
-                flushToWssHwssId(toHwssId);
+            boost::asio::post(serverFinder->tlsClient->get_io_service(), [toWsgId] {
+                flushToWssWsgId(toWsgId);
             });
         }
     }
@@ -474,14 +479,14 @@ void reset_limit_connect_tls_rate_timer() {
     });
 }
 
-void flushToWssHwssId(const std::string& toHwssId) {
-    auto connIt = serverFinder->wssConnMap.find(toHwssId);
+void flushToWssWsgId(const std::string& toWsgId) {
+    auto connIt = serverFinder->wssConnMap.find(toWsgId);
     if (connIt == serverFinder->wssConnMap.end()) {
         return;
     }
     
     if (!connIt->second->conn) {
-        std::cout << "flushToWssHwssId wss conn empty" << std::endl;
+        std::cout << "flushToWssWsgId wss conn empty" << std::endl;
         return;
     }
     if (connIt->second->messageQueue->empty()) {
@@ -492,24 +497,29 @@ void flushToWssHwssId(const std::string& toHwssId) {
         return;
     }
     
-    std::cout << "flushToWssHwssId wss " << connIt->second->messageQueue->size()
-     << "out" <<  connIt->second->outRate << std::endl;
+    std::cout << "flushToWssWsgId wss queue " << connIt->second->messageQueue->size()
+     << " out " <<  connIt->second->outRate << std::endl;
     while (connIt->second->messageQueue->size() >= 256*1024) {
         connIt->second->messageQueue->pop();
     }
     
     //超过速度限制，延迟30ms后再发送
-    if(connIt->second->outRate >= 20*1024) {
+    if(connIt->second->outRate >= 64*1024) {
+        if (serverFinder->tlsFlushTimer) {
+            return;
+        }
         std::shared_ptr<boost::asio::steady_timer> timer = std::make_shared<boost::asio::steady_timer>(serverFinder->tlsClient->get_io_service());
         //router核心应用，ping保持连接,防止连接假死。可以多ping，保持连接。最好不超过30秒
         timer->expires_after(std::chrono::milliseconds(500));
-        timer->async_wait([timer, toHwssId] (const boost::system::error_code& error_code){
+        timer->async_wait([timer, toWsgId] (const boost::system::error_code& error_code){
             if (error_code) {
-                std::cout << "flushToWssHwssId timer error code " << error_code.message() << std::endl;
+                std::cout << "flushToWssWsgId timer error code " << error_code.message() << std::endl;
                 return;
             }
-            flushToWssHwssId(toHwssId);
+            flushToWssWsgId(toWsgId);
+            serverFinder->tlsFlushTimer = nullptr;
         });
+        serverFinder->tlsFlushTimer = timer;
         return;
     }
     
@@ -523,7 +533,7 @@ void flushToWssHwssId(const std::string& toHwssId) {
         sendMessage->set_compressed(false); //disable compress
         websocketpp::lib::error_code send_error = connIt->second->conn->send(sendMessage);
         if (send_error) {
-            std::cout << "hwssId wss " << toHwssId << " send error "<< send_error
+            std::cout << "hwssId wss " << toWsgId << " send error "<< send_error
              << " state "<< connIt->second->conn->get_state() << std::endl;
             break;
         } else {
@@ -535,8 +545,8 @@ void flushToWssHwssId(const std::string& toHwssId) {
     
     if (!connIt->second->messageQueue->empty()) {
         if (connIt->second->conn->get_state() == websocketpp::session::state::value::open) {
-            boost::asio::post(serverFinder->tlsClient->get_io_service(), [toHwssId] {
-                flushToWssHwssId(toHwssId);
+            boost::asio::post(serverFinder->tlsClient->get_io_service(), [toWsgId] {
+                flushToWssWsgId(toWsgId);
             });
         }
     }
@@ -548,7 +558,7 @@ void connect_tls(const std::string connHwssId) {
     if (findIt == serverFinder->wssServerMap.end()) {
         return;
     }
-    const HwssServer& server = findIt->second;
+    const WsgGateway& server = findIt->second;
     std::shared_ptr<tls_client> client = serverFinder->tlsClient;
     websocketpp::lib::error_code ec;
     tls_client::connection_ptr conn =  client->get_connection(server.url, ec);
@@ -595,7 +605,7 @@ void connect_tls(const std::string connHwssId) {
     conn->set_open_handler([conn, connHwssId](websocketpp::connection_hdl hdl){
         std::cout << "router connect success wss " << connHwssId << "pid "  << std::this_thread::get_id()  << std::endl;
         serverFinder->wssConnMap[connHwssId]->conn = conn;
-        flushToWssHwssId(connHwssId);
+        flushToWssWsgId(connHwssId);
     });
     
     conn->set_message_handler([connHwssId](websocketpp::connection_hdl hdl, message_ptr msg) {
@@ -612,17 +622,17 @@ void connect_tls(const std::string connHwssId) {
             if (error) {
                 return;
             }
-            auto hwssId = doc["hwssId"].get_string();
+            auto hwssId = doc["wsgId"].get_string();
             if (hwssId.error()) {
                 std::cout << connHwssId << " send wrong format message" << std::endl;
                 return;
             }
             //默认到ws协议的处理
-            std::string toHwssId(hwssId.value().data(), hwssId.value().size());
-            if (toHwssId == connHwssId) {
+            std::string toWsgId(hwssId.value().data(), hwssId.value().size());
+            if (toWsgId == connHwssId) {
                 return;
             }
-            bool hasEnterQueue = sendMessageToWssHwssId(toHwssId, msg->get_payload());
+            bool hasEnterQueue = sendMessageToWssWsgId(toWsgId, msg->get_payload());
             if (hasEnterQueue) {
                 return;
             }
@@ -698,12 +708,12 @@ void handleMsgFromWsRouter(std::shared_ptr<std::string> msg) {
     if (error) {
         return;
     }
-    auto hwssId = doc["hwssId"].get_string();
+    auto hwssId = doc["wsgId"].get_string();
     if (hwssId.error()) {
         return;
     }
-    std::string toHwssId(hwssId.value().data(), hwssId.value().size());
-    sendMessageToWssHwssId(toHwssId, *msg);
+    std::string toWsgId(hwssId.value().data(), hwssId.value().size());
+    sendMessageToWssWsgId(toWsgId, *msg);
 }
 
 
@@ -817,37 +827,37 @@ int websocket_router_no_tts_test_main(int argc, const char * argv[]) {
     
     {
         
-        HwssServer wsServer2;
+        WsgGateway wsServer2;
         wsServer2.url = "ws://127.0.0.1:9001/wsg?role=router&routerAppId=162374203942&routerAppToken=ZnPMZ3Wv8GR5ofP3LdNYHFIT3eNGcApg";
-        wsServer2.hwssId = "ws_685208380980";
-        std::string wsHwssId2 = "ws_685208380980";
-        serverFinder->wsServerMap[wsHwssId2] = wsServer2;
+        wsServer2.wsgId = "ws_685208380980";
+        std::string wsWsgId2 = "ws_685208380980";
+        serverFinder->wsServerMap[wsWsgId2] = wsServer2;
     }
  
     {
         
-        HwssServer wsServer2;
+        WsgGateway wsServer2;
         wsServer2.url = "ws://127.0.0.1:9002/wsg?role=router&routerAppId=162374203942&routerAppToken=ZnPMZ3Wv8GR5ofP3LdNYHFIT3eNGcApg";
-        wsServer2.hwssId = "ws_685208380981";
-        std::string wsHwssId2 = "ws_685208380981";
-        serverFinder->wsServerMap[wsHwssId2] = wsServer2;
+        wsServer2.wsgId = "ws_685208380981";
+        std::string wsWsgId2 = "ws_685208380981";
+        serverFinder->wsServerMap[wsWsgId2] = wsServer2;
     }
     
     {
         
-        HwssServer wsServer;
+        WsgGateway wsServer;
         wsServer.url = "wss://127.0.0.1:8001/wsg?role=router&routerAppId=162374203942&routerAppToken=ZnPMZ3Wv8GR5ofP3LdNYHFIT3eNGcApg";
-        wsServer.hwssId = "wss_685208380980";
-        std::string wsHwssId = "wss_685208380980";
-        serverFinder->wssServerMap[wsHwssId] = wsServer;
+        wsServer.wsgId = "wss_685208380980";
+        std::string wsWsgId = "wss_685208380980";
+        serverFinder->wssServerMap[wsWsgId] = wsServer;
     }
     
     {
-        HwssServer wsServer;
+        WsgGateway wsServer;
         wsServer.url = "wss://127.0.0.1:8002/wsg?role=router&routerAppId=162374203942&routerAppToken=ZnPMZ3Wv8GR5ofP3LdNYHFIT3eNGcApg";
-        wsServer.hwssId = "wss_685208380981";
-        std::string wsHwssId = "wss_685208380981";
-        serverFinder->wssServerMap[wsHwssId] = wsServer;
+        wsServer.wsgId = "wss_685208380981";
+        std::string wsWsgId = "wss_685208380981";
+        serverFinder->wssServerMap[wsWsgId] = wsServer;
     }
     
     
