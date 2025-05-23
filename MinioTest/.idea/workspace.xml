@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1d4a4163-cf63-4205-b74f-0726a008b353" name="Default Changelist" comment="" />
+    <list default="true" id="1d4a4163-cf63-4205-b74f-0726a008b353" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../jwt/cplus/jwttest/jwttest.xcodeproj/project.xcworkspace/xcuserdata/efurture.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../jwt/cplus/jwttest/jwttest.xcodeproj/project.xcworkspace/xcuserdata/efurture.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../wss/websocketppserver/websocketpp.xcodeproj/project.xcworkspace/xcuserdata/efurture.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/../wss/websocketppserver/websocketpp.xcodeproj/project.xcworkspace/xcuserdata/efurture.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -231,21 +234,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "JUnit.FurtureTaskTest.testSingleThreadOneRequest.executor": "Run",
-    "JUnit.FurtureTaskTest.testSingleThreadOneRequest2.executor": "Run",
-    "JUnit.PostgresqlTest.testPrepareTable.executor": "Run",
-    "JUnit.SqlitePerformanceTest.testInsertTableBenchPrepareInsert.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "kotlin-language-version-configured": "true",
-    "project.structure.last.edited": "SDKs",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.16431452",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;JUnit.FurtureTaskTest.testSingleThreadOneRequest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.FurtureTaskTest.testSingleThreadOneRequest2.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.PostgresqlTest.testPrepareTable.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.SqlitePerformanceTest.testInsertTableBenchPrepareInsert.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;SDKs&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.16431452&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/java/com/efurture/sqlite" />

@@ -222,9 +222,9 @@ void connect_plain(const std::string connWsgId) {
         try_connect_plain_later(connWsgId);
         return;
     }
-    conn->set_open_handshake_timeout(240*1000);
-    conn->set_close_handshake_timeout(240*1000);
-    conn->set_pong_timeout(480*1000);
+    conn->set_open_handshake_timeout(60*1000);
+    conn->set_close_handshake_timeout(120*1000);
+    conn->set_pong_timeout(60*1000);
     conn->set_socket_init_handler([](websocketpp::connection_hdl hdl, websocketpp::lib::asio::ip::tcp::socket& socket){        boost::asio::ip::tcp::no_delay no_delay(true);
         socket.set_option(no_delay);
         
@@ -567,9 +567,9 @@ void connect_tls(const std::string connHwssId) {
         try_connect_tls_later(connHwssId);
         return;
     }
-    conn->set_open_handshake_timeout(240*1000);
-    conn->set_close_handshake_timeout(240*1000);
-    conn->set_pong_timeout(480*1000);
+    conn->set_open_handshake_timeout(60*1000);
+    conn->set_close_handshake_timeout(120*1000);
+    conn->set_pong_timeout(60*1000);
     
     conn->set_socket_init_handler([](websocketpp::connection_hdl hdl, websocketpp::lib::asio::ssl::stream<
                                      websocketpp::lib::asio::ip::tcp::socket>& stream){
