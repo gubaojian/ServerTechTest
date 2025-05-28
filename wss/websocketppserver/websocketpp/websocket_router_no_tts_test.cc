@@ -15,54 +15,8 @@
 #include <set>
 #include <cstdlib>
 #include <unistd.h>
-// This works around a bug in Boost <= 1.80.0 when using Clang >=18.
-// See https://github.com/bitcoin/bitcoin/issues/30751.
-// https://github.com/bitcoin/bitcoin/pull/30821/files
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wenum-constexpr-conversion"
-#endif
-#include <boost/asio.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include "WsgRouterCommon.h"
 
-#include <websocketpp/config/asio_client.hpp>
-#include "websocketpp/client.hpp"
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#endif
-
-#include "simdjson/simdjson.h"
-
-// core_client.hpp中修改：
-// enable_multithreading should be set to false, 两处
-// defalte should be disable
-// 单独跑稳定，xcode中跑可能不稳定，有时会断开。
-
-typedef websocketpp::client<websocketpp::config::asio_client> plain_client;
-typedef websocketpp::client<websocketpp::config::asio_tls_client> tls_client;
-typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
-
-struct WsgGateway {
-    std::string wsgId;
-    std::string url;
-};
-
-struct plain_connection_info{
-    plain_client::connection_ptr conn = nullptr;
-    std::shared_ptr<std::queue<std::string>> messageQueue = std::make_shared<std::queue<std::string>>();
-    int64_t inMessageCount = 0;
-    int64_t outMessageCount = 0;
-    int32_t outRate = 0;
-};
-
-struct tls_connection_info{
-    tls_client::connection_ptr conn = nullptr;
-    std::shared_ptr<std::queue<std::string>> messageQueue = std::make_shared<std::queue<std::string>>();
-    int64_t inMessageCount = 0;
-    int64_t outMessageCount = 0;
-    int32_t outRate = 0;
-};
 
 struct ServerFinder {
     //ws协议hwss服务器id映射
@@ -72,11 +26,11 @@ struct ServerFinder {
     
     //ws协议asio的执行线程及相关信息：。仅在支持对应线程访问
     std::shared_ptr<plain_client> plainClient;
-    std::unordered_map<std::string, std::shared_ptr<plain_connection_info>> wsConnMap;
+    std::unordered_map<std::string, std::shared_ptr<ws_connection_info>> wsConnMap;
     
     //wss协议asio的执行线程及相关信息：。仅在支持对应线程访问
     std::shared_ptr<tls_client> tlsClient;
-    std::unordered_map<std::string, std::shared_ptr<tls_connection_info>> wssConnMap;
+    std::unordered_map<std::string, std::shared_ptr<wss_connection_info>> wssConnMap;
     
     //ws和wss两个线程分别对应两个parser。仅在支持对应线程访问
     simdjson::ondemand::parser plainParser;
@@ -759,7 +713,7 @@ void runWSRouter() {
         
         const auto& wsServerMap = serviceFinder->wsServerMap;
         for(auto wsIt = wsServerMap.begin(); wsIt != wsServerMap.end(); wsIt++) {
-            serviceFinder->wsConnMap[wsIt->first] = std::make_shared<plain_connection_info>();
+            serviceFinder->wsConnMap[wsIt->first] = std::make_shared<ws_connection_info>();
             connect_plain(wsIt->first);
         }
         
@@ -801,7 +755,7 @@ void runWSSRouter() {
 
         const auto& wssServerMap = serviceFinder->wssServerMap;
         for(auto wssIt = wssServerMap.begin(); wssIt != wssServerMap.end(); wssIt++) {
-            serviceFinder->wssConnMap[wssIt->first] = std::make_shared<tls_connection_info>();
+            serviceFinder->wssConnMap[wssIt->first] = std::make_shared<wss_connection_info>();
             connect_tls(wssIt->first);
         }
         
