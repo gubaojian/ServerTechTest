@@ -19,6 +19,20 @@
 #include "WsGatewayManager.hpp"
 #include "WssGatewayManager.hpp"
 
+/**
+ 
+ IF(APPLE)
+   ADD_COMPILE_FLAG("-D_GNU_SOURCE")
+ endif()
+ 
+ */
+#ifndef _GNU_SOURCE
+#   define _GNU_SOURCE
+#endif
+
+
+#include <boost/stacktrace.hpp>
+
 
 struct ServerFinder {
     //ws协议wsg gateway服务器id映射
@@ -92,6 +106,7 @@ int websocket_router_no_tts_test_main(int argc, const char * argv[]) {
     wsGatewayManager->setServerMap(serviceFinder->wsServerMap);
     wssGatewayManager->setServerMap(serviceFinder->wssServerMap);
     
+    std::cout << boost::stacktrace::stacktrace() << std::endl;
     
     if(serviceFinder->wsServerMap.empty() && serviceFinder->wssServerMap.empty()) {
         std::cout << "non config hwss servers for router " << std::endl;
