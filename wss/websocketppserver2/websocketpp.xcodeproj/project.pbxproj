@@ -246,20 +246,29 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				HEADER_SEARCH_PATHS = (
 					/Users/efurture/code/ServerTechTest/wss/websocketppserver/websocketpp/include,
 					"/usr/local/Cellar/openssl@3/3.5.0/include",
 					/Users/efurture/Downloads/boost_1_79_0/pp/include,
+					"/Users/efurture/Downloads/libbacktrace-master/install/include",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"/usr/local/Cellar/openssl@3/3.5.0/lib",
 					/usr/local/lib,
 					"$(PROJECT_DIR)/websocketpp/include/boost_1_79_0/lib",
+					"/Users/efurture/Downloads/libbacktrace-master/install/lib",
+				);
+				OTHER_CFLAGS = (
+					"-g",
+					"-fno-pie",
 				);
 				OTHER_LDFLAGS = (
 					"-lssl",
 					"-lcrypto",
+					"-lbacktrace",
+					"-ldl",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -275,15 +284,23 @@
 					/Users/efurture/code/ServerTechTest/wss/websocketppserver/websocketpp/include,
 					"/usr/local/Cellar/openssl@3/3.5.0/include",
 					/Users/efurture/Downloads/boost_1_79_0/pp/include,
+					"/Users/efurture/Downloads/libbacktrace-master/install/include",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"/usr/local/Cellar/openssl@3/3.5.0/lib",
 					/usr/local/lib,
 					"$(PROJECT_DIR)/websocketpp/include/boost_1_79_0/lib",
+					"/Users/efurture/Downloads/libbacktrace-master/install/lib",
+				);
+				OTHER_CFLAGS = (
+					"-g",
+					"-fno-pie",
 				);
 				OTHER_LDFLAGS = (
 					"-lssl",
 					"-lcrypto",
+					"-lbacktrace",
+					"-ldl",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

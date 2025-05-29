@@ -30,8 +30,14 @@
 #   define _GNU_SOURCE
 #endif
 
+#define BOOST_STACKTRACE_USE_ADDR2LINE 1
+#define BOOST_STACKTRACE_ENABLE_BACKTRACE 1
 
 #include <boost/stacktrace.hpp>
+
+#include "tbox_backtrace.h"
+
+#include <backtrace.h>
 
 
 struct ServerFinder {
@@ -60,6 +66,26 @@ void routeMessageToWssGatewayManager(const std::string &msg,
     if (wssGatewayManager) {
         wssGatewayManager->postMessage(msg, fromWsgId);
     }
+}
+
+static int callback(void *data, uintptr_t pc, const char *filename,
+                   int lineno, const char *function) {
+    printf("  #%d: %s at %s:%d\n", (int)(size_t)data,
+           function ? function : "??",
+           filename ? filename : "??", lineno);
+    return 0;
+}
+
+// 生成回溯信息
+void print_backtrace(void) {
+    backtrace_state *state = backtrace_create_state(NULL, 1, NULL, NULL);
+    if (!state) {
+        fprintf(stderr, "Failed to create backtrace state\n");
+        return;
+    }
+
+    printf("Backtrace:\n");
+    backtrace_full(state, 1, callback, NULL, NULL);
 }
 
 
@@ -106,7 +132,17 @@ int websocket_router_no_tts_test_main(int argc, const char * argv[]) {
     wsGatewayManager->setServerMap(serviceFinder->wsServerMap);
     wssGatewayManager->setServerMap(serviceFinder->wssServerMap);
     
+    boost::stacktrace::enable_backtrace_symbols_resolution();
+    
     std::cout << boost::stacktrace::stacktrace() << std::endl;
+    
+    std::cout << tbox::DumpBacktrace() << std::endl;
+    
+    auto frame = boost::stacktrace::stacktrace()[0];
+    std::cout << frame << std::endl;
+    std::cout << frame.source_file() << ":" << frame.source_line();
+    
+    print_backtrace();
     
     if(serviceFinder->wsServerMap.empty() && serviceFinder->wssServerMap.empty()) {
         std::cout << "non config hwss servers for router " << std::endl;
