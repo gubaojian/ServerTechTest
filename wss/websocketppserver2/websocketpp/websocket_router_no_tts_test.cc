@@ -40,6 +40,12 @@
 #include <backtrace.h>
 
 
+
+/**
+ *  atos -o /Users/efurture/Library/Developer/Xcode/DerivedData/websocketpp-fxdcacpppaqsilggdowsykidzqjp/Build/Products/Debug/websocketpp -l 0 0x10014b9c4
+ websocket_router_no_tts_test_main(int, char const**) (in websocketpp) (websocket_router_no_tts_test.cc:152)
+ */
+
 struct ServerFinder {
     //ws协议wsg gateway服务器id映射
     std::unordered_map<std::string,WsgGateway> wsServerMap;

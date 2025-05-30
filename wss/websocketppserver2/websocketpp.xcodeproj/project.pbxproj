@@ -263,6 +263,9 @@
 				OTHER_CFLAGS = (
 					"-g",
 					"-fno-pie",
+					"-no-pie",
+					"-rdynamic",
+					"-lboost_backtrace",
 				);
 				OTHER_LDFLAGS = (
 					"-lssl",
@@ -295,6 +298,9 @@
 				OTHER_CFLAGS = (
 					"-g",
 					"-fno-pie",
+					"-no-pie",
+					"-rdynamic",
+					"-lboost_backtrace",
 				);
 				OTHER_LDFLAGS = (
 					"-lssl",
