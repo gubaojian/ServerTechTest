@@ -19,6 +19,24 @@
  *  https://github.com/gcc-mirror/gcc/blob/master/libstdc%2B%2B-v3/include/bits/stl_deque.h
  *  https://github.com/gcc-mirror/gcc/blob/master/libstdc%2B%2B-v3/include/bits/stl_list.h
  *  pop不会释放内存，
+ *      //! <b>Effects</b>: Removes the first element from the deque.
+ *     //!
+ *     //! <b>Throws</b>: Nothing.
+ *     //!
+ *     //! <b>Complexity</b>: Constant time.
+ *     void pop_front() BOOST_NOEXCEPT_OR_NOTHROW
+ *     {
+ *        BOOST_ASSERT(!this->empty());
+ *        if (this->members_.m_start.m_cur != this->members_.m_start.m_last - 1) {
+ *           allocator_traits_type::destroy
+ *              ( this->alloc()
+ *              , boost::movelib::to_raw_pointer(this->members_.m_start.m_cur)
+ *              );
+ *           ++this->members_.m_start.m_cur;
+ *        }
+ *        else
+ *           this->priv_pop_front_aux();
+ *     }
  * Android和Mac平台pop时会释放不必要的内存，平台上libc实现不一致。
  *   template <class _Tp, class _Allocator>
  *   void deque<_Tp, _Allocator>::pop_front() {
