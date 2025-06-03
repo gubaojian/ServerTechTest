@@ -19,6 +19,19 @@
  *  https://github.com/gcc-mirror/gcc/blob/master/libstdc%2B%2B-v3/include/bits/stl_list.h
  *  pop不会释放内存，
  * Android和Mac平台pop时会释放不必要的内存，平台上libc实现不一致。
+ *   template <class _Tp, class _Allocator>
+ *   void deque<_Tp, _Allocator>::pop_front() {
+ *     size_type __old_sz    = size();
+ *     size_type __old_start = __start_;
+ *     allocator_type& __a   = __alloc();
+ *     __alloc_traits::destroy(
+ *         __a, std::__to_address(*(__map_.begin() + __start_ / __block_size) + __start_ % __block_size));
+ *     --__size();
+ *     ++__start_;
+ *     __annotate_shrink_front(__old_sz, __old_start);
+ *     __maybe_remove_front_spare();
+ *   }
+ *
  *  微软实现也一样：
  *     https://github.com/microsoft/STL/blob/main/stl/inc/queue
  *     https://github.com/microsoft/STL/blob/main/stl/inc/deque
