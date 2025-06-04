@@ -108,11 +108,13 @@ void masked_copy_simd64 (std::string const & i, std::string & o,
         u64O[i] = u64I[i] ^ u64Key.i;
     }
     size_t remain = i.length()%8;
-    size_t offset = i.size() - remain;
-    uint8_t* rI = (uint8_t*)(i.data() + offset);
-    uint8_t* rO = (uint8_t*)(o.data() + offset);
-    for (int i=0; i<remain; i++) {
-        rO[i] = rI[i] ^ key.c[i%4];
+    if (remain > 0) {
+        size_t offset = i.size() - remain;
+        uint8_t* rI = (uint8_t*)(i.data() + offset);
+        uint8_t* rO = (uint8_t*)(o.data() + offset);
+        for (int i=0; i<remain; i++) {
+            rO[i] = rI[i] ^ key.c[i%4];
+        }
     }
 }
 
@@ -128,11 +130,13 @@ void masked_copy_simd32(std::string const & i, std::string & o,
         u32O[i] = u32I[i] ^ u32Key.i;
     }
     size_t remain = i.length()%4;
-    size_t offset = i.size() - remain;
-    uint8_t* rI = (uint8_t*)(i.data() + offset);
-    uint8_t* rO = (uint8_t*)(o.data() + offset);
-    for (int i=0; i<remain; i++) {
-        rO[i] = rI[i] ^ key.c[i%4];
+    if (remain > 0) {
+        size_t offset = i.size() - remain;
+        uint8_t* rI = (uint8_t*)(i.data() + offset);
+        uint8_t* rO = (uint8_t*)(o.data() + offset);
+        for (int i=0; i<remain; i++) {
+            rO[i] = rI[i] ^ key.c[i%4];
+        }
     }
 }
 
@@ -158,7 +162,7 @@ int main(int argc, const char * argv[]) {
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     
     {
-        std::string in(1023, 'a');
+        std::string in(1025, 'a');
         std::string out;
         std::string out2;
         std::string out3;
