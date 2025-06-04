@@ -13,6 +13,9 @@
 #include <list>
 
 /**
+ * https://www.ctyun.cn/developer/article/444952717525061
+ *  https://github.com/openjdk/jdk21/blob/jdk-21%2B35/src/hotspot/os/linux/os_linux.cpp#L5518
+ *  https://github.com/alibaba/arthas/issues/3020 
  * std::list std::deque 调用shrink_to_fit试试。
  * 尝试替代queue保持各平台内存一致性。或者创建新对象替换老对象的方式释放。
  * std::queue 在linux平台上不释放内存，具体看deque实现源代码
