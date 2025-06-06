@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "0184E5462DF041E30072079B"
-               BuildableName = "CopyTest"
-               BlueprintName = "CopyTest"
-               ReferencedContainer = "container:CopyTest.xcodeproj">
+               BlueprintIdentifier = "0184E6DC2DF1281B0072079B"
+               BuildableName = "RandomTest"
+               BlueprintName = "RandomTest"
+               ReferencedContainer = "container:RandomTest.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -31,7 +31,7 @@
       shouldAutocreateTestPlan = "YES">
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -45,10 +45,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "0184E5462DF041E30072079B"
-            BuildableName = "CopyTest"
-            BlueprintName = "CopyTest"
-            ReferencedContainer = "container:CopyTest.xcodeproj">
+            BlueprintIdentifier = "0184E6DC2DF1281B0072079B"
+            BuildableName = "RandomTest"
+            BlueprintName = "RandomTest"
+            ReferencedContainer = "container:RandomTest.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,10 +62,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "0184E5462DF041E30072079B"
-            BuildableName = "CopyTest"
-            BlueprintName = "CopyTest"
-            ReferencedContainer = "container:CopyTest.xcodeproj">
+            BlueprintIdentifier = "0184E6DC2DF1281B0072079B"
+            BuildableName = "RandomTest"
+            BlueprintName = "RandomTest"
+            ReferencedContainer = "container:RandomTest.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

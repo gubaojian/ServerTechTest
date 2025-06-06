@@ -152,11 +152,8 @@ void byte_mask2(char* first, char* last, char* result,
     }
 }
 
-/**
- * 64simd used 84
- * used 1032
- */
-int main(int argc, const char * argv[]) {
+
+void testMaskBench() {
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -206,11 +203,112 @@ int main(int argc, const char * argv[]) {
         std::cout << "eq " << (out == out3) << std::endl;
     }
     
-    
-    
-    
+}
 
+
+void testCopyBench() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     
+    {
+        std::string in(1024, 'a');
+        
+        start = std::chrono::high_resolution_clock::now();
+        for(int i=0; i<1024*1024; i++) {
+            std::string ap;
+            ap.reserve(1024);
+            ap.append(in);
+        }
+        end = std::chrono::high_resolution_clock::now();
+        used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "append used " << used.count() << std::endl;
+        
+        
+        start = std::chrono::high_resolution_clock::now();
+        for(int i=0; i<1024*1024; i++) {
+            std::string ap = in;
+        }
+        end = std::chrono::high_resolution_clock::now();
+        used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "eq used " << used.count() << std::endl;
+        
+     
+        
+        start = std::chrono::high_resolution_clock::now();
+        for(int i=0; i<1024*1024; i++) {
+            std::string cp;
+            cp.resize(1024);
+            std::memcpy((char*)cp.data(), (char*)in.data(), in.size());
+        }
+        end = std::chrono::high_resolution_clock::now();
+        used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "cp used " << used.count() << std::endl;
+    }
+    
+}
+
+
+
+void testCopyReSize() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    
+    {
+        std::string in(1024, 'a');
+        
+        start = std::chrono::high_resolution_clock::now();
+        for(int i=0; i<1024*1024; i++) {
+            std::string ap;
+            ap.resize(1024);
+        }
+        end = std::chrono::high_resolution_clock::now();
+        used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "resize used " << used.count() << std::endl;
+        
+        
+        start = std::chrono::high_resolution_clock::now();
+        for(int i=0; i<1024*1024; i++) {
+            std::string c(1024, '\n');
+        }
+        end = std::chrono::high_resolution_clock::now();
+        used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "cp used " << used.count() << std::endl;
+        
+    }
+    
+}
+
+
+struct buffer {
+    buffer(char const * b, size_t l) : buf(b),len(l) {}
+
+    char const * buf;
+    size_t len;
+};
+
+/**
+ * 64simd used 84
+ * used 1032
+ *
+ * boost asio速度更快：
+ *   https://github.com/boostorg/beast/issues/1699
+ */
+int main(int argc, const char * argv[]) {
+    
+    testMaskBench();
+    
+    testCopyBench();
+    
+    testCopyReSize();
+    
+        
+    std::string s1;
+    std::string s2;
+    
+    s2 = std::move(s1);
+    s1 = std::move(s2);
     
     
     
