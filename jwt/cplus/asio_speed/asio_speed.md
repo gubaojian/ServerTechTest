@@ -1,0 +1,1 @@
+g++ -std=c++11 -O3 asio_loopback_test.cpp -lboost_system -lboost_thread -lpthread -o asio_loopback_test
