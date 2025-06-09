@@ -11,6 +11,19 @@
 #include <chrono>
 #include "simdjson/simdjson.h"
 
+/**
+ * normal data used 331ms
+ * wsgId ws_685208380980
+ * custom sort data used 448ms
+ * wsgId2 ws_685208380980
+ * wsgId3 ws_685208380980
+ * custom sort data with hand parse used 36ms
+ *
+ *normal data used 493ms
+ custom sort data used 453ms
+ custom sort data with hand parse used 20ms
+ *
+ */
 int main(int argc, const char * argv[]) {
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
@@ -66,7 +79,45 @@ int main(int argc, const char * argv[]) {
     }
     end = std::chrono::high_resolution_clock::now();
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "data used " << used.count() << "ms" << std::endl;
+    std::cout << "custom sort data used " << used.count() << "ms" << std::endl;
+    std::cout << "wsgId2 " << wsgId2 << std::endl;
+    
+    std::string wsgId3;
+    start = std::chrono::high_resolution_clock::now();
+    const std::string prefix = "{\"wsgId\":\"";
+    if (str1.starts_with(prefix)) {
+        auto pos = str1.find('"', prefix.size() + 1);
+        if (pos >= 0) {
+            wsgId3 = str1.substr(prefix.size(), pos - prefix.size());
+        }
+    }
+    std::cout << "wsgId3 " <<  wsgId3 << std::endl;
+    for(int i=0; i<10000*200; i++){
+        if (str1.starts_with(prefix)) {
+            auto pos = str1.find('"', prefix.size() + 1);
+            if (pos >= 0) {
+                wsgId3 = str1.substr(prefix.size(), pos - prefix.size());
+            }
+        } else {
+            simdjson::padded_string json = simdjson::padded_string(str1);
+            simdjson::ondemand::document doc;
+            auto error = parser.iterate(json).get(doc);
+            if (error) {
+                std::cout << " send wrong format message" << std::endl;
+                break;
+            }
+            auto wsgId = doc["wsgId"].get_string();
+            if (wsgId.error()) {
+                std::cout << " send wrong format message, missing wsgId" << std::endl;
+                break;
+            }
+            wsgId3 = std::string(wsgId.value().data(), wsgId.value().size());
+        }
+      
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "custom sort data with hand parse used " << used.count() << "ms" << std::endl;
     std::cout << "wsgId2 " << wsgId2 << std::endl;
 
     return 0;
