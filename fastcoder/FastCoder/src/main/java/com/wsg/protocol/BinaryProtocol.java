@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 public class BinaryProtocol implements Protocol {
 
-    private static ThreadLocal<byte[]> localBuffer = ThreadLocal.withInitial(new Supplier<byte[]>() {
+    private static final ThreadLocal<byte[]> localBuffer = ThreadLocal.withInitial(new Supplier<byte[]>() {
         @Override
         public byte[] get() {
             return new byte[96*1024]; //消息最大64kb
