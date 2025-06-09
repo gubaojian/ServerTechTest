@@ -1,4 +1,7 @@
-g++ -std=c++11 -O3 asio_loopback_test.cpp -lboost_system -lboost_thread -lpthread -o asio_loopback_test
+g++ -std=c++11 -O3 -I/opt/homebrew/Cellar/boost/1.88.0/include/ -L/opt/homebrew/Cellar/boost/1.88.0/lib asio_loopback_test.cpp -lboost_system -lboost_thread -lpthread -o asio_loopback_test
+
+
+g++ -std=c++11 -O3 -I/opt/homebrew/Cellar/boost/1.88.0/include/ -L/opt/homebrew/Cellar/boost/1.88.0/lib asio_loopback_test2.cpp -lboost_system -lboost_thread -lpthread -o asio_loopback_test2
 
 
 g++ -std=c++11 -O3 asio_loopback_test3.cpp -lboost_system -lboost_thread -lpthread -o asio_loopback_test3
