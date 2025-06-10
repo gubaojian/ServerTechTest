@@ -14,7 +14,7 @@ public class JsonProtocol implements  Protocol {
         // 比如wsgbus直接start_with然后根据长度进行截取,可以避免json解析。
         Map<String,String> map = new LinkedHashMap<>();
         map.put(ProtocolConstants.WSG_ID, wsgId);
-        map.put(ProtocolConstants.CONN_ID, wsgId);
+        map.put(ProtocolConstants.CONN_ID, connId);
         map.put(ProtocolConstants.ACTION, ProtocolConstants.ACTION_TEXT_MSG);
         map.put(ProtocolConstants.MSG, message);
         String json = JSON.toJSONString(map);
@@ -27,7 +27,7 @@ public class JsonProtocol implements  Protocol {
         // 比如wsgbus直接start_with然后根据长度进行截取,可以避免json解析。
         Map<String,String> map = new LinkedHashMap<>();
         map.put(ProtocolConstants.WSG_ID, wsgId);
-        map.put(ProtocolConstants.CONN_ID, wsgId);
+        map.put(ProtocolConstants.CONN_ID, connId);
         map.put(ProtocolConstants.ACTION, ProtocolConstants.ACTION_TEXT_MSG);
         String base64Message = Base64.getEncoder().encodeToString(message);
         map.put(ProtocolConstants.MSG, base64Message);
