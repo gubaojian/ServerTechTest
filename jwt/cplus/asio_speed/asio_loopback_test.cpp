@@ -77,6 +77,11 @@ public:
         tcp::endpoint endpoint(boost::asio::ip::make_address("127.0.0.1"), PORT);
         socket_.connect(endpoint);
         start_write();
+        start_write2();
+        start_write3();
+        start_write4();
+        start_write5();
+        start_write5();
     }
 
     uint64_t get_bytes_sent() const {
@@ -93,6 +98,71 @@ private:
                 if (!ec) {
                     bytes_sent_ += length;
                     start_write();
+                }
+            });
+    }
+    
+    void start_write2() {
+        auto self(shared_from_this());  // 现在可以正常使用
+        boost::asio::async_write(
+            socket_,
+            boost::asio::buffer(data_),
+            [this, self](boost::system::error_code ec, std::size_t length) {
+                if (!ec) {
+                    bytes_sent_ += length;
+                    start_write2();
+                }
+            });
+    }
+    
+    void start_write3() {
+        auto self(shared_from_this());  // 现在可以正常使用
+        boost::asio::async_write(
+            socket_,
+            boost::asio::buffer(data_),
+            [this, self](boost::system::error_code ec, std::size_t length) {
+                if (!ec) {
+                    bytes_sent_ += length;
+                    start_write3();
+                }
+            });
+    }
+    
+    void start_write4() {
+        auto self(shared_from_this());  // 现在可以正常使用
+        boost::asio::async_write(
+            socket_,
+            boost::asio::buffer(data_),
+            [this, self](boost::system::error_code ec, std::size_t length) {
+                if (!ec) {
+                    bytes_sent_ += length;
+                    start_write4();
+                }
+            });
+    }
+    
+    void start_write5() {
+        auto self(shared_from_this());  // 现在可以正常使用
+        boost::asio::async_write(
+            socket_,
+            boost::asio::buffer(data_),
+            [this, self](boost::system::error_code ec, std::size_t length) {
+                if (!ec) {
+                    bytes_sent_ += length;
+                    start_write5();
+                }
+            });
+    }
+    
+    void start_write6() {
+        auto self(shared_from_this());  // 现在可以正常使用
+        boost::asio::async_write(
+            socket_,
+            boost::asio::buffer(data_),
+            [this, self](boost::system::error_code ec, std::size_t length) {
+                if (!ec) {
+                    bytes_sent_ += length;
+                    start_write6();
                 }
             });
     }
@@ -114,6 +184,17 @@ private:
  * 吞吐量: 2533.61 MB/秒
  * 线程数: 4
  * 缓冲区大小: 1024 KB
+ 
+ 测试开始，持续 30 秒...
+ 测试结束，测试时间 30 秒...
+ 测试结果:
+ 总发送字节数: 288450674688 字节
+ 测试时长: 31.007 秒
+ 吞吐量: 74422.1 Mbps
+ 吞吐量: 9302.76 MB/秒
+ 线程数: 4
+ 缓冲区大小: 1024 KB
+ 
  */
 int main() {
     try {
