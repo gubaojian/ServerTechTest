@@ -35,7 +35,7 @@ int main() {
         std::vector<int> batch;
         for (int i = 0; i < POST_COUNT; ++i) {
             batch.push_back(i);
-            if (batch.size() >= 100) {
+            if (batch.size() >= 128) {
                  // 使用boost::asio::post替代io_context.post
                 boost::asio::post(io_context, [&, bt = std::move(batch)]() {
                     for(int i=0; i<bt.size(); ++i) {
@@ -48,6 +48,16 @@ int main() {
                 batch = std::vector<int>(); // 清空batch
             }
         }
+        if (batch.size() > 0 ) {
+            boost::asio::post(io_context, [&, bt = std::move(batch)]() {
+                for(int i=0; i<bt.size(); ++i) {
+                    if (++counter == POST_COUNT) {
+                       finished = true;
+                   }
+                }
+            });
+        }
+       
     });
     
     // 等待所有post完成
