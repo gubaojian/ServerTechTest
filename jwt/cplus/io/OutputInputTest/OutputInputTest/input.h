@@ -17,20 +17,27 @@ private:
     const uint8_t* buffer;
     size_t position;
     size_t start;
+    size_t bufferSize;
 
 public:
-    Input(const uint8_t* buffer, size_t start)
-        : buffer(buffer), position(start), start(start) {}
+    Input(const uint8_t* buffer, size_t start, size_t size)
+        : buffer(buffer), position(start), start(start), bufferSize(size) {}
 
     // 禁止拷贝构造和赋值，避免指针浅拷贝问题
     Input(const Input&) = delete;
     Input& operator=(const Input&) = delete;
 
     uint8_t readByte() {
+        if (position  + 1 > bufferSize) {
+            return 0;
+        }
         return buffer[position++];
     }
 
     int32_t readInt() {
+        if (position  + 4 > bufferSize) {
+            return 0;
+        }
         int32_t value =
             (static_cast<int32_t>(buffer[position]) << 24) |
             (static_cast<int32_t>(buffer[position + 1]) << 16) |
@@ -41,21 +48,39 @@ public:
     }
 
     std::string_view readShortStringUtf8() {
+        if (position >= bufferSize) {
+            return std::string_view();
+        }
         uint8_t length = readByte();
+        if ((position + length) > bufferSize) {
+            return std::string_view();
+        }
         std::string_view str(reinterpret_cast<const char*>(buffer + position), length);
         position += length;
         return str;
     }
 
     std::string_view readLongStringUtf8() {
+        if (position >= bufferSize) {
+            return std::string_view();
+        }
         int32_t length = readInt();
+        if ((position + length) > bufferSize) {
+            return std::string_view();
+        }
         std::string_view str(reinterpret_cast<const char*>(buffer + position), length);
         position += length;
         return str;
     }
 
     std::string_view readBinary() {
+        if (position >= bufferSize) {
+            return std::string_view();
+        }
         int32_t length = readInt();
+        if ((position + length) > bufferSize) {
+            return std::string_view();
+        }
         std::string_view binary(reinterpret_cast<const char*>(buffer + position), length);
         position += length;
         return binary;

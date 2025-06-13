@@ -19,14 +19,18 @@ private:
     size_t position;
 
 public:
-    Output(uint8_t* buffer, size_t pos)
-        : buffer(buffer), position(pos) {}
+    Output(uint8_t* buffer, size_t start)
+        : buffer(buffer), position(start) {}
 
     // 禁止拷贝构造和赋值，避免浅拷贝问题
     Output(const Output&) = delete;
     Output& operator=(const Output&) = delete;
 
     size_t getPosition() const {
+        return position;
+    }
+    
+    size_t getSize() const {
         return position;
     }
 
