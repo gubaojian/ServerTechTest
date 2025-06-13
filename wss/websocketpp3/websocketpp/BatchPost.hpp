@@ -13,10 +13,9 @@
 #include <iostream>
 
 #include <stdio.h>
+
 template <typename T>
 using OnBatchMessaage = std::function<void(std::shared_ptr<std::vector<T>>)>;
-
-//void (*)(std::shared_ptr<std::vector<T>>  batch);
 
 
 template <typename T>

@@ -100,6 +100,9 @@ int main(int argc, const char * argv[]) {
         }
     }
     std::cout << "wsgId3 " <<  wsgId3 << std::endl;
+    std::string_view header(str1.data(), 128);
+    std::cout << header << std::endl;
+
     for(int i=0; i<10000*200; i++){
         if (str1.starts_with(prefix)) {
             auto pos = str1.find('"', prefix.size() + 1);
