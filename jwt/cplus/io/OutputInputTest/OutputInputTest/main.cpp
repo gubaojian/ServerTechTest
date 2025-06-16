@@ -18,12 +18,13 @@ void test_normal_format() {
     
     output.writeShortStringUtf8("hello world");
     output.writeLongStringUtf8("你好");
+    output.writeStringUtf8("auto length string");
     
     std::cout << "normal format " << output.getSize() << std::endl;
     
     std::cout << input.readShortStringUtf8() << std::endl;
     std::cout << input.readLongStringUtf8() << std::endl;
-    
+    std::cout << input.readStringUtf8() << std::endl;
 }
 
 void test_invalid_format() {
@@ -50,6 +51,9 @@ int main(int argc, const char * argv[]) {
     test_normal_format();
  
     test_invalid_format();
+    
+    std::cout << (uint8_t) (200) << std::endl;
+    std::cout << (uint8_t) (100) << std::endl;
     
     return 0;
 }

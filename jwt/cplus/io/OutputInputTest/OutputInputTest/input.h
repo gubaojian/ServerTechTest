@@ -46,6 +46,15 @@ public:
         position += 4;
         return value;
     }
+    
+   std::string_view readStringUtf8() {
+        size_t type = readByte();
+        if (type == 0) { //short string type;
+            return readShortStringUtf8();
+        } else {
+            return readLongStringUtf8();
+        }
+    }
 
     std::string_view readShortStringUtf8() {
         if (position >= bufferSize) {
