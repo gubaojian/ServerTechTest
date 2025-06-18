@@ -6,6 +6,8 @@ import com.wsg.protocol.Protocol;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,6 +17,98 @@ public class Main {
     public static void main(String[] args) {
           testJson();
           testBinary();
+
+        int mask = RandomUtils.insecure().randomInt();
+        String message = RandomStringUtils.insecure().nextAlphabetic(1024);
+
+        ByteBuffer one = testMask(message, mask);
+        ByteBuffer two = testFastMask(message, mask);
+        ByteBuffer three = testFastMask(message, mask);
+
+
+        System.out.println(one.equals(two));
+
+        System.out.println(three.equals(two));
+
+        testMaskBench(message, mask);
+
+
+    }
+
+    public static  void testMaskBench(String message, int mask) {
+        long start = System.currentTimeMillis();
+        for(int i=0; i<1000*10*100; i++) {
+            testMask(message, mask);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("normal mask used " + (end - start));
+
+        start = System.currentTimeMillis();
+        for(int i=0; i<1000*10*100; i++) {
+            testFastMask32(message, mask);
+        }
+        end = System.currentTimeMillis();
+        System.out.println("fast32 mask used " + (end - start));
+
+        start = System.currentTimeMillis();
+        for(int i=0; i<1000*10*100; i++) {
+            testFastMask(message, mask);
+        }
+        end = System.currentTimeMillis();
+        System.out.println("fast64 mask used " + (end - start));
+    }
+
+    public static ByteBuffer testMask(String message, int mask) {
+        ByteBuffer masks = ByteBuffer.allocate(4);
+        masks.putInt(mask);
+        byte[] bts = message.getBytes(StandardCharsets.UTF_8);
+        ByteBuffer read = ByteBuffer.wrap(bts);
+        ByteBuffer write = ByteBuffer.allocate(bts.length);
+        int i=0;
+        while (read.hasRemaining()) {
+            write.put((byte) (read.get() ^ masks.get(i%4)));
+            i++;
+        }
+        return write;
+    }
+
+    public static ByteBuffer testFastMask(String message, int mask) {
+        ByteBuffer masks = ByteBuffer.allocate(8);
+        masks.putInt(mask);
+        masks.putInt(mask);
+        byte[] bts = message.getBytes(StandardCharsets.UTF_8);
+        ByteBuffer read = ByteBuffer.wrap(bts);
+        ByteBuffer write = ByteBuffer.allocate(bts.length);
+
+        int len = read.capacity()/8;
+        for(int j=0; j<len; j++) {
+           write.putLong( read.getLong()^masks.getLong(0));
+        }
+        int i=0;
+        while (read.hasRemaining()) {
+            write.put((byte) (read.get() ^ masks.get(i%4)));
+            i++;
+        }
+        return write;
+    }
+
+    public static ByteBuffer testFastMask32(String message, int mask) {
+        ByteBuffer masks = ByteBuffer.allocate(4);
+        masks.putInt(mask);
+        byte[] bts = message.getBytes(StandardCharsets.UTF_8);
+        ByteBuffer read = ByteBuffer.wrap(bts);
+        ByteBuffer write = ByteBuffer.allocate(bts.length);
+
+        int len = read.capacity()/4;
+        for(int j=0; j<len; j++) {
+            write.putInt( read.getInt()^masks.getInt(0));
+        }
+        int i=0;
+        while (read.hasRemaining()) {
+            write.put((byte) (read.get() ^ masks.get(i%4)));
+            i++;
+        }
+        return write;
     }
 
     public static void testJson() {
