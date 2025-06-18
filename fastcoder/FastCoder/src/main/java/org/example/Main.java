@@ -85,7 +85,7 @@ public class Main {
         ByteBuffer read = ByteBuffer.wrap(bts);
         ByteBuffer write = ByteBuffer.allocate(bts.length);
 
-        int len = read.capacity()/8;
+        int len = read.remaining()/8;
         long maskLong = masks.getLong(0);
         for(int j=0; j<len; j++) {
            write.putLong( read.getLong()^maskLong);
