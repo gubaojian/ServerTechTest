@@ -20,7 +20,8 @@ public class Main {
           testBinary();
 
         int mask = RandomUtils.insecure().randomInt();
-        String message = RandomStringUtils.insecure().nextAlphabetic(1024);
+        String message = RandomStringUtils.insecure().next(1024);
+
 
         System.out.println(message);
 
@@ -41,6 +42,7 @@ public class Main {
     }
 
     public static  void testMaskBench(String message, int mask) {
+        byte[] bts = message.getBytes(StandardCharsets.UTF_8);
         long start = System.currentTimeMillis();
         for(int i=0; i<1000*10*100; i++) {
             testMask(message, mask);
@@ -58,6 +60,20 @@ public class Main {
         start = System.currentTimeMillis();
         for(int i=0; i<1000*10*100; i++) {
             testFastMask(message, mask);
+        }
+        end = System.currentTimeMillis();
+        System.out.println("fast64 mask used " + (end - start));
+
+        start = System.currentTimeMillis();
+        for(int i=0; i<1000*10*100; i++) {
+            testMask(bts, mask);
+        }
+        end = System.currentTimeMillis();
+        System.out.println("normal mask used " + (end - start));
+
+        start = System.currentTimeMillis();
+        for(int i=0; i<1000*10*100; i++) {
+            testFastMask(bts, mask);
         }
         end = System.currentTimeMillis();
         System.out.println("fast64 mask used " + (end - start));
@@ -89,6 +105,39 @@ public class Main {
         long maskLong = masks.getLong(0);
         for(int j=0; j<len; j++) {
            write.putLong( read.getLong()^maskLong);
+        }
+        int i=0;
+        while (read.hasRemaining()) {
+            write.put((byte) (read.get() ^ masks.get(i%4)));
+            i++;
+        }
+        return write;
+    }
+
+    public static ByteBuffer testMask(byte[] bts, int mask) {
+        ByteBuffer masks = ByteBuffer.allocate(4);
+        masks.putInt(mask);
+        ByteBuffer read = ByteBuffer.wrap(bts);
+        ByteBuffer write = ByteBuffer.allocate(bts.length);
+        int i=0;
+        while (read.hasRemaining()) {
+            write.put((byte) (read.get() ^ masks.get(i%4)));
+            i++;
+        }
+        return write;
+    }
+
+    public static ByteBuffer testFastMask(byte[] bts, int mask) {
+        ByteBuffer masks = ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN);;
+        masks.putInt(mask);
+        masks.putInt(mask);
+        ByteBuffer read = ByteBuffer.wrap(bts);
+        ByteBuffer write = ByteBuffer.allocate(bts.length);
+
+        int len = read.remaining()/8;
+        long maskLong = masks.getLong(0);
+        for(int j=0; j<len; j++) {
+            write.putLong( read.getLong()^maskLong);
         }
         int i=0;
         while (read.hasRemaining()) {
