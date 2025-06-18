@@ -30,8 +30,11 @@
  custom sort data used 323ms
  custom sort data with hand parse used 19ms
  binary data with hand parse used 7ms
- *
  */
+
+
+
+
 int main(int argc, const char * argv[]) {
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
@@ -152,6 +155,8 @@ int main(int argc, const char * argv[]) {
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "binary data with hand parse used " << used.count() << "ms" << std::endl;
     std::cout << "wsgId4 " << wsgId4 << std::endl;
+    
+    
 
 
     return 0;
