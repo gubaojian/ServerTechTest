@@ -21,14 +21,18 @@ public class Main {
         int mask = RandomUtils.insecure().randomInt();
         String message = RandomStringUtils.insecure().nextAlphabetic(1024);
 
+        System.out.println(message);
+
         ByteBuffer one = testMask(message, mask);
         ByteBuffer two = testFastMask(message, mask);
         ByteBuffer three = testFastMask(message, mask);
 
 
         System.out.println(one.equals(two));
-
         System.out.println(three.equals(two));
+        byte[] bts = two.array();
+        ByteBuffer back = testFastMaskBack(bts, mask);
+        System.out.println(new String(back.array()));
 
         testMaskBench(message, mask);
 
@@ -83,6 +87,25 @@ public class Main {
         int len = read.capacity()/8;
         for(int j=0; j<len; j++) {
            write.putLong( read.getLong()^masks.getLong(0));
+        }
+        int i=0;
+        while (read.hasRemaining()) {
+            write.put((byte) (read.get() ^ masks.get(i%4)));
+            i++;
+        }
+        return write;
+    }
+
+    public static ByteBuffer testFastMaskBack(byte[] bts, int mask) {
+        ByteBuffer masks = ByteBuffer.allocate(8);
+        masks.putInt(mask);
+        masks.putInt(mask);
+        ByteBuffer read = ByteBuffer.wrap(bts);
+        ByteBuffer write = ByteBuffer.allocate(bts.length);
+
+        int len = read.capacity()/8;
+        for(int j=0; j<len; j++) {
+            write.putLong( read.getLong()^masks.getLong(0));
         }
         int i=0;
         while (read.hasRemaining()) {
