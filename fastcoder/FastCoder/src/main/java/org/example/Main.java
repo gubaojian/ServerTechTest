@@ -7,6 +7,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
@@ -77,7 +78,7 @@ public class Main {
     }
 
     public static ByteBuffer testFastMask(String message, int mask) {
-        ByteBuffer masks = ByteBuffer.allocate(8);
+        ByteBuffer masks = ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN);;
         masks.putInt(mask);
         masks.putInt(mask);
         byte[] bts = message.getBytes(StandardCharsets.UTF_8);
@@ -85,8 +86,9 @@ public class Main {
         ByteBuffer write = ByteBuffer.allocate(bts.length);
 
         int len = read.capacity()/8;
+        long maskLong = masks.getLong(0);
         for(int j=0; j<len; j++) {
-           write.putLong( read.getLong()^masks.getLong(0));
+           write.putLong( read.getLong()^maskLong);
         }
         int i=0;
         while (read.hasRemaining()) {
