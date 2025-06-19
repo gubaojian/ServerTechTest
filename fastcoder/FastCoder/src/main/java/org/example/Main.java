@@ -5,6 +5,7 @@ import com.wsg.protocol.JsonProtocol;
 import com.wsg.protocol.Protocol;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.xmpp.packet.IQ;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -36,9 +37,18 @@ public class Main {
         ByteBuffer back = testFastMaskBack(bts, mask);
         System.out.println(new String(back.array()));
 
-        testMaskBench(message, mask);
+        //testMaskBench(message, mask);
+
+        testXml();
+    }
 
 
+    public static void testXml() {
+        final IQ pingRequest = new IQ(IQ.Type.get);
+        pingRequest.setChildElement("ping", "urn:xmpp:ping");
+        pingRequest.setFrom("sourcefrom23255555");
+        pingRequest.setTo("8887346346");
+        System.out.println(pingRequest.toXML());
     }
 
     public static  void testMaskBench(String message, int mask) {
