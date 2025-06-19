@@ -73,7 +73,13 @@ public:
     void push(const T& value) {
         std::unique_lock<std::mutex> lock(mutex_);
         queue_.push(value);
-        cv_.notify_one();
+        cv_.notify_all();
+    }
+    
+    void push(T&& value) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        queue_.push(std::move(value));
+        cv_.notify_all();
     }
 
     bool pop(T& value) {
@@ -84,9 +90,31 @@ public:
         queue_.pop();
         return true;
     }
+    
+    bool try_pop(T& value) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        if (queue_.empty() || !running_) return false;
+        value = queue_.front();
+        queue_.pop();
+        return true;
+    }
+
+    bool pop(T& value, std::chrono::milliseconds timeout) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        if (!cv_.wait_for(lock, timeout, [this]{ return !queue_.empty() || !running_; })) {
+            return false;  // 超时
+        }
+        if (queue_.empty()) return false;
+        value = queue_.front();
+        queue_.pop();
+        return true;
+    }
 
     void stop() {
-        running_ = false;
+        {
+            std::unique_lock<std::mutex> lock(mutex_);
+            running_ = false;  // 在锁保护下设置标志
+        }
         cv_.notify_all();
     }
 };
@@ -230,7 +258,7 @@ int main() {
     }
     
     {
-        boost::lockfree::queue<int> lockfree_queue(QUEUE_SIZE);
+        boost::lockfree::queue<int, boost::lockfree::capacity<QUEUE_SIZE>> lockfree_queue(QUEUE_SIZE);
         run_benchmark("boost::lockfree", [&] { return test_spsc(lockfree_queue, 1, 1); });
     }
     
