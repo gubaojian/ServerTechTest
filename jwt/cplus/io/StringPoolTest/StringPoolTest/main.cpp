@@ -16,27 +16,32 @@
   * lock
   * make ptr used 37ms
   * pool make ptr used 26ms
+  * 针对短内存字符串
   */
-class StringPool {
+class ShortStringPool {
     public:
-        StringPool(){};
-        StringPool(const StringPool&) = delete;
-        StringPool& operator=(const StringPool&) = delete;
+        ShortStringPool(int maxSize_):maxSize(maxSize_){};
+        ShortStringPool(const ShortStringPool&) = delete;
+        ShortStringPool& operator=(const ShortStringPool&) = delete;
     
     public:
         std::shared_ptr<std::string> getString(const std::string& key) {
             std::lock_guard<std::mutex> lock(mutex);
-            auto it = poolMaps.find(key);
-            if (it != poolMaps.end()) {
+            if (shortStringMaps.size() > maxSize) {
+                shortStringMaps.clear();
+            }
+            auto it = shortStringMaps.find(key);
+            if (it != shortStringMaps.end()) {
                 return it->second;
             }
-            poolMaps[key] = std::make_shared<std::string>(key);
-            return poolMaps.at(key);
+            shortStringMaps[key] = std::make_shared<std::string>(key);
+            return shortStringMaps.at(key);
         }
     
     private:
-        std::unordered_map<std::string, std::shared_ptr<std::string>> poolMaps;
+        std::unordered_map<std::string, std::shared_ptr<std::string>> shortStringMaps;
         std::mutex mutex;
+        size_t maxSize;
 };
 
 int main(int argc, const char * argv[]) {
@@ -55,7 +60,7 @@ int main(int argc, const char * argv[]) {
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "make ptr used " << used.count() << "ms" << std::endl;
     
-    StringPool pool;
+    ShortStringPool pool(128);
     start = std::chrono::high_resolution_clock::now();
     for(int i=0; i<10000*200; i++) {
         ptr = pool.getString(wsgId);
