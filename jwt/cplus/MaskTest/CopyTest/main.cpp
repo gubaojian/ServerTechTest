@@ -104,7 +104,7 @@ void masked_copy_simd64 (std::string const & i, std::string & o,
     size_t length = i.size()/8;
     uint64_t* u64I = (uint64_t*)i.data();
     uint64_t* u64O = (uint64_t*)o.data();
-    for(int i=0; i<length; i++){
+    for(size_t i=0; i<length; i++){
         u64O[i] = u64I[i] ^ u64Key.i;
     }
     size_t remain = i.length()%8;
@@ -128,10 +128,10 @@ void masked_copy_simd128(std::string const & i, std::string & o,
     uint64_t* u64I = (uint64_t*)i.data();
     uint64_t* u64O = (uint64_t*)o.data();
     size_t loop2Length = (length/2)*2;
-    for(int i=0; i<loop2Length; i+=2){
-        int next = i + 1;
+    for(size_t i=0; i<loop2Length; i+=2){
+        size_t two = i + 1;
         u64O[i] = u64I[i] ^ u64Key.i;
-        u64O[next] = u64I[next] ^ u64Key.i;
+        u64O[two] = u64I[two] ^ u64Key.i;
     }
     for(size_t i=loop2Length; i<length; i++){
         u64O[i] = u64I[i] ^ u64Key.i;
