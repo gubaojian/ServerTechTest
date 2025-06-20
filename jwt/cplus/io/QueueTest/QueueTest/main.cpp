@@ -41,21 +41,21 @@
  测试配置: 4096 次操作, 5 轮测试
  测试项目             最小耗时平均耗时最大耗时   吞吐量
  -------------------------------------------------------------------
- std::queue (SPMC)              0.72 ms      0.74 ms      0.80 ms     5533640 ops/sec
- std::queue (MPSC)              0.78 ms      0.82 ms      0.89 ms     4978123 ops/sec
- std::queue (MPMC)              0.84 ms      0.89 ms      0.93 ms     4605352 ops/sec
- boost::lockfree                0.67 ms      0.73 ms      0.77 ms     5598688 ops/sec
- boost::lockfree (MPSC)         1.03 ms      1.15 ms      1.36 ms     3554321 ops/sec
- boost::lockfree (MPMC)         0.96 ms      1.32 ms      1.59 ms     3104441 ops/sec
- boost::asio::post (1 thread)      0.86 ms      0.90 ms      0.93 ms     4553135 ops/sec
- boost::asio::post (4 threads)      1.35 ms      1.40 ms      1.55 ms     2918626 ops/sec
- boost::asio::post (8 threads)      1.57 ms      1.83 ms      2.03 ms     2239230 ops/sec
+ std::queue (SPMC)              5.35 ms      6.72 ms      7.44 ms     4879531 ops/sec
+ std::queue (MPSC)              7.26 ms      7.62 ms      8.12 ms     4298232 ops/sec
+ std::queue (MPMC)              6.70 ms      6.84 ms      7.01 ms     4791344 ops/sec
+ boost::lockfree                5.65 ms      6.81 ms      9.13 ms     4809629 ops/sec
+ boost::lockfree (MPSC)         8.76 ms      9.82 ms     10.49 ms     3338155 ops/sec
+ boost::lockfree (MPMC)         9.98 ms     11.96 ms     13.90 ms     2740487 ops/sec
+ boost::asio::post (1 thread)      6.22 ms      6.57 ms      7.27 ms     4989494 ops/sec
+ boost::asio::post (4 threads)      8.72 ms      9.65 ms     10.48 ms     3394944 ops/sec
+ boost::asio::post (8 threads)     12.28 ms     14.18 ms     17.72 ms     2310958 ops/sec
  *
  */
 using namespace std::chrono;
 
 // 测试配置
-constexpr size_t QUEUE_SIZE = 4096;  // 测试数据量
+constexpr size_t QUEUE_SIZE = 4096*8;  // 测试数据量
 constexpr size_t BATCH_SIZE = 1000;     // 批处理大小
 constexpr int WARMUP_ROUNDS = 0;        // 预热轮数
 constexpr int BENCHMARK_ROUNDS = 5;     // 正式测试轮数
@@ -208,7 +208,7 @@ void masked_copy_simd64 (std::string const & i, std::string & o,
         uint8_t* rI = (uint8_t*)(i.data() + offset);
         uint8_t* rO = (uint8_t*)(o.data() + offset);
         for (int i=0; i<remain; i++) {
-            rO[i] = rI[i] ^ key.c[i%4];
+            rO[i] = rI[i] ^ key.c[i & 3];
         }
     }
 }
@@ -238,7 +238,7 @@ void masked_copy_simd128(std::string const & i, std::string & o,
         uint8_t* rI = (uint8_t*)(i.data() + offset);
         uint8_t* rO = (uint8_t*)(o.data() + offset);
         for (int i=0; i<remain; i++) {
-            rO[i] = rI[i] ^ key.c[i%4];
+            rO[i] = rI[i] ^ key.c[i & 3];
         }
     }
 }
