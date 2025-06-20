@@ -8,6 +8,9 @@
 #include <iostream>
 #include "is_utf8.h"
 #include "simdutf.h"
+#include <arpa/inet.h>
+
+
 
 static bool isValidUtf8(unsigned char *s, size_t length)
 {
@@ -116,6 +119,27 @@ int main(int argc, const char * argv[]) {
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << isutf83 << std::endl;
     std::cout << "simdutf::validate_utf8 used " << used.count() << std::endl;
+    
+    uint32_t random = (uint32_t) rand();
+    uint32_t network_random = htonl(random);  // 转换为网络字节序（大端）
+    
+    char buf[128];
+    char mask[4];
+    
+    mask[0] = (random >> 24)&0xFF;
+    mask[1] = (random >> 16)&0xFF;
+    mask[2] = (random >> 8)&0xFF;
+    mask[3] = (random)&0xFF;
+    
+    std::cout << random << std::endl;
+    
+    memcpy(buf, mask, 4);
+    
+    std::cout << *((uint32_t*)(mask)) << std::endl;
+    
+    std::cout << network_random << std::endl;
+    
+    std::cout << htonl(network_random) << std::endl;
     
     return 0;
 }
