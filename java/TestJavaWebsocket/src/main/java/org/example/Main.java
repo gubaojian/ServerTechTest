@@ -1,13 +1,21 @@
 package org.example;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.java_websocket.WebSocketImpl;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
+import org.java_websocket.framing.BinaryFrame;
+import org.java_websocket.framing.TextFrame;
 import org.java_websocket.handshake.ServerHandshake;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 /**
  * tcp接收端的速度，也会影响发送端的速度。
@@ -15,7 +23,7 @@ import java.net.URISyntaxException;
  * 如果接收端处理速度很慢，也会导致发送端速度慢。
  * */
 public class Main {
-    public static void main(String[] args) throws URISyntaxException, InterruptedException {
+    public static void main(String[] args) throws URISyntaxException, InterruptedException, IOException {
         WebSocketClient client = new WebSocketClient(new URI("ws://localhost:8080")) {
             @Override
             public void onOpen(ServerHandshake handshakedata) {
@@ -39,8 +47,17 @@ public class Main {
         };
         client.connectBlocking();
         Thread.sleep(100);
+        String text = RandomStringUtils.insecure().nextAlphabetic(1024);
         //Draft_6455.useFastMask = false;
-        String text = RandomStringUtils.insecure().next(1024);
+        WebSocketImpl impl = (WebSocketImpl) client.getConnection();
+        BinaryFrame binaryFrame = new BinaryFrame();
+        binaryFrame.setPayload(ByteBuffer.wrap(text.getBytes(StandardCharsets.UTF_8)));
+        ByteBuffer byteBuffer = impl.createEncodedBinaryFrame(binaryFrame);
+        File binary = new File("binary.dat");
+        FileUtils.writeByteArrayToFile(binary, byteBuffer.array());
+
+        System.out.println(text);
+
         long start = System.currentTimeMillis();
         for(int i=0; i<1000*1000; i++) {
             client.send(text);

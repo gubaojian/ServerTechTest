@@ -7,7 +7,13 @@
 
 #include <iostream>
 #include <string>
+#include <chrono>
+#include <thread>
 #include <memory>
+#include "WebSocketProtocol.h"
+#include "file_utils.h"
+
+
 
 /**
  * https://bugs.webkit.org/show_bug.cgi?id=79880
@@ -106,19 +112,19 @@ void masked_copy_simd64 (std::string const & i, std::string & o,
     uint64_converter u64Key;
     std::memcpy(u64Key.c, key.c, 4);
     std::memcpy(u64Key.c + 4, key.c, 4);
-    size_t length = i.size()/8;
+    size_t length64 = i.size()/8;
     uint64_t* u64I = (uint64_t*)i.data();
     uint64_t* u64O = (uint64_t*)o.data();
-    for(size_t i=0; i<length; i++){
+    for(size_t i=0; i<length64; i++){
         u64O[i] = u64I[i] ^ u64Key.i;
     }
-    size_t remain = i.length()%8;
+    size_t remain = i.size()%8;
     if (remain > 0) {
         size_t offset = i.size() - remain;
         uint8_t* rI = (uint8_t*)(i.data() + offset);
         uint8_t* rO = (uint8_t*)(o.data() + offset);
         for (int i=0; i<remain; i++) {
-            rO[i] = rI[i] ^ key.c[i%4];
+            rO[i] = rI[i] ^ key.c[i & 3];
         }
     }
 }
@@ -129,16 +135,16 @@ void masked_copy_simd128(std::string const & i, std::string & o,
     uint64_converter u64Key;
     std::memcpy(u64Key.c, key.c, 4);
     std::memcpy(u64Key.c + 4, key.c, 4);
-    size_t length = i.size()/8;
+    size_t length64 = i.size()/8;
     uint64_t* u64I = (uint64_t*)i.data();
     uint64_t* u64O = (uint64_t*)o.data();
-    size_t loop2Length = (length/2)*2;
+    size_t loop2Length = (length64/2)*2;
     for(size_t i=0; i<loop2Length; i+=2){
         size_t two = i + 1;
         u64O[i] = u64I[i] ^ u64Key.i;
         u64O[two] = u64I[two] ^ u64Key.i;
     }
-    for(size_t i=loop2Length; i<length; i++){
+    for(size_t i=loop2Length; i<length64; i++){
         u64O[i] = u64I[i] ^ u64Key.i;
     }
     size_t remain = i.length()%8;
@@ -147,7 +153,7 @@ void masked_copy_simd128(std::string const & i, std::string & o,
         uint8_t* rI = (uint8_t*)(i.data() + offset);
         uint8_t* rO = (uint8_t*)(o.data() + offset);
         for (int i=0; i<remain; i++) {
-            rO[i] = rI[i] ^ key.c[i%4];
+            rO[i] = rI[i] ^ key.c[i & 3];
         }
     }
 }
@@ -332,6 +338,95 @@ struct buffer {
     size_t len;
 };
 
+unsigned int messages = 0;
+unsigned int test_count = 0;
+
+struct Impl {
+    static bool refusePayloadLength(uint64_t length, uWS::WebSocketState<true> *wState, void *s) {
+
+        /* We need a limit */
+        if (length > 16000) {
+            return true;
+        }
+
+        /* Return ok */
+        return false;
+    }
+
+    static bool setCompressed(uWS::WebSocketState<true> *wState, void *s) {
+        /* We support it */
+        return true;
+    }
+
+    static void forceClose(uWS::WebSocketState<true> *wState, void *s, std::string_view reason = {}) {
+
+    }
+
+    static bool handleFragment(char *data, size_t length, unsigned int remainingBytes, int opCode, bool fin, uWS::WebSocketState<true> *webSocketState, void *s) {
+
+        if (opCode == uWS::TEXT) {
+            if (!uWS::protocol::isValidUtf8((unsigned char *)data, length)) {
+                /* Return break */
+                return true;
+            }
+        } else if (opCode == uWS::CLOSE) {
+            uWS::protocol::parseClosePayload((char *)data, length);
+        }
+
+        messages += 1;
+        
+        test_count += data[rand()%length];
+
+        /* Return ok */
+        return false;
+    }
+};
+
+
+void testProtocolBench() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::string binaryFrame = FileUtils::readFile("/Users/baojian/code/ServerTechTest/jwt/cplus/MaskTest/CopyTest/binary.dat", true);
+
+    uWS::WebSocketProtocol<true, Impl> protocol;
+    uWS::WebSocketState<true> state;
+    std::vector<std::shared_ptr<std::string>> datas;
+    for(int i=0; i<1024*1024; i++) {
+        datas.push_back(std::make_shared<std::string>(binaryFrame));
+    }
+    
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    /**
+    uWS::switch_fast = true;
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<1024*1024; i++) {
+        std::shared_ptr<std::string> frame = datas.at(i);
+        protocol.consume(frame->data(), frame->length(), &state, nullptr);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "fast prepare count " << 1024*1024 << std::endl;
+    std::cout << "fast message count " << messages << std::endl;
+    std::cout << "fast protocol used " << used.count() << std::endl;*/
+    
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    uWS::switch_fast = false;
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<1024*1024; i++) {
+        std::shared_ptr<std::string> frame = datas.at(i);
+        protocol.consume(frame->data(), frame->length(), &state, nullptr);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "prepare count " << 1024*1024 << std::endl;
+    std::cout << "message count " << messages << std::endl;
+    std::cout << "protocol used " << used.count() << std::endl;
+    
+    std::cout << test_count << std::endl;
+}
+
+
 /**
  * 64simd used 84
  * used 1032
@@ -343,16 +438,12 @@ int main(int argc, const char * argv[]) {
     
     testMaskBench();
     
-    testCopyBench();
+    //testCopyBench();
     
-    testCopyReSize();
+    //testCopyReSize();
     
-        
-    std::string s1;
-    std::string s2;
+    testProtocolBench();
     
-    s2 = std::move(s1);
-    s1 = std::move(s2);
     
     
     
