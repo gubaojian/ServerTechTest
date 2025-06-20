@@ -26,30 +26,30 @@
  测试配置: 4096 次操作, 5 轮测试
  测试项目             最小耗时平均耗时最大耗时   吞吐量
  -------------------------------------------------------------------
- std::queue (SPMC)              0.42 ms      0.43 ms      0.48 ms     9490269 ops/sec
- std::queue (MPSC)              0.63 ms      0.68 ms      0.72 ms     6016451 ops/sec
- std::queue (MPMC)              0.99 ms      1.14 ms      1.25 ms     3599297 ops/sec
- boost::lockfree                0.73 ms      0.74 ms      0.75 ms     5535135 ops/sec
- boost::lockfree (MPSC)         0.81 ms      0.82 ms      0.84 ms     4964848 ops/sec
- boost::lockfree (MPMC)         1.64 ms      1.92 ms      2.07 ms     2135781 ops/sec
- boost::asio::post (1 thread)      1.28 ms      1.32 ms      1.34 ms     3110099 ops/sec
- boost::asio::post (4 threads)      2.86 ms      3.10 ms      3.46 ms     1320524 ops/sec
- boost::asio::post (8 threads)      6.66 ms      6.93 ms      7.35 ms      591139 ops/sec
+ std::queue (SPMC)              0.72 ms      0.74 ms      0.80 ms     5533640 ops/sec
+ std::queue (MPSC)              0.78 ms      0.82 ms      0.89 ms     4978123 ops/sec
+ std::queue (MPMC)              0.84 ms      0.89 ms      0.93 ms     4605352 ops/sec
+ boost::lockfree                0.67 ms      0.73 ms      0.77 ms     5598688 ops/sec
+ boost::lockfree (MPSC)         1.03 ms      1.15 ms      1.36 ms     3554321 ops/sec
+ boost::lockfree (MPMC)         0.96 ms      1.32 ms      1.59 ms     3104441 ops/sec
+ boost::asio::post (1 thread)      0.86 ms      0.90 ms      0.93 ms     4553135 ops/sec
+ boost::asio::post (4 threads)      1.35 ms      1.40 ms      1.55 ms     2918626 ops/sec
+ boost::asio::post (8 threads)      1.57 ms      1.83 ms      2.03 ms     2239230 ops/sec
  
  release 模式：
  === 队列性能对比测试 ===
  测试配置: 4096 次操作, 5 轮测试
  测试项目             最小耗时平均耗时最大耗时   吞吐量
  -------------------------------------------------------------------
- std::queue (SPMC)              0.10 ms      0.11 ms      0.12 ms    38208955 ops/sec
- std::queue (MPSC)              0.16 ms      0.19 ms      0.22 ms    22068966 ops/sec
- std::queue (MPMC)              0.29 ms      0.35 ms      0.47 ms    11538028 ops/sec
- boost::lockfree                0.45 ms      0.47 ms      0.51 ms     8740930 ops/sec
- boost::lockfree (MPSC)         0.75 ms      0.81 ms      0.89 ms     5064293 ops/sec
- boost::lockfree (MPMC)         1.92 ms      2.04 ms      2.09 ms     2004502 ops/sec
- boost::asio::post (1 thread)      0.25 ms      0.33 ms      0.36 ms    12503053 ops/sec
- boost::asio::post (4 threads)      0.73 ms      0.88 ms      0.99 ms     4661962 ops/sec
- boost::asio::post (8 threads)      1.53 ms      1.80 ms      2.06 ms     2273030 ops/sec
+ std::queue (SPMC)              0.72 ms      0.74 ms      0.80 ms     5533640 ops/sec
+ std::queue (MPSC)              0.78 ms      0.82 ms      0.89 ms     4978123 ops/sec
+ std::queue (MPMC)              0.84 ms      0.89 ms      0.93 ms     4605352 ops/sec
+ boost::lockfree                0.67 ms      0.73 ms      0.77 ms     5598688 ops/sec
+ boost::lockfree (MPSC)         1.03 ms      1.15 ms      1.36 ms     3554321 ops/sec
+ boost::lockfree (MPMC)         0.96 ms      1.32 ms      1.59 ms     3104441 ops/sec
+ boost::asio::post (1 thread)      0.86 ms      0.90 ms      0.93 ms     4553135 ops/sec
+ boost::asio::post (4 threads)      1.35 ms      1.40 ms      1.55 ms     2918626 ops/sec
+ boost::asio::post (8 threads)      1.57 ms      1.83 ms      2.03 ms     2239230 ops/sec
  *
  */
 using namespace std::chrono;
@@ -59,6 +59,14 @@ constexpr size_t QUEUE_SIZE = 4096;  // 测试数据量
 constexpr size_t BATCH_SIZE = 1000;     // 批处理大小
 constexpr int WARMUP_ROUNDS = 0;        // 预热轮数
 constexpr int BENCHMARK_ROUNDS = 5;     // 正式测试轮数
+
+boost::asio::io_context main_io_context;
+std::atomic<int64_t> io_count;
+std::mutex connMutex;
+
+boost::asio::io_context main_io_context2;
+std::mutex connMutex2;
+std::atomic<int64_t> io_count2;
 
 // 同步队列实现 (std::queue + std::mutex)
 template<typename T>
@@ -119,6 +127,191 @@ public:
     }
 };
 
+/// Four byte conversion union
+union uint32_converter {
+    uint32_t i;
+    uint8_t c[4];
+};
+
+/// Eight byte conversion union
+union uint64_converter {
+    uint64_t i;
+    uint8_t  c[8];
+};
+
+
+typedef uint32_converter masking_key_type;
+
+
+/// Byte by byte mask/unmask
+/**
+ * Iterator based byte by byte masking and unmasking for WebSocket payloads.
+ * Performs masking in place using the supplied key offset by the supplied
+ * offset number of bytes.
+ *
+ * This function is simple and can be done in place on input with arbitrary
+ * lengths and does not vary based on machine word size. It is slow.
+ *
+ * @param b Beginning iterator to start masking
+ *
+ * @param e Ending iterator to end masking
+ *
+ * @param o Beginning iterator to store masked results
+ *
+ * @param key 32 bit key to mask with.
+ *
+ * @param key_offset offset value to start masking at.
+ */
+template <typename input_iter, typename output_iter>
+void byte_mask(input_iter first, input_iter last, output_iter result,
+    masking_key_type const & key, size_t key_offset = 0)
+{
+    size_t key_index = key_offset%4;
+    while (first != last) {
+        *result = *first ^ key.c[key_index++];
+        key_index %= 4;
+        ++result;
+        ++first;
+    }
+}
+
+/// Copy and mask/unmask in one operation
+/**
+ * Reads input from one string and writes unmasked output to another.
+ *
+ * @param [in] i The input string.
+ * @param [out] o The output string.
+ * @param [in] key The masking key to use for masking/unmasking
+ */
+void masked_copy (std::string const & i, std::string & o,
+    masking_key_type key)
+{
+    byte_mask(i.begin(),i.end(),o.begin(),key);
+}
+
+
+void masked_copy_simd64 (std::string const & i, std::string & o,
+    masking_key_type key)
+{
+    uint64_converter u64Key;
+    std::memcpy(u64Key.c, key.c, 4);
+    std::memcpy(u64Key.c + 4, key.c, 4);
+    size_t length = i.size()/8;
+    uint64_t* u64I = (uint64_t*)i.data();
+    uint64_t* u64O = (uint64_t*)o.data();
+    for(size_t i=0; i<length; i++){
+        u64O[i] = u64I[i] ^ u64Key.i;
+    }
+    size_t remain = i.length()%8;
+    if (remain > 0) {
+        size_t offset = i.size() - remain;
+        uint8_t* rI = (uint8_t*)(i.data() + offset);
+        uint8_t* rO = (uint8_t*)(o.data() + offset);
+        for (int i=0; i<remain; i++) {
+            rO[i] = rI[i] ^ key.c[i%4];
+        }
+    }
+}
+
+void masked_copy_simd128(std::string const & i, std::string & o,
+    masking_key_type key)
+{
+    uint64_converter u64Key;
+    std::memcpy(u64Key.c, key.c, 4);
+    std::memcpy(u64Key.c + 4, key.c, 4);
+    size_t length = i.size()/8;
+    uint64_t* u64I = (uint64_t*)i.data();
+    uint64_t* u64O = (uint64_t*)o.data();
+    size_t loop2Length = (length/2)*2;
+    uint64_t mask = u64Key.i;
+    for(size_t i=0; i<loop2Length; i+=2){
+        size_t two = i + 1;
+        u64O[i] = u64I[i] ^ mask;
+        u64O[two] = u64I[two] ^ mask;
+    }
+    for(size_t i=loop2Length; i<length; i++){
+        u64O[i] = u64I[i] ^ mask;
+    }
+    size_t remain = i.length()%8;
+    if (remain > 0) {
+        size_t offset = i.size() - remain;
+        uint8_t* rI = (uint8_t*)(i.data() + offset);
+        uint8_t* rO = (uint8_t*)(o.data() + offset);
+        for (int i=0; i<remain; i++) {
+            rO[i] = rI[i] ^ key.c[i%4];
+        }
+    }
+}
+
+void masked_copy_simd256(std::string const & i, std::string & o,
+    masking_key_type key)
+{
+    uint64_converter u64Key;
+    std::memcpy(u64Key.c, key.c, 4);
+    std::memcpy(u64Key.c + 4, key.c, 4);
+    size_t length = i.size()/8;
+    uint64_t* u64I = (uint64_t*)i.data();
+    uint64_t* u64O = (uint64_t*)o.data();
+    size_t loop4Length = (length/4)*4;
+    uint64_t mask = u64Key.i;
+    for(size_t i=0; i<loop4Length; i+=4){
+        size_t two = i + 1;
+        size_t three = i + 1;
+        size_t four = i + 1;
+        u64O[i] = u64I[i] ^ mask;
+        u64O[two] = u64I[two] ^ mask;
+        u64O[three] = u64I[three] ^ mask;
+        u64O[four] = u64I[four] ^ mask;
+    }
+    for(size_t i=loop4Length; i<length; i++){
+        u64O[i] = u64I[i] ^ mask;
+    }
+    size_t remain = i.length()%8;
+    if (remain > 0) {
+        size_t offset = i.size() - remain;
+        uint8_t* rI = (uint8_t*)(i.data() + offset);
+        uint8_t* rO = (uint8_t*)(o.data() + offset);
+        for (int i=0; i<remain; i++) {
+            rO[i] = rI[i] ^ key.c[i%4];
+        }
+    }
+}
+
+void masked_copy_simd32(std::string const & i, std::string & o,
+    masking_key_type key)
+{
+    uint32_converter u32Key;
+    std::memcpy(u32Key.c, key.c, 4);
+    size_t length = i.size()/4;
+    uint32_t* u32I = (uint32_t*)i.data();
+    uint32_t* u32O = (uint32_t*)o.data();
+    for(int i=0; i<length; i++){
+        u32O[i] = u32I[i] ^ u32Key.i;
+    }
+    size_t remain = i.length()%4;
+    if (remain > 0) {
+        size_t offset = i.size() - remain;
+        uint8_t* rI = (uint8_t*)(i.data() + offset);
+        uint8_t* rO = (uint8_t*)(o.data() + offset);
+        for (int i=0; i<remain; i++) {
+            rO[i] = rI[i] ^ key.c[i%4];
+        }
+    }
+}
+
+void byte_mask2(char* first, char* last, char* result,
+               uint8_t* mask, size_t key_offset)
+{
+    size_t key_index = key_offset%4;
+    while (first != last) {
+        *result = *first ^ mask[key_index++];
+        key_index %= 4;
+        ++result;
+        ++first;
+    }
+}
+
+
 // 测试函数
 template<typename Queue>
 double test_spsc(Queue& queue, int producer_count, int consumer_count) {
@@ -149,6 +342,40 @@ double test_spsc(Queue& queue, int producer_count, int consumer_count) {
             
             while (consumed.fetch_add(1, std::memory_order_relaxed) < QUEUE_SIZE) {
                 while (!queue.pop(value)) {}
+                //模拟耗时操作
+                /**
+                //std::this_thread::sleep_for(std::chrono::microseconds(2));
+                auto start = std::chrono::high_resolution_clock::now();
+                auto end = std::chrono::high_resolution_clock::now();
+                auto used = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
+                do {
+                    end = std::chrono::high_resolution_clock::now();
+                    used = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
+                } while (used <= 2);
+                */
+                std::shared_ptr<std::string> in = std::make_shared<std::string>(1024, 'a');
+                masking_key_type key;
+                {
+                    std::lock_guard<std::mutex> lock(connMutex2);
+                    key.i = rand();
+                }
+                masked_copy_simd128(*in, *in, key);
+               
+                boost::asio::post(main_io_context2, [in] {
+                    {
+                        std::lock_guard<std::mutex> lock(connMutex2);
+                        io_count2 += in->size();
+                        io_count2 += in->at(rand()%1024);
+                    }
+                    auto start = std::chrono::high_resolution_clock::now();
+                    auto end = std::chrono::high_resolution_clock::now();
+                    auto used = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
+                    do {
+                        end = std::chrono::high_resolution_clock::now();
+                        used = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
+                    } while (used <= 2);
+                   
+                });
             }
         });
     }
@@ -183,6 +410,37 @@ double test_boost_post(int thread_count) {
     // 提交任务
     for (size_t i = 0; i < QUEUE_SIZE; ++i) {
         boost::asio::post(io_context, [&] {
+            /**
+            auto start = std::chrono::high_resolution_clock::now();
+            auto end = std::chrono::high_resolution_clock::now();
+            auto used = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
+            do {
+                end = std::chrono::high_resolution_clock::now();
+                used = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
+            } while (used <= 6);*/
+            std::shared_ptr<std::string> in = std::make_shared<std::string>(1025, 'a');
+            masking_key_type key;
+            {
+                std::lock_guard<std::mutex> lock(connMutex);
+                key.i = rand();
+            }
+            masked_copy_simd128(*in, *in, key);
+            
+            boost::asio::post(main_io_context, [in] {
+                {
+                    std::lock_guard<std::mutex> lock(connMutex);
+                    io_count += in->size();
+                    io_count += in->at(rand()%1024);
+                }
+                auto start = std::chrono::high_resolution_clock::now();
+                auto end = std::chrono::high_resolution_clock::now();
+                auto used = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
+                do {
+                    end = std::chrono::high_resolution_clock::now();
+                    used = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
+                } while (used <= 2);
+            });
+            
             if (counter.fetch_add(1, std::memory_order_relaxed) >= QUEUE_SIZE - 1) {
                 finished = true;
             }
@@ -231,6 +489,17 @@ void run_benchmark(const std::string& name, std::function<double()> test_func) {
 }
 
 int main() {
+    
+    std::thread mainThread([]{
+        main_io_context.run_one();
+        main_io_context.run();
+    });
+    
+    std::thread mainThread2([]{
+        main_io_context.run_one();
+        main_io_context2.run();
+    });
+    
     std::cout << "=== 队列性能对比测试 ===" << std::endl;
     std::cout << "测试配置: " << QUEUE_SIZE << " 次操作, "
               << BENCHMARK_ROUNDS << " 轮测试" << std::endl;
@@ -275,6 +544,11 @@ int main() {
     run_benchmark("boost::asio::post (1 thread)", [&] { return test_boost_post(1); });
     run_benchmark("boost::asio::post (4 threads)", [&] { return test_boost_post(4); });
     run_benchmark("boost::asio::post (8 threads)", [&] { return test_boost_post(8); });
+    
+    
+    mainThread.join();
+    
+    mainThread2.join();
     
     return 0;
 }

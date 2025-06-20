@@ -15,6 +15,12 @@ import java.util.UUID;
 
 //TIP 要<b>运行</b>代码，请按 <shortcut actionId="Run"/> 或
 // 点击装订区域中的 <icon src="AllIcons.Actions.Execute"/> 图标。
+// normal mask used 2129
+//fast32 mask used 1079
+//fast64 mask used 976
+//normal mask used 1174
+//fast64 mask used 148
+//fast128 mask used 173
 public class Main {
     public static void main(String[] args) {
           testJson();
@@ -37,9 +43,9 @@ public class Main {
         ByteBuffer back = testFastMaskBack(bts, mask);
         System.out.println(new String(back.array()));
 
-        //testMaskBench(message, mask);
+        testMaskBench(message, mask);
 
-        testXml();
+        //testXml();
     }
 
 
@@ -87,6 +93,13 @@ public class Main {
         }
         end = System.currentTimeMillis();
         System.out.println("fast64 mask used " + (end - start));
+
+        start = System.currentTimeMillis();
+        for(int i=0; i<1000*10*100; i++) {
+            testFastMask128(bts, mask);
+        }
+        end = System.currentTimeMillis();
+        System.out.println("fast128 mask used " + (end - start));
     }
 
     public static ByteBuffer testMask(String message, int mask) {
@@ -147,6 +160,30 @@ public class Main {
         int len = read.remaining()/8;
         long maskLong = masks.getLong(0);
         for(int j=0; j<len; j++) {
+            write.putLong( read.getLong()^maskLong);
+        }
+        int i=0;
+        while (read.hasRemaining()) {
+            write.put((byte) (read.get() ^ masks.get(i%4)));
+            i++;
+        }
+        return write;
+    }
+
+    public static ByteBuffer testFastMask128(byte[] bts, int mask) {
+        ByteBuffer masks = ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN);;
+        masks.putInt(mask);
+        masks.putInt(mask);
+        ByteBuffer read = ByteBuffer.wrap(bts);
+        ByteBuffer write = ByteBuffer.allocate(bts.length);
+        int len = read.remaining()/8;
+        long maskLong = masks.getLong(0);
+        int loop2Length = (len/2)*2;
+        for(int j=0; j<loop2Length; j+=2) {
+            write.putLong( read.getLong()^maskLong);
+            write.putLong( read.getLong()^maskLong);
+        }
+        for(int j=loop2Length; j<len; j++) {
             write.putLong( read.getLong()^maskLong);
         }
         int i=0;

@@ -29,6 +29,11 @@
  *  simd32 used 103
  *  used 668
  *
+ * simd128 used 26
+ simd64 used 50
+ simd32 used 69
+ normal used 508
+ *
  */
 
 
