@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 /**
  * tcp接收端的速度，也会影响发送端的速度。
  * 有时满可能是因为接收端处理速度慢导致的。
+ * 如果接收端处理速度很慢，也会导致发送端速度慢。
  * */
 public class Main {
     public static void main(String[] args) throws URISyntaxException, InterruptedException {
