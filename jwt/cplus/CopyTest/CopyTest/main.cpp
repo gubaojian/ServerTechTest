@@ -101,19 +101,20 @@ void masked_copy_simd64 (std::string const & i, std::string & o,
     uint64_converter u64Key;
     std::memcpy(u64Key.c, key.c, 4);
     std::memcpy(u64Key.c + 4, key.c, 4);
-    size_t length = i.size()/8;
+    // n dive 8 eq n >> 3
+    size_t length = i.size() >> 3;
     uint64_t* u64I = (uint64_t*)i.data();
     uint64_t* u64O = (uint64_t*)o.data();
     for(int i=0; i<length; i++){
         u64O[i] = u64I[i] ^ u64Key.i;
     }
-    size_t remain = i.length()%8;
+    size_t remain = i.length() & 0x07;
     if (remain > 0) {
         size_t offset = i.size() - remain;
         uint8_t* rI = (uint8_t*)(i.data() + offset);
         uint8_t* rO = (uint8_t*)(o.data() + offset);
         for (int i=0; i<remain; i++) {
-            rO[i] = rI[i] ^ key.c[i%4];
+            rO[i] = rI[i] ^ key.c[i & 3];
         }
     }
 }
