@@ -59,6 +59,58 @@ union uint64_converter {
 typedef uint32_converter masking_key_type;
 
 
+struct buffer {
+    buffer(char const * b, size_t l) : buf(b),len(l) {}
+
+    char const * buf;
+    size_t len;
+};
+
+unsigned int messages = 0;
+unsigned int test_count = 0;
+
+struct Impl {
+    static bool refusePayloadLength(uint64_t length, uWS::WebSocketState<true> *wState, void *s) {
+
+        /* We need a limit */
+        if (length > 16000) {
+            return true;
+        }
+
+        /* Return ok */
+        return false;
+    }
+
+    static bool setCompressed(uWS::WebSocketState<true> *wState, void *s) {
+        /* We support it */
+        return true;
+    }
+
+    static void forceClose(uWS::WebSocketState<true> *wState, void *s, std::string_view reason = {}) {
+
+    }
+
+    static bool handleFragment(char *data, size_t length, unsigned int remainingBytes, int opCode, bool fin, uWS::WebSocketState<true> *webSocketState, void *s) {
+
+        if (opCode == uWS::TEXT) {
+            if (!uWS::protocol::isValidUtf8((unsigned char *)data, length)) {
+                /* Return break */
+                return true;
+            }
+        } else if (opCode == uWS::CLOSE) {
+            uWS::protocol::parseClosePayload((char *)data, length);
+        }
+
+        messages += 1;
+        
+        test_count += data[rand()%length];
+
+        /* Return ok */
+        return false;
+    }
+};
+
+
 /// Byte by byte mask/unmask
 /**
  * Iterator based byte by byte masking and unmasking for WebSocket payloads.
@@ -109,14 +161,15 @@ void masked_copy (std::string const & i, std::string & o,
 void masked_copy_simd64 (std::string const & i, std::string & o,
     masking_key_type key)
 {
-    uint64_converter u64Key;
-    std::memcpy(u64Key.c, key.c, 4);
-    std::memcpy(u64Key.c + 4, key.c, 4);
+    uint8_t mask[8] = {key.c[0], key.c[1], key.c[2], key.c[3], key.c[0], key.c[1], key.c[2], key.c[3]};
+    uint64_t maskInt;
+    memcpy(&maskInt, mask, 8);
+    
     size_t length64 = i.size()/8;
     uint64_t* u64I = (uint64_t*)i.data();
     uint64_t* u64O = (uint64_t*)o.data();
-    for(size_t i=0; i<length64; i++){
-        u64O[i] = u64I[i] ^ u64Key.i;
+    for(size_t m=0; m<length64; m++){
+        u64O[m] = u64I[m] ^ maskInt;
     }
     size_t remain = i.size()%8;
     if (remain > 0) {
@@ -124,7 +177,7 @@ void masked_copy_simd64 (std::string const & i, std::string & o,
         uint8_t* rI = (uint8_t*)(i.data() + offset);
         uint8_t* rO = (uint8_t*)(o.data() + offset);
         for (int i=0; i<remain; i++) {
-            rO[i] = rI[i] ^ key.c[i & 3];
+            rO[i] = rI[i] ^ key.c[i % 4];
         }
     }
 }
@@ -132,28 +185,29 @@ void masked_copy_simd64 (std::string const & i, std::string & o,
 void masked_copy_simd128(std::string const & i, std::string & o,
     masking_key_type key)
 {
-    uint64_converter u64Key;
-    std::memcpy(u64Key.c, key.c, 4);
-    std::memcpy(u64Key.c + 4, key.c, 4);
+    uint8_t mask[8] = {key.c[0], key.c[1], key.c[2], key.c[3], key.c[0], key.c[1], key.c[2], key.c[3]};
+    uint64_t maskInt;
+    memcpy(&maskInt, mask, 8);
+    
     size_t length64 = i.size()/8;
     uint64_t* u64I = (uint64_t*)i.data();
     uint64_t* u64O = (uint64_t*)o.data();
     size_t loop2Length = (length64/2)*2;
     for(size_t i=0; i<loop2Length; i+=2){
         size_t two = i + 1;
-        u64O[i] = u64I[i] ^ u64Key.i;
-        u64O[two] = u64I[two] ^ u64Key.i;
+        u64O[i] = u64I[i] ^ maskInt;
+        u64O[two] = u64I[two] ^ maskInt;
     }
-    for(size_t i=loop2Length; i<length64; i++){
-        u64O[i] = u64I[i] ^ u64Key.i;
+    if(loop2Length < length64){
+        u64O[loop2Length] = u64I[loop2Length] ^ maskInt;
     }
-    size_t remain = i.length()%8;
+    size_t remain = i.length() % 8;
     if (remain > 0) {
         size_t offset = i.size() - remain;
         uint8_t* rI = (uint8_t*)(i.data() + offset);
         uint8_t* rO = (uint8_t*)(o.data() + offset);
         for (int i=0; i<remain; i++) {
-            rO[i] = rI[i] ^ key.c[i & 3];
+            rO[i] = rI[i] ^ key.c[i % 4];
         }
     }
 }
@@ -229,6 +283,23 @@ void testMaskBench() {
         used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         std::cout << "simd64 used " << used.count() << std::endl;
         
+        uWS::WebSocketProtocol<true, Impl> protocol;
+        
+        start = std::chrono::high_resolution_clock::now();
+        for(int i=0; i<1024*1024; i++) {
+            protocol.unmaskImpreciseCopyMask<14>((char*)in.data() + 20, in.size() - 20);
+        }
+        end = std::chrono::high_resolution_clock::now();
+        used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "WebSocketProtocol unmaskImpreciseCopyMask used " << used.count() << std::endl;
+        
+        start = std::chrono::high_resolution_clock::now();
+        for(int i=0; i<1024*1024; i++) {
+            protocol.unmaskPreciseMask<14>((char*)in.data() + 20, in.size() - 20);
+        }
+        end = std::chrono::high_resolution_clock::now();
+        used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "WebSocketProtocol unmaskPreciseMask used " << used.count() << std::endl;
      
         
         start = std::chrono::high_resolution_clock::now();
@@ -331,56 +402,6 @@ void testCopyReSize() {
 }
 
 
-struct buffer {
-    buffer(char const * b, size_t l) : buf(b),len(l) {}
-
-    char const * buf;
-    size_t len;
-};
-
-unsigned int messages = 0;
-unsigned int test_count = 0;
-
-struct Impl {
-    static bool refusePayloadLength(uint64_t length, uWS::WebSocketState<true> *wState, void *s) {
-
-        /* We need a limit */
-        if (length > 16000) {
-            return true;
-        }
-
-        /* Return ok */
-        return false;
-    }
-
-    static bool setCompressed(uWS::WebSocketState<true> *wState, void *s) {
-        /* We support it */
-        return true;
-    }
-
-    static void forceClose(uWS::WebSocketState<true> *wState, void *s, std::string_view reason = {}) {
-
-    }
-
-    static bool handleFragment(char *data, size_t length, unsigned int remainingBytes, int opCode, bool fin, uWS::WebSocketState<true> *webSocketState, void *s) {
-
-        if (opCode == uWS::TEXT) {
-            if (!uWS::protocol::isValidUtf8((unsigned char *)data, length)) {
-                /* Return break */
-                return true;
-            }
-        } else if (opCode == uWS::CLOSE) {
-            uWS::protocol::parseClosePayload((char *)data, length);
-        }
-
-        messages += 1;
-        
-        test_count += data[rand()%length];
-
-        /* Return ok */
-        return false;
-    }
-};
 
 
 void testProtocolBench() {

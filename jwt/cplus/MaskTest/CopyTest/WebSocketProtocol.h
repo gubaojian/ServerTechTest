@@ -276,7 +276,7 @@ public:
     static const unsigned int MEDIUM_MESSAGE_HEADER = isServer ? 8 : 4;
     static const unsigned int LONG_MESSAGE_HEADER = isServer ? 14 : 10;
 
-protected:
+public:
     static inline bool isFin(char *frame) {return *((unsigned char *) frame) & 128;}
     static inline unsigned char getOpCode(char *frame) {return *((unsigned char *) frame) & 15;}
     static inline unsigned char payloadLength(char *frame) {return ((unsigned char *) frame)[1] & 127;}
@@ -329,40 +329,51 @@ protected:
         }
     }
     
-    union uint64_converter {
-        uint64_t i;
-        uint8_t  c[8];
-    };
-    
-    
-    static inline void unmaskPreciseMask(char *src, size_t length) {
-        uint64_converter u64Key;
-        std::memcpy(u64Key.c,     src - 4, 4);
-        std::memcpy(u64Key.c + 4, src - 4, 4);
-        size_t length64 = length/8;
-        uint64_t* u64I = (uint64_t*)src;
-        uint64_t* u64O = (uint64_t*)src;
-        size_t loop2Length = (length64/2)*2;
-        for(size_t i=0; i<loop2Length; i+=2){
-            size_t two = i + 1;
-            u64O[i] = u64I[i] ^ u64Key.i;
-            u64O[two] = u64I[two] ^ u64Key.i;
-        }
-        for(size_t i=loop2Length; i<length64; i++){
-            u64O[i] = u64I[i] ^ u64Key.i;
-        }
-        size_t remain = length%8;
-        if (remain > 0) {
-            size_t offset = length - remain;
-            uint8_t* rI = (uint8_t*)(src + offset);
-            uint8_t* rO = (uint8_t*)(src + offset);
-            for (int i=0; i<remain; i++) {
-                rO[i] = rI[i] ^ u64Key.c[i & 3];
+    template <int HEADER_SIZE>
+    static inline void unmaskPreciseMask(char *src, unsigned int length) {
+        if constexpr (HEADER_SIZE != 6) {
+            char mask[8] = {src[-4], src[-3], src[-2], src[-1], src[-4], src[-3], src[-2], src[-1]};
+            uint64_t maskInt;
+            memcpy(&maskInt, mask, 8);
+            
+            size_t lengthu64 = length/8;
+            uint64_t* u64I = (uint64_t*)src;
+            uint64_t* u64O = (uint64_t*)src;
+            for(size_t m=0; m<lengthu64; m++){
+                u64O[m] = u64I[m] ^ maskInt;
+            }
+            size_t remain = length % 8;
+            if (remain > 0) {
+                size_t roffset =  length - remain;
+                uint8_t* rI = (uint8_t*)(src + roffset);
+                uint8_t* rO = (uint8_t*)(src + roffset);
+                for (int i=0; i<remain; i++) {
+                    rO[i] = rI[i] ^ mask[i % 4];
+                }
+            }
+        } else {
+            char mask[4] = {src[-4], src[-3], src[-2], src[-1]};
+            uint32_t maskInt;
+            memcpy(&maskInt, mask, 4);
+            
+            size_t lengthu32 = length/4;
+            uint32_t* u32I = (uint32_t*)src;
+            uint32_t* u32O = (uint32_t*)src;
+            for(int i=0; i<length; i++){
+                u32O[i] = u32I[i] ^  maskInt;
+            }
+            size_t remain = length%4;
+            if (remain > 0) {
+                size_t roffset = length - remain;
+                uint8_t* rI = (uint8_t*)(src + roffset);
+                uint8_t* rO = (uint8_t*)(src + roffset);
+                for (int i=0; i<remain; i++) {
+                    rO[i] = rI[i] ^ mask[i%4];
+                }
             }
         }
-        
     }
-
+    
     static inline void rotateMask(unsigned int offset, char *mask) {
         char originalMask[4] = {mask[0], mask[1], mask[2], mask[3]};
         mask[(0 + offset) % 4] = originalMask[0];
@@ -403,7 +414,7 @@ protected:
             bool fin = isFin(src);
             if (isServer) {
                 if (switch_fast) {
-                    unmaskPreciseMask(src + MESSAGE_HEADER, (unsigned int) payLength);
+                    unmaskPreciseMask<MESSAGE_HEADER>(src + MESSAGE_HEADER, (unsigned int) payLength);
                     if (Impl::handleFragment(src + MESSAGE_HEADER, payLength, 0, wState->state.opCode[wState->state.opStack], fin, wState, user)) {
                         return true;
                     }
