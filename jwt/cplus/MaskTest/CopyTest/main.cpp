@@ -91,19 +91,27 @@ struct Impl {
     }
 
     static bool handleFragment(char *data, size_t length, unsigned int remainingBytes, int opCode, bool fin, uWS::WebSocketState<true> *webSocketState, void *s) {
-
-        if (opCode == uWS::TEXT) {
-            if (!uWS::protocol::isValidUtf8((unsigned char *)data, length)) {
-                /* Return break */
-                return true;
-            }
-        } else if (opCode == uWS::CLOSE) {
-            uWS::protocol::parseClosePayload((char *)data, length);
-        }
-
-        messages += 1;
         
-        test_count += data[rand()%length];
+        std::string_view str (data, length);
+        
+        std::cout <<"parse " << str << std::endl;
+        if (remainingBytes <= 0) {
+            if (opCode == uWS::TEXT) {
+                if (!uWS::protocol::isValidUtf8((unsigned char *)data, length)) {
+                    /* Return break */
+                    //return true;
+                }
+            } else if (opCode == uWS::CLOSE) {
+                uWS::protocol::parseClosePayload((char *)data, length);
+            }
+
+            messages += 1;
+            
+            if (length > 0) {
+                test_count += data[rand()%length];
+            }
+        }
+        
 
         /* Return ok */
         return false;
@@ -295,7 +303,7 @@ void testMaskBench() {
         
         start = std::chrono::high_resolution_clock::now();
         for(int i=0; i<1024*1024; i++) {
-            protocol.unmaskPreciseMask<14>((char*)in.data() + 20, in.size() - 20);
+            protocol.unmaskPreciseCopyMask<14>((char*)in.data() + 20, in.size() - 20);
         }
         end = std::chrono::high_resolution_clock::now();
         used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -447,6 +455,35 @@ void testProtocolBench() {
     std::cout << test_count << std::endl;
 }
 
+void testProtocolPartParse() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::string binaryFrame = FileUtils::readFile("/Users/baojian/code/ServerTechTest/jwt/cplus/MaskTest/CopyTest/part_binary.dat", true);
+    
+    std::string two;
+    two.append(binaryFrame);
+    two.append(binaryFrame);
+
+    uWS::WebSocketProtocol<true, Impl> protocol;
+    uWS::WebSocketState<true> state;
+    
+    char* src = (char*)binaryFrame.data();
+    
+    
+    //part parse
+    protocol.consume(src, 20, &state, nullptr);
+    protocol.consume(src + 20, 20, &state, nullptr);
+    protocol.consume(src + 40, binaryFrame.size() - 40, &state, nullptr);
+    
+    std::cout << "parse two message" << std::endl;
+    //parse two message
+    protocol.consume(two.data(), two.size(), &state, nullptr);
+    
+    std::cout << state.state.wantsHead << std::endl;
+
+}
+
 
 /**
  * 64simd used 84
@@ -457,13 +494,15 @@ void testProtocolBench() {
  */
 int main(int argc, const char * argv[]) {
     
-    testMaskBench();
+    //testMaskBench();
     
     //testCopyBench();
     
     //testCopyReSize();
     
-    testProtocolBench();
+    //testProtocolBench();
+    
+    testProtocolPartParse();
     
     
     

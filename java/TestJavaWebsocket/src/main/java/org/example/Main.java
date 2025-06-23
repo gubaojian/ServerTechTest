@@ -56,6 +56,14 @@ public class Main {
         File binary = new File("binary.dat");
         FileUtils.writeByteArrayToFile(binary, byteBuffer.array());
 
+        TextFrame textFrame = new TextFrame();
+        String part = "hello world;hello world;hello world;hello world;hello world;hello world;hello world;hello world;";
+        textFrame.setPayload(ByteBuffer.wrap(part.getBytes(StandardCharsets.UTF_8)));
+        ByteBuffer textFrameByteBuffer = impl.createEncodedBinaryFrame(textFrame);
+        File textFrameFile = new File("part_binary.dat");
+        System.out.println(textFrameByteBuffer.array().length);
+        FileUtils.writeByteArrayToFile(textFrameFile, textFrameByteBuffer.array());
+
         System.out.println(text);
 
         long start = System.currentTimeMillis();
