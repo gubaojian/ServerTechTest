@@ -344,11 +344,11 @@ public:
             }
             size_t remain = length % 8;
             if (remain > 0) {
-                size_t roffset =  length - remain;
-                uint8_t* rI = (uint8_t*)(src + roffset);
-                uint8_t* rO = (uint8_t*)(src + roffset);
-                for (int i=0; i<remain; i++) {
-                    rO[i] = rI[i] ^ mask[i % 4];
+                size_t roffset = length - remain;
+                char* rI = (char*)(src + roffset);
+                char* rO = (char*)(src + roffset);
+                for (size_t i=0; i<remain; i++) {
+                    rO[i] = rI[i] ^ mask[i%4];
                 }
             }
         } else {
@@ -359,15 +359,15 @@ public:
             size_t lengthu32 = length/4;
             uint32_t* u32I = (uint32_t*)src;
             uint32_t* u32O = (uint32_t*)src;
-            for(int i=0; i<length; i++){
+            for(size_t i=0; i<lengthu32; i++){
                 u32O[i] = u32I[i] ^  maskInt;
             }
             size_t remain = length%4;
             if (remain > 0) {
                 size_t roffset = length - remain;
-                uint8_t* rI = (uint8_t*)(src + roffset);
-                uint8_t* rO = (uint8_t*)(src + roffset);
-                for (int i=0; i<remain; i++) {
+                char* rI = (char*)(src + roffset);
+                char* rO = (char*)(src + roffset);
+                for (size_t i=0; i<remain; i++) {
                     rO[i] = rI[i] ^ mask[i%4];
                 }
             }

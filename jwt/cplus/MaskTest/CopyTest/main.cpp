@@ -174,9 +174,9 @@ void masked_copy_simd64 (std::string const & i, std::string & o,
     size_t remain = i.size()%8;
     if (remain > 0) {
         size_t offset = i.size() - remain;
-        uint8_t* rI = (uint8_t*)(i.data() + offset);
-        uint8_t* rO = (uint8_t*)(o.data() + offset);
-        for (int i=0; i<remain; i++) {
+        char* rI = (char*)(i.data() + offset);
+        char* rO = (char*)(o.data() + offset);
+        for (size_t i=0; i<remain; i++) {
             rO[i] = rI[i] ^ key.c[i % 4];
         }
     }
@@ -204,9 +204,9 @@ void masked_copy_simd128(std::string const & i, std::string & o,
     size_t remain = i.length() % 8;
     if (remain > 0) {
         size_t offset = i.size() - remain;
-        uint8_t* rI = (uint8_t*)(i.data() + offset);
-        uint8_t* rO = (uint8_t*)(o.data() + offset);
-        for (int i=0; i<remain; i++) {
+        char* rI = (char*)(i.data() + offset);
+        char* rO = (char*)(o.data() + offset);
+        for (size_t i=0; i<remain; i++) {
             rO[i] = rI[i] ^ key.c[i % 4];
         }
     }
