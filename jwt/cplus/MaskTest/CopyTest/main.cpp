@@ -456,30 +456,30 @@ void testProtocolBench() {
 }
 
 void testProtocolPartParse() {
-    auto start = std::chrono::high_resolution_clock::now();
-    auto end = std::chrono::high_resolution_clock::now();
-    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::string binaryFrame = FileUtils::readFile("/Users/baojian/code/ServerTechTest/jwt/cplus/MaskTest/CopyTest/part_binary.dat", true);
+    std::string framedata = FileUtils::readFile("/Users/baojian/code/ServerTechTest/jwt/cplus/MaskTest/CopyTest/one_frame.dat", true);
     
     std::string two;
-    two.append(binaryFrame);
-    two.append(binaryFrame);
+    two.append(framedata);
+    two.append(framedata);
 
     uWS::WebSocketProtocol<true, Impl> protocol;
     uWS::WebSocketState<true> state;
     
-    char* src = (char*)binaryFrame.data();
+    char* src = (char*)framedata.data();
     
-    
+    std::string first_read = framedata;
+    std::string second_read = framedata;
+    std::string third_read = framedata;
     //part parse
-    protocol.consume(src, 20, &state, nullptr);
-    protocol.consume(src + 20, 20, &state, nullptr);
-    protocol.consume(src + 40, binaryFrame.size() - 40, &state, nullptr);
+    protocol.consume(first_read.data(), 19, &state, nullptr);
+    protocol.consume(second_read.data() + 19, 23, &state, nullptr);
+    protocol.consume(third_read.data() + 19 + 23, framedata.size() - 19 - 23, &state, nullptr);
     
-    std::cout << "parse two message" << std::endl;
+    
     //parse two message
     protocol.consume(two.data(), two.size(), &state, nullptr);
     
+    std::cout << "parse two message" << std::endl;
     std::cout << state.state.wantsHead << std::endl;
 
 }
