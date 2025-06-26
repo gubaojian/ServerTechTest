@@ -89,6 +89,20 @@ int main(int argc, const char * argv[]) {
     
     //test 127.0.0.1 be convert to 0000:0000:0000:0000:0000:ffff:7f00:0001
     //test 192.168.71.87 be convert to 0000:0000:0000:0000:0000:ffff:c0a8:4757
+    
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    
+    bool in = false;
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+        in = ipMatcher.inWhiteList(ip);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << in << "make ptr used " << used.count() << "ms" << std::endl;
+    
    
     
     return 0;
