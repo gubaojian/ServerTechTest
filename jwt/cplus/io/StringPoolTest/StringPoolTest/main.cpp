@@ -20,28 +20,46 @@
   */
 class ShortStringPool {
     public:
-        ShortStringPool(int maxSize_):maxSize(maxSize_){};
+        ShortStringPool(int maxSize_):maxSize(maxSize_){
+            shortStrings = new std::shared_ptr<std::string>[maxSize];
+        };
+    
+        ~ShortStringPool() {
+            if (shortStrings != nullptr) {
+                delete [] shortStrings;
+                shortStrings = nullptr;
+            }
+        }
         ShortStringPool(const ShortStringPool&) = delete;
         ShortStringPool& operator=(const ShortStringPool&) = delete;
     
     public:
         std::shared_ptr<std::string> getString(const std::string& key) {
-            std::lock_guard<std::mutex> lock(mutex);
-            if (shortStringMaps.size() > maxSize) {
-                shortStringMaps.clear();
-            }
-            auto it = shortStringMaps.find(key);
-            if (it != shortStringMaps.end()) {
-                return it->second;
-            }
-            shortStringMaps[key] = std::make_shared<std::string>(key);
-            return shortStringMaps.at(key);
+            std::string_view view(key.data(), key.size());
+            return getString(view);
         }
     
+        std::shared_ptr<std::string> getString(const char* data, size_t length) {
+            std::string_view view(data, length);
+            return getString(view);
+        }
+       
+        std::shared_ptr<std::string> getString(std::string_view& view) {
+            size_t index = hash(view) % maxSize;
+            std::shared_ptr<std::string> it = shortStrings[index];
+            if (it) {
+                return it;
+            }
+            it = std::make_shared<std::string>(view);
+            shortStrings[index] = it;
+            return it;
+        }
+      
+    
     private:
-        std::unordered_map<std::string, std::shared_ptr<std::string>> shortStringMaps;
-        std::mutex mutex;
         size_t maxSize;
+        std::shared_ptr<std::string>* shortStrings;
+        std::hash<std::string_view> hash;
 };
 
 int main(int argc, const char * argv[]) {
@@ -60,10 +78,10 @@ int main(int argc, const char * argv[]) {
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "make ptr used " << used.count() << "ms" << std::endl;
     
-    ShortStringPool pool(128);
+    ShortStringPool pool(1024);
     start = std::chrono::high_resolution_clock::now();
     for(int i=0; i<10000*200; i++) {
-        ptr = pool.getString(wsgId);
+        ptr = pool.getString(wsgId.data(), wsgId.size());
     }
     end = std::chrono::high_resolution_clock::now();
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
