@@ -68,6 +68,32 @@ int main(int argc, const char * argv[]) {
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "normal data used " << used.count() << "ms" << std::endl;
     std::cout << "wsgId " << wsgId1 << std::endl;
+    
+    start = std::chrono::high_resolution_clock::now();
+    char shareBuffer[4096];
+    for(int i=0; i<10000*200; i++) {
+        std::memcpy(shareBuffer, str2.data(), str2.size());
+        simdjson::padded_string_view json(shareBuffer, str2.size(), 4096);
+        simdjson::ondemand::document doc;
+        auto error = parser.iterate(json).get(doc);
+        if (error) {
+            std::cout << " send wrong format message" << std::endl;
+            break;
+        }
+        auto wsgId = doc["wsgId"].get_string();
+        if (wsgId.error()) {
+            std::cout << " send wrong format message, missing wsgId" << std::endl;
+            break;
+        }
+        
+        wsgId1 = std::string(wsgId.value().data(), wsgId.value().size());
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "string_view normal data used " << used.count() << "ms" << std::endl;
+    std::cout << "string_view wsgId " << wsgId1 << std::endl;
+    
+    
   
   
     std::string wsgId2;
@@ -90,7 +116,7 @@ int main(int argc, const char * argv[]) {
     }
     end = std::chrono::high_resolution_clock::now();
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "custom sort data used " << used.count() << "ms" << std::endl;
+    std::cout << "normal parse sort data used " << used.count() << "ms" << std::endl;
     std::cout << "wsgId2 " << wsgId2 << std::endl;
     
     std::string wsgId3;
