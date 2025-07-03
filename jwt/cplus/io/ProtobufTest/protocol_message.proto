@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option java_package = "com.wsg.protocol.protobuf";
+
+package wsg.gateway.protocol;
+
+
+
+// use bytes instead of string to skip utf8-validate
+message PackMessage {
+  bytes wsgId = 1;
+  bytes connId = 2;
+  bytes action = 3;
+  bytes appId = 4;
+  bytes msg = 5;
+}

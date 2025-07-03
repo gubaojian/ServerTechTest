@@ -1,0 +1,1 @@
+protoc --cpp_out=./  --java_out=./java/ protocol_message.proto
