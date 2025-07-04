@@ -2,8 +2,11 @@ package org.example;
 
 import com.wsg.protocol.PackProtocol;
 import com.wsg.protocol.UnPackProtocol;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
@@ -17,18 +20,15 @@ import java.util.UUID;
 //fast64 mask used 148
 //fast128 mask used 173
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
        testTextJson();
        testTextBinary();
-
-        testBinaryJson();
-        testBinaryBinary();
+       testBinaryJson();
+       testBinaryBinary();
     }
 
 
-
     public static void testTextJson() {
-
         PackProtocol packProtocol = new PackProtocol();
         UnPackProtocol unPackProtocol = new UnPackProtocol();
         String wsgId = "wsg_88448848322";
@@ -102,7 +102,7 @@ public class Main {
         System.out.println(map);
     }
 
-    public static void testBinaryBinary() {
+    public static void testBinaryBinary() throws IOException {
         long start = System.currentTimeMillis();
         PackProtocol packProtocol = new PackProtocol();
         UnPackProtocol unPackProtocol = new UnPackProtocol();
@@ -125,5 +125,7 @@ public class Main {
         end = System.currentTimeMillis();
         System.out.println("binary unpack binary use "  + (end -start));
         System.out.println(map);
+
+        FileUtils.writeByteArrayToFile(new File("test.dat"), packMessgae);
     }
 }

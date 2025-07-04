@@ -13,7 +13,6 @@ public class StringExt {
         output.writeLargeBinary(bts);
     }
 
-
     public static String readTinyString(Input input) {
         return input.readTinyBinary().toStringUtf8();
     }

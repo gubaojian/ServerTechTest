@@ -10,9 +10,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+/**
+ * 约定不管是json还是二进制，按约定顺序提高解析效率，添加字段统一放到后面.
+ * 这样能提升解析效率，增加兼容性。老版本只是忽略对应的字段
+ * */
 public class PackProtocol {
-
-
 
     public byte[] jsonPackText(String wsgId, String connId, String message) {
         //wsgId放到最前面, msg放最后，增加可读性，提升解析性能，方便解析。

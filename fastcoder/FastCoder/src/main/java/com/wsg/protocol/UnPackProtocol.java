@@ -43,9 +43,8 @@ public class UnPackProtocol {
         if (bts[0] != 'b') {
             throw new IllegalArgumentException("binary protocol not right");
         }
-        if (bts[1] != 0) {
-            throw new IllegalArgumentException("binary protocol version not right");
-        }
+        //unpack skip version check
+        byte version = bts[1];
         Input input = new Input(bts, 2);
         map.put(ProtocolConstants.WSG_ID, StringExt.readTinyString(input));
         map.put(ProtocolConstants.CONN_ID, StringExt.readTinyString(input));
