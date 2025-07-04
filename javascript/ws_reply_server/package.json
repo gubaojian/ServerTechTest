@@ -1,0 +1,30 @@
+{
+  "name": "websocket-server",
+  "version": "1.0.0",
+  "description": "A simple WebSocket server using uWebSockets.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node ws_server.js"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": [
+    "websocket",
+    "server",
+    "uWebSockets",
+    "nodejs",
+    "real-time"
+  ],
+  "type": "module",
+  "dependencies": {
+    "utf-8-validate": "^6.0.5",
+    "uwebsockets": "^3.0.2",
+    "ws": "^8.18.2"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.9"
+  }
+}

@@ -4,13 +4,23 @@ import java.nio.charset.StandardCharsets;
 
 public class Input {
     private int position;
-    private byte[] buffer;
-    private int start;
+    private final byte[] buffer;
 
     public Input(byte[] buffer, int start) {
         this.buffer = buffer;
         this.position = start;
-        this.start = start;
+    }
+
+    public byte[] getBuffer() {
+        return buffer;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int pos) {
+        position = pos;
     }
 
     public final byte readByte() {
@@ -28,25 +38,25 @@ public class Input {
         return number;
     }
 
-    public final String readShortStringUtf8() {
+    public final void skip(int length) {
+        position += length;
+    }
+
+    public final BinaryView readTinyBinary() {
         int  length = readByte();
-        String str = new String(buffer, position, length, StandardCharsets.UTF_8);
+        BinaryView view = new BinaryView(buffer, position, length);
         position += length;
-        return str;
+        return view;
     }
 
-    public final String readLongStringUtf8() {
+    public final BinaryView readLargeBinary() {
         int  length = readInt();
-        String str = new String(buffer, position, length, StandardCharsets.UTF_8);
+        BinaryView view = new BinaryView(buffer, position, length);
         position += length;
-        return str;
+        return view;
     }
 
-    public final byte[] readBinary() {
-        int  length = readInt();
-        byte[] bts = new byte[length];
-        System.arraycopy(buffer, position, bts, 0, length);
-        position += length;
-        return bts;
+    public final boolean hasNext() {
+        return position < buffer.length;
     }
 }
