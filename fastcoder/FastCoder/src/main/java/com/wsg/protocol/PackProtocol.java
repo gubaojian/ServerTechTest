@@ -42,7 +42,7 @@ public class PackProtocol {
     }
 
     public byte[] binaryPackText(String wsgId, String connId, String message) {
-        byte[] buffer = localBuffer.get();
+        byte[] buffer = kvLocalBuffer.get();
         Output output = new Output(buffer, 0);
         //协议头部及版本号
         output.writeByte((byte) 'b');
@@ -55,8 +55,31 @@ public class PackProtocol {
         return output.toBytes();
     }
 
+    public byte[] binaryKVPackText(String wsgId, String connId, String message) {
+        byte[] bts = message.getBytes(StandardCharsets.UTF_8);
+        return binaryKVPackText(wsgId, connId, message);
+    }
+
+    public byte[] binaryKVPackText(String wsgId, String connId, byte[] utf8) {
+        byte[] buffer = kvLocalBuffer.get();
+        Output output = new Output(buffer, 0);
+        //协议头部及版本号
+        output.writeByte((byte) 'b');
+        output.writeByte((byte) 0);
+        //按kv顺序写入内容, 注意k不要重复。
+        output.writeByte((byte) 'w');
+        StringExt.writeTinyString(output, wsgId);
+        output.writeByte((byte) 'c');
+        StringExt.writeTinyString(output, connId);
+        output.writeByte((byte) 'a');
+        StringExt.writeTinyString(output, "t");
+        output.writeByte((byte) 'm');
+        output.writeLargeBinary(utf8);
+        return output.toBytes();
+    }
+
     public byte[] binaryPackBinary(String wsgId, String connId, byte[] message) {
-        byte[] buffer = localBuffer.get();
+        byte[] buffer = kvLocalBuffer.get();
         Output output = new Output(buffer, 0);
         //协议头部及版本号
         output.writeByte((byte) 'b');
@@ -70,7 +93,7 @@ public class PackProtocol {
     }
 
 
-    private static final ThreadLocal<byte[]> localBuffer = ThreadLocal.withInitial(new Supplier<byte[]>() {
+    private static final ThreadLocal<byte[]> kvLocalBuffer = ThreadLocal.withInitial(new Supplier<byte[]>() {
         @Override
         public byte[] get() {
             return new byte[96*1024]; //消息最大64kb

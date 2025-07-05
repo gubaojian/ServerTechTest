@@ -1,6 +1,7 @@
 package com.wsg.protocol;
 
 import com.alibaba.fastjson2.JSON;
+import com.wsg.protocol.binary.BinaryView;
 import com.wsg.protocol.binary.Input;
 import com.wsg.protocol.binary.StringExt;
 
@@ -57,4 +58,57 @@ public class UnPackProtocol {
         }
         return map;
     }
+
+    public Map<String, Object> binaryKVUnpack(byte[] bts) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        if (bts[0] != 'b') {
+            throw new IllegalArgumentException("binary protocol not right");
+        }
+        //unpack skip version check
+        byte version = bts[1];
+        Input input = new Input(bts, 2);
+        BinaryView msg = null;
+        String action = null;
+        while (input.hasNext()) {
+            byte k = input.readByte();
+            switch (k) {
+                case 'w' :
+                    map.put(ProtocolConstants.WSG_ID, StringExt.readTinyString(input));
+                    break;
+                case 'c' :
+                    map.put(ProtocolConstants.CONN_ID, StringExt.readTinyString(input));
+                    break;
+                case 'a' :
+                    {
+                         String v = StringExt.readTinyString(input);
+                         //针对text和binary msg特殊优化。
+                         if ("t".equals(v)) {
+                            v = ProtocolConstants.ACTION_TEXT_MSG;
+                         } else if ("b".equals(v)) {
+                            v = ProtocolConstants.ACTION_BINARY_MSG;
+                         }
+                         action = v;
+                         map.put(ProtocolConstants.ACTION, action);
+                    }
+                    break;
+                case 'm' :
+                    msg = input.readLargeBinary();
+                    break;
+                default:
+                    input.readTinyBinary();
+                    break;
+            }
+        }
+        if (ProtocolConstants.ACTION_BINARY_MSG.equals(action)) {
+            if (msg != null) {
+                map.put(ProtocolConstants.MSG, msg.toBytes());
+            }
+        } else {
+            if (msg != null) {
+                map.put(ProtocolConstants.MSG, msg.toStringUtf8());
+            }
+        }
+        return map;
+    }
+
 }

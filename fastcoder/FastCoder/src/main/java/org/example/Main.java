@@ -1,5 +1,6 @@
 package org.example;
 
+import com.alibaba.fastjson2.JSON;
 import com.wsg.protocol.PackProtocol;
 import com.wsg.protocol.UnPackProtocol;
 import org.apache.commons.io.FileUtils;
@@ -25,6 +26,7 @@ public class Main {
        testTextBinary();
        testBinaryJson();
        testBinaryBinary();
+       testKVBinaryBinary();
     }
 
 
@@ -124,6 +126,33 @@ public class Main {
         }
         end = System.currentTimeMillis();
         System.out.println("binary unpack binary use "  + (end -start));
+        System.out.println(map);
+
+        FileUtils.writeByteArrayToFile(new File("test.dat"), packMessgae);
+    }
+
+    public static void testKVBinaryBinary() throws IOException {
+        long start = System.currentTimeMillis();
+        PackProtocol packProtocol = new PackProtocol();
+        UnPackProtocol unPackProtocol = new UnPackProtocol();
+        String wsgId = "wsg_88448848322";
+        String connId = UUID.randomUUID().toString();
+        String message = RandomStringUtils.insecure().nextAlphabetic(1024);
+        byte[] bts = message.getBytes(StandardCharsets.UTF_8);
+        byte[] packMessgae = null;
+        for(int i=0; i<1024*10*200; i++) {
+            packMessgae = packProtocol.binaryKVPackText(wsgId, connId, bts);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("kv binary binary use "  + (end -start)+ " length " + packMessgae.length);
+
+        Map<String,Object> map = null;
+        start = System.currentTimeMillis();
+        for(int i=0; i<1024*10*200; i++) {
+            map = unPackProtocol.binaryKVUnpack(packMessgae);
+        }
+        end = System.currentTimeMillis();
+        System.out.println("kv binary unpack binary use "  + (end -start));
         System.out.println(map);
 
         FileUtils.writeByteArrayToFile(new File("test.dat"), packMessgae);
