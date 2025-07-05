@@ -1,7 +1,11 @@
 package com.wsg.protocol.binary;
 
-import java.nio.charset.StandardCharsets;
-
+/*
+ * 暂时不用var int，降低提升代码多端移值难度。
+ * bool，string等字符串编码处理独立出去，可以方便字符串扩展，
+ * 库仅支持短长短二进制和自定义操作，方便移值。
+ * 针对场景进行精简定制。降低难度。后续可以根据版本号进行扩展
+ * */
 public class Input {
     private int position;
     private final byte[] buffer;
