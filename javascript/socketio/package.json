@@ -1,0 +1,10 @@
+{
+  "type": "module",
+  "dependencies": {
+    "bufferutil": "^4.0.9",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "utf-8-validate": "^6.0.5",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.52.0"
+  }
+}
