@@ -53,3 +53,5 @@ javascript/ws_server/node_modules/
 javascript/ws_reply_server/node_modules/
 javascript/*/node_modules/
 
+rust/ws/hello-ws/target/
+
