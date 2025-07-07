@@ -36,8 +36,8 @@ public class ReplyServer {
 
             @Override
             public void onMessage(WebSocket conn, String message) {
-                System.out.println(message);
-                conn.send("reply " + message);
+                //System.out.println(message);
+                conn.send(message);
             }
 
             @Override

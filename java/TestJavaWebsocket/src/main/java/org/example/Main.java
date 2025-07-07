@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets;
  * */
 public class Main {
     public static void main(String[] args) throws URISyntaxException, InterruptedException, IOException {
-        WebSocketClient client = new WebSocketClient(new URI("ws://localhost:8080")) {
+        WebSocketClient client = new WebSocketClient(new URI("ws://localhost:8887")) {
             @Override
             public void onOpen(ServerHandshake handshakedata) {
 
@@ -45,6 +45,7 @@ public class Main {
 
             }
         };
+        client.setReceiveBufferSize(512*1024);
         client.connectBlocking();
         Thread.sleep(100);
         String text = RandomStringUtils.insecure().nextAlphabetic(1024);
@@ -67,9 +68,11 @@ public class Main {
         System.out.println(text);
 
         long start = System.currentTimeMillis();
-        for(int i=0; i<1000*1000; i++) {
+        for(int i=0; i<1000*1000*2; i++) {
             client.send(text);
         }
+
+
 
         System.out.println("send complete " + (System.currentTimeMillis() - start));
 
