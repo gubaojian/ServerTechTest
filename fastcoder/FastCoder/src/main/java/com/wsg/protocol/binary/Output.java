@@ -31,11 +31,27 @@ public class Output {
     }
 
     public final void  writeVarInt(int value) {
-        while ((value & ~0x7F) != 0) {
-            writeByte((byte) ((value & 0x7F) | 0x80));
-            value >>>= 7; // 无符号右移
+        if (value <= 0x7F) { // 1字节
+            buffer[position++] = (byte) value;
+        } else if (value <= 0x3FFF) { // 2字节
+            buffer[position++] = (byte) ((value & 0x7F) | 0x80);
+            buffer[position++] = (byte) (value >>> 7);
+        } else if (value <= 0x1FFFFF) { // 3字节
+            buffer[position++] = (byte) ((value & 0x7F) | 0x80);
+            buffer[position++] = (byte) (((value >>> 7) & 0x7F) | 0x80);
+            buffer[position++] = (byte) (value >>> 14);
+        } else if (value <= 0xFFFFFFF) { // 4字节
+            buffer[position++] = (byte) ((value & 0x7F) | 0x80);
+            buffer[position++] = (byte) (((value >>> 7) & 0x7F) | 0x80);
+            buffer[position++] = (byte) (((value >>> 14) & 0x7F) | 0x80);
+            buffer[position++] = (byte) (value >>> 21);
+        } else { // 5字节
+            buffer[position++] = (byte) ((value & 0x7F) | 0x80);
+            buffer[position++] = (byte) (((value >>> 7) & 0x7F) | 0x80);
+            buffer[position++] = (byte) (((value >>> 14) & 0x7F) | 0x80);
+            buffer[position++] = (byte) (((value >>> 21) & 0x7F) | 0x80);
+            buffer[position++] = (byte) (value >>> 28);
         }
-        writeByte((byte) value);
     }
 
     /**
