@@ -30,26 +30,23 @@ public class Output {
         position += bts.length;
     }
 
-    /**
-     * max 126 length binary
-     * */
-    public final void writeTinyBinary(byte[] bts) {
-        if (bts.length > 126) {
-            throw new IllegalArgumentException("tiny binary should be less than 126 byte");
+    public final void  writeVarInt(int value) {
+        while ((value & ~0x7F) != 0) {
+            writeByte((byte) ((value & 0x7F) | 0x80));
+            value >>>= 7; // 无符号右移
         }
-        writeByte((byte) bts.length);
+        writeByte((byte) value);
+    }
+
+    /**
+     * var int  + bytes
+     * */
+    public final void writeBinary(byte[] bts) {
+        writeVarInt(bts.length);
         System.arraycopy(bts, 0, buffer, position, bts.length);
         position += bts.length;
     }
 
-    /**
-     * max 1gb length binary
-     * */
-    public final void writeLargeBinary(byte[] bts) {
-        writeInt(bts.length);
-        System.arraycopy(bts, 0, buffer, position, bts.length);
-        position += bts.length;
-    }
 
     public final void writeInt(int val) {
         buffer[position + 3] = (byte) (val);

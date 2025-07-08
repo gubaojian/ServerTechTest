@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "dependencies": {
+    "easyjssdk": "^1.0.5"
+  }
+}

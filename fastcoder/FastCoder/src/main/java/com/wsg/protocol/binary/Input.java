@@ -46,15 +46,44 @@ public class Input {
         position += length;
     }
 
-    public final BinaryView readTinyBinary() {
-        int  length = readByte();
-        BinaryView view = new BinaryView(buffer, position, length);
-        position += length;
-        return view;
+    public int readVarInt() {
+        byte b = readByte();
+        if (b >= 0) return b;
+
+        int value = b & 0x7F;
+        int shift = 7;
+
+        b = readByte();
+        if (b >= 0) {
+           return value | (b << shift);
+        }
+
+
+        value |= (b & 0x7F) << shift;
+        shift += 7;
+
+        b = readByte();
+        if (b >= 0) {
+            return value | (b << shift);
+        }
+        value |= (b & 0x7F) << shift;
+        shift += 7;
+
+        //last 5 byte
+        b = readByte();
+        if (b >= 0) {
+            // 检查是否超过32位最大值
+            if ((b & 0x7F) > 0x0F) {
+                throw new IllegalArgumentException("VarInt exceeds 32-bit maximum value");
+            }
+            return value | (b << shift);
+        }
+        // max 5 byte length
+        throw new IllegalArgumentException("VarInt too big (exceeds 5 bytes)");
     }
 
-    public final BinaryView readLargeBinary() {
-        int  length = readInt();
+    public final BinaryView readBinary() {
+        int  length = readVarInt();
         BinaryView view = new BinaryView(buffer, position, length);
         position += length;
         return view;

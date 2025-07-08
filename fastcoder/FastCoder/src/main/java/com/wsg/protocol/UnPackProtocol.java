@@ -47,14 +47,14 @@ public class UnPackProtocol {
         //unpack skip version check
         byte version = bts[1];
         Input input = new Input(bts, 2);
-        map.put(ProtocolConstants.WSG_ID, StringExt.readTinyString(input));
-        map.put(ProtocolConstants.CONN_ID, StringExt.readTinyString(input));
-        String action = StringExt.readTinyString(input);
+        map.put(ProtocolConstants.WSG_ID, StringExt.readString(input));
+        map.put(ProtocolConstants.CONN_ID, StringExt.readString(input));
+        String action = StringExt.readString(input);
         map.put(ProtocolConstants.ACTION, action);
         if (ProtocolConstants.ACTION_BINARY_MSG.equals(action)) {
-            map.put(ProtocolConstants.MSG, input.readLargeBinary().toBytes());
+            map.put(ProtocolConstants.MSG, input.readBinary().toBytes());
         } else {
-            map.put(ProtocolConstants.MSG, StringExt.readLargeString(input));
+            map.put(ProtocolConstants.MSG, StringExt.readString(input));
         }
         return map;
     }
@@ -73,14 +73,14 @@ public class UnPackProtocol {
             byte k = input.readByte();
             switch (k) {
                 case 'w' :
-                    map.put(ProtocolConstants.WSG_ID, StringExt.readTinyString(input));
+                    map.put(ProtocolConstants.WSG_ID, StringExt.readString(input));
                     break;
                 case 'c' :
-                    map.put(ProtocolConstants.CONN_ID, StringExt.readTinyString(input));
+                    map.put(ProtocolConstants.CONN_ID, StringExt.readString(input));
                     break;
                 case 'a' :
                     {
-                         String v = StringExt.readTinyString(input);
+                         String v = StringExt.readString(input);
                          //针对text和binary msg特殊优化。
                          if ("t".equals(v)) {
                             v = ProtocolConstants.ACTION_TEXT_MSG;
@@ -92,10 +92,10 @@ public class UnPackProtocol {
                     }
                     break;
                 case 'm' :
-                    msg = input.readLargeBinary();
+                    msg = input.readBinary();
                     break;
                 default:
-                    input.readTinyBinary();
+                    input.readBinary();
                     break;
             }
         }

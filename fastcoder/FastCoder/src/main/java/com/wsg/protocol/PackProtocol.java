@@ -48,10 +48,10 @@ public class PackProtocol {
         output.writeByte((byte) 'b');
         output.writeByte((byte) 0);
         //按顺序写入内容
-        StringExt.writeTinyString(output, wsgId);
-        StringExt.writeTinyString(output, connId);
-        StringExt.writeTinyString(output, ProtocolConstants.ACTION_TEXT_MSG);
-        StringExt.writeLargeString(output, message);
+        StringExt.writeString(output, wsgId);
+        StringExt.writeString(output, connId);
+        StringExt.writeString(output, ProtocolConstants.ACTION_TEXT_MSG);
+        StringExt.writeString(output, message);
         return output.toBytes();
     }
 
@@ -66,15 +66,15 @@ public class PackProtocol {
         //协议头部及版本号
         output.writeByte((byte) 'b');
         output.writeByte((byte) 0);
-        //按kv顺序写入内容, 注意k不要重复。
+        //按kv顺序写入内容, 注意k不要重复，unpack中增加相应处理方法。
         output.writeByte((byte) 'w');
-        StringExt.writeTinyString(output, wsgId);
+        StringExt.writeString(output, wsgId);
         output.writeByte((byte) 'c');
-        StringExt.writeTinyString(output, connId);
+        StringExt.writeString(output, connId);
         output.writeByte((byte) 'a');
-        StringExt.writeTinyString(output, "t");
+        StringExt.writeString(output, "t");
         output.writeByte((byte) 'm');
-        output.writeLargeBinary(utf8);
+        output.writeBinary(utf8);
         return output.toBytes();
     }
 
@@ -85,10 +85,10 @@ public class PackProtocol {
         output.writeByte((byte) 'b');
         output.writeByte((byte) 0);
         //按顺序写入内容
-        StringExt.writeTinyString(output, wsgId);
-        StringExt.writeTinyString(output, connId);
-        StringExt.writeTinyString(output, ProtocolConstants.ACTION_BINARY_MSG);
-        output.writeLargeBinary(message);
+        StringExt.writeString(output, wsgId);
+        StringExt.writeString(output, connId);
+        StringExt.writeString(output, ProtocolConstants.ACTION_BINARY_MSG);
+        output.writeBinary(message);
         return output.toBytes();
     }
 
