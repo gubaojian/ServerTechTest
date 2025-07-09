@@ -47,38 +47,30 @@ public class Input {
     }
 
     public int readVarInt() {
-        byte b = readByte();
-        if (b >= 0) return b;
-
-        int value = b & 0x7F;
-        int shift = 7;
-
-        b = readByte();
-        if (b >= 0) {
-           return value | (b << shift);
-        }
-
-
-        value |= (b & 0x7F) << shift;
-        shift += 7;
-
-        b = readByte();
-        if (b >= 0) {
-            return value | (b << shift);
-        }
-        value |= (b & 0x7F) << shift;
-        shift += 7;
-
-        //last 5 byte
-        b = readByte();
-        if (b >= 0) {
-            // 检查是否超过32位最大值
-            if ((b & 0x7F) > 0x0F) {
+        if (buffer[position] >= 0) {
+            return buffer[position++];
+        } else if (buffer[position + 1] >= 0) {
+            return (buffer[position++] & 0x7F)
+                    | ((buffer[position++] & 0x7F) << 7);
+        } else if (buffer[position + 2] >= 0) {
+            return (buffer[position++] & 0x7F)
+                    | ((buffer[position++] & 0x7F) << 7)
+                    | ((buffer[position++] & 0x7F) << 14);
+        } else if (buffer[position + 3] >= 0) {
+            return (buffer[position++] & 0x7F)
+                    | ((buffer[position++] & 0x7F) << 7)
+                    | ((buffer[position++] & 0x7F) << 14)
+                    | ((buffer[position++] & 0x7F) << 21);
+        } else if (buffer[position + 4] >= 0) {
+            if ((buffer[position + 4] & 0x7F) > 0x0F) {
                 throw new IllegalArgumentException("VarInt exceeds 32-bit maximum value");
             }
-            return value | (b << shift);
+            return (buffer[position++] & 0x7F)
+                    | ((buffer[position++] & 0x7F) << 7)
+                    | ((buffer[position++] & 0x7F) << 14)
+                    | ((buffer[position++] & 0x7F) << 21)
+                    | ((buffer[position++] & 0x7F) << 28);
         }
-        // max 5 byte length
         throw new IllegalArgumentException("VarInt too big (exceeds 5 bytes)");
     }
 
@@ -87,6 +79,11 @@ public class Input {
         BinaryView view = new BinaryView(buffer, position, length);
         position += length;
         return view;
+    }
+
+    public final void skipBinary() {
+        int  length = readVarInt();
+        position += length;
     }
 
     public final boolean hasNext() {

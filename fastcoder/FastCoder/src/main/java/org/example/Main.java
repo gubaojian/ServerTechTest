@@ -21,11 +21,11 @@ import java.util.UUID;
 //fast64 mask used 148
 //fast128 mask used 173
 public class Main {
-    public static void main(String[] args) throws IOException {
-       testTextJson();
-       testTextBinary();
-       testBinaryJson();
-       testBinaryBinary();
+    public static void main(String[] args) throws IOException, InterruptedException {
+       //testTextJson();
+       //testTextBinary();
+       //testBinaryJson();
+       //testBinaryBinary();
        testKVBinaryBinary();
     }
 
@@ -131,7 +131,7 @@ public class Main {
         FileUtils.writeByteArrayToFile(new File("test.dat"), packMessgae);
     }
 
-    public static void testKVBinaryBinary() throws IOException {
+    public static void testKVBinaryBinary() throws IOException, InterruptedException {
         long start = System.currentTimeMillis();
         PackProtocol packProtocol = new PackProtocol();
         UnPackProtocol unPackProtocol = new UnPackProtocol();
@@ -145,6 +145,9 @@ public class Main {
         }
         long end = System.currentTimeMillis();
         System.out.println("kv binary binary use "  + (end -start)+ " length " + packMessgae.length);
+
+
+        Thread.sleep(1000);
 
         Map<String,Object> map = null;
         start = System.currentTimeMillis();

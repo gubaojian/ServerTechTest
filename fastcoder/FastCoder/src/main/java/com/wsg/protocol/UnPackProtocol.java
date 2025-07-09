@@ -95,7 +95,7 @@ public class UnPackProtocol {
                     msg = input.readBinary();
                     break;
                 default:
-                    input.readBinary();
+                    input.skipBinary();
                     break;
             }
         }
