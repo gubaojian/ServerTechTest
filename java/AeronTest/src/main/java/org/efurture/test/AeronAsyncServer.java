@@ -17,7 +17,7 @@ public class AeronAsyncServer {
 
         MediaDriver.Context driverCtx = new MediaDriver.Context();
         driverCtx.ipcTermBufferLength(512*1024*1024);
-        driverCtx.mtuLength(16*1024);
+        driverCtx.mtuLength(32*1024);
         driverCtx.ipcMtuLength(32*1024);
         driverCtx.socketSndbufLength(2*1024*1024);
         driverCtx.socketRcvbufLength(2*1024*1024);
