@@ -55,3 +55,5 @@ javascript/*/node_modules/
 
 rust/ws/hello-ws/target/
 
+/netty/nettyTest/.idea/
+
