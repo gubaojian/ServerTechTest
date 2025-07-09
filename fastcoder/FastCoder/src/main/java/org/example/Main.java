@@ -20,6 +20,7 @@ import java.util.UUID;
 //normal mask used 1174
 //fast64 mask used 148
 //fast128 mask used 173
+//跨语言，二进制binary， 三种类型：二进制，对象，列表。
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
        //testTextJson();
