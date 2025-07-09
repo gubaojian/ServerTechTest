@@ -22,8 +22,6 @@ import java.util.UUID;
 //fast128 mask used 173
 public class Main {
     public static void main(String[] args) {
-          testJson();
-          testBinary();
 
         int mask = RandomUtils.insecure().randomInt();
         String message = RandomStringUtils.insecure().next(1024);

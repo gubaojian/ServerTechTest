@@ -1,0 +1,48 @@
+<messageSchema xmlns="http://www.fixprotocol.org/2008/SBE"
+               package="org.example"
+               id="1"
+               version="1"
+               semanticVersion="1.0.0">
+
+    <types>
+        <type name="char" primitiveType="uint8"/>
+        <type name="string" primitiveType="uint8" length="255" characterEncoding="UTF-8"/>
+        <type name="bool" primitiveType="uint8">
+            <validValue name="false" value="0"/>
+            <validValue name="true" value="1"/>
+        </type>
+    </types>
+
+    <message name="TestObject" id="1" description="测试对象">
+        <!-- 添加 id 属性 -->
+        <field name="name" type="string" id="1"/>
+        <field name="age" type="int32" id="2"/>
+        <field name="isActive" type="bool" id="3"/>
+        <field name="score" type="float64" id="4"/>
+
+        <composite name="Hobbies">
+            <field name="value" type="string" id="1"/>
+        </composite>
+
+        <composite name="Attribute">
+            <field name="key" type="string" id="1"/>
+            <field name="value" type="string" id="2"/>
+        </composite>
+
+        <group name="hobbies" description="爱好列表" dimensionsType="uint8">
+            <typeRef name="Hobbies"/>
+        </group>
+
+        <group name="attributes" description="属性映射" dimensionsType="uint8">
+            <typeRef name="Attribute"/>
+        </group>
+
+        <messageRef name="nestedObject" messageId="2" presence="optional"/>
+    </message>
+
+    <message name="NestedObject" id="2" description="嵌套对象">
+        <!-- 添加 id 属性 -->
+        <field name="name" type="string" id="1"/>
+        <field name="isActive" type="bool" id="2"/>
+    </message>
+</messageSchema>
