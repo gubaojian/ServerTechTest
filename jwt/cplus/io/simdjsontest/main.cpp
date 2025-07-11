@@ -165,7 +165,7 @@ int main() {
         simdjson::ondemand::parser parser;
         simdjson::padded_string json(json1024);
         simdjson::ondemand::document tweets = parser.iterate(json);
-        tweets["user"]["email"];
+        std::cout << tweets["user"]["email"] << std::endl;
     }
 
     {
@@ -173,9 +173,9 @@ int main() {
         char* buffer = new char[1024*128];
         std::memcpy(buffer, json1024.data(), json1024.size());
         std::memset(buffer + json1024.size(), 0, simdjson::SIMDJSON_PADDING);
-        simdjson::padded_string_view json(buffer, json1024.size() + simdjson::SIMDJSON_PADDING);
+        simdjson::padded_string_view json(buffer, json1024.size(), json1024.size() + simdjson::SIMDJSON_PADDING);
         simdjson::ondemand::document tweets = parser.iterate(json);
-        tweets["user"]["email"];
+        std::cout << tweets["user"]["email"] << std::endl;
         delete[] buffer;
     }
 
@@ -222,14 +222,14 @@ int main() {
              {
                  std::memcpy(buffer, json1024.data(), json1024.size());
                  std::memset(buffer + json1024.size(), 0, simdjson::SIMDJSON_PADDING);
-                 simdjson::padded_string_view json(buffer, json1024.size() + simdjson::SIMDJSON_PADDING);
+                 simdjson::padded_string_view json(buffer,json1024.size(), json1024.size() + simdjson::SIMDJSON_PADDING);
                  simdjson::ondemand::document tweets = parser.iterate(json);
                  tweets["user"]["email"];
              }
              {
                  std::memcpy(buffer, json128.data(), json128.size());
                  std::memset(buffer + json128.size(), 0, simdjson::SIMDJSON_PADDING);
-                 simdjson::padded_string_view json(buffer, json128.size() + simdjson::SIMDJSON_PADDING);
+                 simdjson::padded_string_view json(buffer, json128.size(),json128.size() + simdjson::SIMDJSON_PADDING);
                  simdjson::ondemand::document tweets = parser.iterate(json);
                  tweets["id"];
              }
@@ -237,7 +237,7 @@ int main() {
              {
                  std::memcpy(buffer, json512.data(), json512.size());
                  std::memset(buffer + json512.size(), 0, simdjson::SIMDJSON_PADDING);
-                 simdjson::padded_string_view json(buffer, json512.size() + simdjson::SIMDJSON_PADDING);
+                 simdjson::padded_string_view json(buffer, json512.size(), json512.size() + simdjson::SIMDJSON_PADDING);
                  simdjson::ondemand::document tweets = parser.iterate(json);
                  tweets["app"]["platform"];
              }
@@ -245,7 +245,7 @@ int main() {
              {
                  std::memcpy(buffer, json128.data(), json128.size());
                  std::memset(buffer + json128.size(), 0, simdjson::SIMDJSON_PADDING);
-                 simdjson::padded_string_view json(buffer, json128.size() + simdjson::SIMDJSON_PADDING);
+                 simdjson::padded_string_view json(buffer, json128.size(), json128.size() + simdjson::SIMDJSON_PADDING);
                  simdjson::ondemand::document tweets = parser.iterate(json);
                  tweets["id"];
              }
