@@ -145,6 +145,7 @@ void testValidateUTF8Performance(std::string fileName) {
 
 int main(int argc, const char * argv[]) {
     
+    /**英文速度都很快，带中文时速度差别非常大 */
     testValidateUTF8Performance("/Users/baojian/code/ServerTechTest/jwt/cplus/io/UTest/UTest/test_1.json");
   
     testValidateUTF8Performance("/Users/baojian/code/ServerTechTest/jwt/cplus/io/UTest/UTest/test_2.json");

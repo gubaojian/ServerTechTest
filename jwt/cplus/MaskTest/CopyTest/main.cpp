@@ -261,7 +261,7 @@ void testMaskBench() {
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     
     {
-        std::string in(1025, 'a');
+        std::string in = FileUtils::readFile("/Users/baojian/code/ServerTechTest/jwt/cplus/io/UTest/UTest/test_2.json", true);
         std::string out;
         std::string out2;
         std::string out3;
@@ -275,7 +275,7 @@ void testMaskBench() {
         
         
         start = std::chrono::high_resolution_clock::now();
-        for(int i=0; i<1024*1024; i++) {
+        for(int i=0; i<1000*1000*2; i++) {
             masked_copy_simd128(in, out2, key);
         }
         end = std::chrono::high_resolution_clock::now();
@@ -284,7 +284,7 @@ void testMaskBench() {
         
         
         start = std::chrono::high_resolution_clock::now();
-        for(int i=0; i<1024*1024; i++) {
+        for(int i=0; i<1000*1000*2; i++) {
             masked_copy_simd64(in, out2, key);
         }
         end = std::chrono::high_resolution_clock::now();
@@ -294,7 +294,7 @@ void testMaskBench() {
         uWS::WebSocketProtocol<true, Impl> protocol;
         
         start = std::chrono::high_resolution_clock::now();
-        for(int i=0; i<1024*1024; i++) {
+        for(int i=0; i<1000*1000*2; i++) {
             protocol.unmaskImpreciseCopyMask<14>((char*)in.data() + 20, in.size() - 20);
         }
         end = std::chrono::high_resolution_clock::now();
@@ -302,7 +302,7 @@ void testMaskBench() {
         std::cout << "WebSocketProtocol unmaskImpreciseCopyMask used " << used.count() << std::endl;
         
         start = std::chrono::high_resolution_clock::now();
-        for(int i=0; i<1024*1024; i++) {
+        for(int i=0; i<1000*1000*2; i++) {
             protocol.unmaskPreciseCopyMask<14>((char*)in.data() + 20, in.size() - 20);
         }
         end = std::chrono::high_resolution_clock::now();
@@ -321,7 +321,7 @@ void testMaskBench() {
         
         start = std::chrono::high_resolution_clock::now();
         for(int i=0; i<1024*1024; i++) {
-            masked_copy(in, out, key);
+            //masked_copy(in, out, key);
         }
         end = std::chrono::high_resolution_clock::now();
         used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -494,7 +494,7 @@ void testProtocolPartParse() {
  */
 int main(int argc, const char * argv[]) {
     
-    //testMaskBench();
+    testMaskBench();
     
     //testCopyBench();
     
