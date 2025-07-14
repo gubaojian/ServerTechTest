@@ -282,8 +282,11 @@ void testWsgPacker() {
 int main() {
 
     testPacker();
-   testWsgPacker();
-
+    std::cout << "wsg enableBinaryKV ----------------- "<< std::endl;
+    testWsgPacker();
+    std::cout << "wsg disable enableBinaryKV ----------------- "  << std::endl;
+    wsg::gateway::enableBinaryKV = false;
+    testWsgPacker();
 
 
     return 0;
