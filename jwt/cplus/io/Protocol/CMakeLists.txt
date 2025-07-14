@@ -16,6 +16,7 @@ add_subdirectory(lib/yyjson-master)
 
 include_directories(${PROJECT_SOURCE_DIR}/lib/yyjson-master/src)
 include_directories(${PROJECT_SOURCE_DIR}/lib/Turbo-Base64-master)
+include_directories(${PROJECT_SOURCE_DIR}/lib/thread-pool-5.0.0/include)
 
 add_executable(protocol main.cpp)
 

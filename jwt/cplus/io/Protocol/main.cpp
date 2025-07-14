@@ -8,6 +8,7 @@
 #include <turbob64.h>
 
 #include "pack_unpack_protocol.h"
+#include "BS_thread_pool.hpp"
 
 
 namespace test {
@@ -278,6 +279,31 @@ void testWsgPacker() {
     std::cout << "wsg unpack " << unPackerText.message << std::endl;
     std::cout << "wsg unpack " << unPackerBinary.message << std::endl;
 }
+
+void learn_pool() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    BS::thread_pool pool(1); //默认构造函数有问题
+
+    auto message = std::make_shared<std::string>(1024, 'a');
+
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+
+        pool.submit_task([message] {
+           wsg::gateway::PackProtocol packer;
+           std::string wsgId = "wsgId3332";
+          std::string connId = "2235823572375_3332_38888";
+           packer.autoPackBinary(*message, connId, wsgId);
+       });
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "pool submit task used " << used.count() << " ms " << std::endl;
+
+
+}
 // TIP 要<b>Run</b>代码，请按 <shortcut actionId="Run"/> 或点击装订区域中的 <icon src="AllIcons.Actions.Execute"/> 图标。
 int main() {
 
@@ -287,6 +313,9 @@ int main() {
     std::cout << "wsg disable enableBinaryKV ----------------- "  << std::endl;
     wsg::gateway::enableBinaryKV = false;
     testWsgPacker();
+
+    learn_pool();
+
 
 
     return 0;
