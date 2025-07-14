@@ -7,6 +7,9 @@
 #include <yyjson.h>
 #include <turbob64.h>
 
+#include "pack_unpack_protocol.h"
+
+
 namespace test {
 
         constexpr size_t poolBufferSize = 256*1024;
@@ -163,8 +166,8 @@ namespace test {
          };
 }
 
-// TIP 要<b>Run</b>代码，请按 <shortcut actionId="Run"/> 或点击装订区域中的 <icon src="AllIcons.Actions.Execute"/> 图标。
-int main() {
+
+void testPacker() {
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -218,7 +221,68 @@ int main() {
 
     std::cout << "unpack " << unPackerText.message << std::endl;
     std::cout << "unpack " << unPackerBinary.message << std::endl;
+}
 
+void testWsgPacker() {
+     auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    wsg::gateway::PackProtocol packer;
+    std::string message(1024, 'a');
+    std::string wsgId = "wsgId3332";
+    std::string connId = "2235823572375_3332_38888";
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+        packer.autoPackBinary(message, connId, wsgId);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "wsg pack binary used" << used.count() << "ms" << std::endl;
+
+
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+        packer.autoPackText(message, connId, wsgId);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "wsg pack text used" << used.count() << "ms" << std::endl;
+
+
+    auto packBinary = packer.autoPackBinary(message, connId, wsgId);
+    std::cout << "length " << packBinary->size() << " "  << *packBinary << std::endl;
+    auto packText = packer.autoPackText(message, connId, wsgId);
+    std::cout << "length " << packText->size() << " " << *packText << std::endl;
+
+
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+        wsg::gateway::UnPackProtocol unPacker(*packText);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "wsg unpack text used" << used.count() << "ms" << std::endl;
+
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+        wsg::gateway::UnPackProtocol unPacker(*packBinary);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "wsg unpack binary used" << used.count() << "ms" << std::endl;
+
+    wsg::gateway::UnPackProtocol unPackerText(*packText);
+    wsg::gateway::UnPackProtocol unPackerBinary(*packBinary);
+
+    std::cout << "wsg unpack " << unPackerText.message << std::endl;
+    std::cout << "wsg unpack " << unPackerBinary.message << std::endl;
+}
+// TIP 要<b>Run</b>代码，请按 <shortcut actionId="Run"/> 或点击装订区域中的 <icon src="AllIcons.Actions.Execute"/> 图标。
+int main() {
+
+    testPacker();
+   testWsgPacker();
 
 
 

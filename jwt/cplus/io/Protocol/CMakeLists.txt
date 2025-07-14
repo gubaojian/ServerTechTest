@@ -3,6 +3,12 @@ project(protocol)
 
 set(CMAKE_CXX_STANDARD 20)
 
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 ")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 ")
+    MESSAGE("-----BUILD------ DEBUG OPTION")
+endif()
+
 add_subdirectory(lib/Turbo-Base64-master)
 
 set(YYJSON_INSTALL OFF CACHE BOOL "" FORCE)
