@@ -8,6 +8,7 @@
 #include <iostream>
 #include "is_utf8.h"
 #include "simdutf.h"
+#include "file_utils.h"
 #include <arpa/inet.h>
 
 
@@ -72,26 +73,37 @@ static bool isValidUtf8(unsigned char *s, size_t length)
  * https://github.com/simdutf/
  */
 
-int main(int argc, const char * argv[]) {
+#define UWS_SKIP_UTF8_FOR_JSON 1
+
+inline bool can_skip_utf8_validation(const char *s, size_t length) {
+#ifdef UWS_SKIP_UTF8_FOR_JSON
+    if (length > 2 && s[0] == '{' && s[length - 1] == '}') {
+        return true; //most be json skip validate;
+    }
+#endif
+    
+    return false;
+}
+
+bool fast_utf8_validate(const char *s, size_t length) {
+    if (can_skip_utf8_validation(s, length)) {
+        return true; //most be json skip validate;
+    }
+    return simdutf::validate_utf8(s, length);
+}
+
+void testValidateUTF8Performance(std::string fileName) {
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     
-    std::string msg;
+    std::cout << "fileName " << fileName << std::endl;
     
-    for(int i=0; i<512; i++) {
-        msg.append("测");
-        char ch = i%26 + 'a';
-        msg.append(1, ch);
-    }
-     
-    std::cout << msg << std::endl;
-    
-  
+    std::string msg = FileUtils::readFile(fileName, true);
     
     bool isutf8 = false;
     start = std::chrono::high_resolution_clock::now();
-    for(int i=0; i<1024*1024; i++) {
+    for(int i=0; i<1000*1000*2; i++) {
         isutf8 = isValidUtf8((unsigned char*)msg.data(), msg.size());
     }
     end = std::chrono::high_resolution_clock::now();
@@ -101,7 +113,7 @@ int main(int argc, const char * argv[]) {
     
     bool isutf82 = false;
     start = std::chrono::high_resolution_clock::now();
-    for(int i=0; i<1024*1024; i++) {
+    for(int i=0; i<1000*1000*2; i++) {
         isutf82 = is_utf8(msg.data(), msg.size());
     }
     end = std::chrono::high_resolution_clock::now();
@@ -112,7 +124,7 @@ int main(int argc, const char * argv[]) {
     
     bool isutf83 = false;
     start = std::chrono::high_resolution_clock::now();
-    for(int i=0; i<1024*1024; i++) {
+    for(int i=0; i<1000*1000*2; i++) {
         isutf83 =  simdutf::validate_utf8(msg.data(), msg.size());
     }
     end = std::chrono::high_resolution_clock::now();
@@ -120,26 +132,26 @@ int main(int argc, const char * argv[]) {
     std::cout << isutf83 << std::endl;
     std::cout << "simdutf::validate_utf8 used " << used.count() << std::endl;
     
-    uint32_t random = (uint32_t) rand();
-    uint32_t network_random = htonl(random);  // 转换为网络字节序（大端）
+    bool isutf84 = false;
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<1000*1000*2; i++) {
+        isutf84 =  fast_utf8_validate(msg.data(), msg.size());
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << isutf84 << std::endl;
+    std::cout << "fast_utf8_skip_validate used " << used.count() << std::endl;
+}
+
+int main(int argc, const char * argv[]) {
     
-    char buf[128];
-    char mask[4];
+    testValidateUTF8Performance("/Users/baojian/code/ServerTechTest/jwt/cplus/io/UTest/UTest/test_1.json");
+  
+    testValidateUTF8Performance("/Users/baojian/code/ServerTechTest/jwt/cplus/io/UTest/UTest/test_2.json");
     
-    mask[0] = (random >> 24)&0xFF;
-    mask[1] = (random >> 16)&0xFF;
-    mask[2] = (random >> 8)&0xFF;
-    mask[3] = (random)&0xFF;
     
-    std::cout << random << std::endl;
-    
-    memcpy(buf, mask, 4);
-    
-    std::cout << *((uint32_t*)(mask)) << std::endl;
-    
-    std::cout << network_random << std::endl;
-    
-    std::cout << htonl(network_random) << std::endl;
+    testValidateUTF8Performance("/Users/baojian/code/ServerTechTest/jwt/cplus/io/UTest/UTest/test3.dat");
+  
     
     return 0;
 }
