@@ -16,7 +16,7 @@ public class UnPackProtocol {
         Map<String, Object> map = JSON.parseObject(message);
         String msg = (String) map.get(ProtocolConstants.MSG);
         if (ProtocolConstants.ACTION_BINARY_MSG.equals(map.get(ProtocolConstants.ACTION))){
-            map.put(ProtocolConstants.MSG, Base64.getDecoder().decode(msg));
+            map.put(ProtocolConstants.MSG, Base64.getDecoder().decode(msg)); //async
         }
         return map;
     }
