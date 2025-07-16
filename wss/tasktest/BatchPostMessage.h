@@ -77,7 +77,9 @@ private:
         {
             std::lock_guard<std::mutex> messageLock(messageMutex);
             std::lock_guard<std::mutex> poolLock(poolMutex);
-            //std::cout << "use pool " << std::this_thread::get_id()  << " pool size " << pools.size() << std::endl;
+           if (messages->empty()) {
+                return;
+            }
             if (!pools.empty()) {
                 messages = pools.front();
                 pools.pop();
