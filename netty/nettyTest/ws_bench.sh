@@ -3,7 +3,7 @@
 
  k6 run --vus 100 --duration 30s ws_bench2.js
 
- k6 run --vus 300 --duration 30s ws_bench2.js
+ k6 run --vus 200 --duration 30s ws_bench2.js
 
 
 websocket-bench -c 100 -m 1000 -s "hello world" ws://localhost:8080/ws

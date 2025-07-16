@@ -66,7 +66,7 @@ public class WebSocketServer {
     }
 
     public static void main(String[] args) throws Exception {
-        int port = 8080;
+        int port = 8081;
         new WebSocketServer(port).run();
     }
 }
@@ -130,7 +130,7 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
 
         // 处理文本消息
         String request = ((TextWebSocketFrame) frame).text();
-        ///System.out.println("收到消息: " + request);
+        //System.out.println("收到消息: " + request);
 
         ctx.channel().write(new TextWebSocketFrame("服务器收到: " + request));
     }
