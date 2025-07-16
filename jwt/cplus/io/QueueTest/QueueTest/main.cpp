@@ -19,6 +19,8 @@
 #include <boost/lockfree/queue.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
+#include "FastSwapQueue.h"
+#include "BatchPostMessage.h"
 
 /**
 
@@ -38,18 +40,25 @@
  
  release 模式：
  === 队列性能对比测试 ===
- 测试配置: 4096 次操作, 5 轮测试
+ 测试配置: 32768 次操作, 5 轮测试
  测试项目             最小耗时平均耗时最大耗时   吞吐量
  -------------------------------------------------------------------
- std::queue (SPMC)              5.35 ms      6.72 ms      7.44 ms     4879531 ops/sec
- std::queue (MPSC)              7.26 ms      7.62 ms      8.12 ms     4298232 ops/sec
- std::queue (MPMC)              6.70 ms      6.84 ms      7.01 ms     4791344 ops/sec
- boost::lockfree                5.65 ms      6.81 ms      9.13 ms     4809629 ops/sec
- boost::lockfree (MPSC)         8.76 ms      9.82 ms     10.49 ms     3338155 ops/sec
- boost::lockfree (MPMC)         9.98 ms     11.96 ms     13.90 ms     2740487 ops/sec
- boost::asio::post (1 thread)      6.22 ms      6.57 ms      7.27 ms     4989494 ops/sec
- boost::asio::post (4 threads)      8.72 ms      9.65 ms     10.48 ms     3394944 ops/sec
- boost::asio::post (8 threads)     12.28 ms     14.18 ms     17.72 ms     2310958 ops/sec
+ -------------------------------------------------------------------
+ std::queue (SPMC)              2.63 ms      2.98 ms      3.54 ms    11011493 ops/sec
+ std::queue (MPSC)              3.42 ms      3.79 ms      3.95 ms     8643174 ops/sec
+ std::queue (MPMC)              5.27 ms      5.40 ms      5.52 ms     6073322 ops/sec
+ boost::lockfree                3.24 ms      3.33 ms      3.46 ms     9852667 ops/sec
+ boost::lockfree (MPSC)         6.75 ms      7.15 ms      7.72 ms     4583578 ops/sec
+ boost::lockfree (MPMC)        12.24 ms     13.05 ms     13.57 ms     2511882 ops/sec
+ boost::asio::post (1 thread)      4.77 ms      6.65 ms      7.74 ms     4929001 ops/sec
+ boost::asio::post (4 threads)      8.80 ms      9.26 ms      9.69 ms     3538355 ops/sec
+ boost::asio::post (8 threads)     16.67 ms     18.23 ms     19.13 ms     1797477 ops/sec
+ boost::asio::post fastswap queu (1 thread)      2.14 ms      2.18 ms      2.23 ms    15060208 ops/sec
+ boost::asio::post fastswap queu (4 thread)      2.52 ms      2.86 ms      3.20 ms    11446936 ops/sec
+ boost::asio::post fastswap queu (8 thread)      3.32 ms      4.03 ms      4.51 ms     8138692 ops/sec
+ boost::asio::post batch post (1 thread)      2.05 ms      2.11 ms      2.15 ms    15547542 ops/sec
+ boost::asio::post batch post (4 thread)      3.88 ms      3.99 ms      4.09 ms     8217062 ops/sec
+ boost::asio::post batch post (8 thread)      5.64 ms      5.85 ms      6.11 ms     5604241 ops/sec
  *
  */
 using namespace std::chrono;
@@ -360,7 +369,7 @@ double test_spsc(Queue& queue, int producer_count, int consumer_count) {
                     key.i = rand();
                 }
                 masked_copy_simd128(*in, *in, key);
-               
+               /**
                 boost::asio::post(main_io_context2, [in] {
                     {
                         std::lock_guard<std::mutex> lock(connMutex2);
@@ -375,7 +384,7 @@ double test_spsc(Queue& queue, int producer_count, int consumer_count) {
                         used = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
                     } while (used <= 2);
                    
-                });
+                });*/
             }
         });
     }
@@ -426,6 +435,7 @@ double test_boost_post(int thread_count) {
             }
             masked_copy_simd128(*in, *in, key);
             
+            /**
             boost::asio::post(main_io_context, [in] {
                 {
                     std::lock_guard<std::mutex> lock(connMutex);
@@ -439,7 +449,7 @@ double test_boost_post(int thread_count) {
                     end = std::chrono::high_resolution_clock::now();
                     used = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
                 } while (used <= 2);
-            });
+            });*/
             
             if (counter.fetch_add(1, std::memory_order_relaxed) >= QUEUE_SIZE - 1) {
                 finished = true;
@@ -451,6 +461,107 @@ double test_boost_post(int thread_count) {
     while (!finished) std::this_thread::yield();
     
     auto end_time = high_resolution_clock::now();
+    
+    // 停止并清理
+    io_context.stop();
+    for (auto& t : threads) t.join();
+    
+    return duration_cast<microseconds>(end_time - start_time).count() / 1000.0;
+}
+
+double test_boost_post_with_swap_queue(int thread_count) {
+    boost::asio::io_context io_context;
+    auto work = boost::asio::make_work_guard(io_context);
+    
+    std::vector<std::thread> threads;
+    for (int i = 0; i < thread_count; ++i) {
+        threads.emplace_back([&] { io_context.run(); });
+    }
+    
+    std::atomic<size_t> counter(0);
+    std::atomic<bool> finished(false);
+    
+    FastSwapQueue fastSwapQueue(true);
+    fastSwapQueue.setConsumeTasksFunc([&] {
+        boost::asio::post(io_context, [&] {
+            fastSwapQueue.consumeTasks();
+        });
+    });
+    auto start_time = high_resolution_clock::now();
+    
+    // 提交任务
+    for (size_t i = 0; i < QUEUE_SIZE; ++i) {
+        fastSwapQueue.post([&] {
+            std::shared_ptr<std::string> in = std::make_shared<std::string>(1025, 'a');
+            masking_key_type key;
+            {
+                std::lock_guard<std::mutex> lock(connMutex);
+                key.i = rand();
+            }
+            masked_copy_simd128(*in, *in, key);
+            if (counter.fetch_add(1, std::memory_order_relaxed) >= QUEUE_SIZE - 1) {
+                finished = true;
+            }
+        });
+    }
+    
+    // 等待所有任务完成
+    while (!finished) std::this_thread::yield();
+    
+    auto end_time = high_resolution_clock::now();
+    
+    
+    // 停止并清理
+    io_context.stop();
+    for (auto& t : threads) t.join();
+    
+    return duration_cast<microseconds>(end_time - start_time).count() / 1000.0;
+}
+
+double test_boost_post_with_batch_queue(int thread_count) {
+    boost::asio::io_context io_context;
+    auto work = boost::asio::make_work_guard(io_context);
+    
+    std::vector<std::thread> threads;
+    for (int i = 0; i < thread_count; ++i) {
+        threads.emplace_back([&] { io_context.run(); });
+    }
+    
+    std::atomic<size_t> counter(0);
+    std::atomic<bool> finished(false);
+    
+    BatchPostMessage<int> batchPostMessage(256, true);
+    batchPostMessage.setOnBatchMessageAction([&](auto batchMsg) {
+        boost::asio::post(io_context, [&,batchMsg] {
+            for(int i=0; i<batchMsg->size(); i++) {
+                std::shared_ptr<std::string> in = std::make_shared<std::string>(1025, 'a');
+                masking_key_type key;
+                {
+                    std::lock_guard<std::mutex> lock(connMutex);
+                    key.i = rand();
+                }
+                masked_copy_simd128(*in, *in, key);
+                if (counter.fetch_add(1, std::memory_order_relaxed) >= QUEUE_SIZE - 1) {
+                    finished = true;
+                }
+            }
+            batchPostMessage.recycle(batchMsg);
+        });
+    });
+  
+    auto start_time = high_resolution_clock::now();
+    
+    // 提交任务
+    for (size_t i = 0; i < QUEUE_SIZE; ++i) {
+        batchPostMessage.add(i);
+    }
+    batchPostMessage.flush();
+    
+    // 等待所有任务完成
+    while (!finished) std::this_thread::yield();
+    
+    auto end_time = high_resolution_clock::now();
+    
     
     // 停止并清理
     io_context.stop();
@@ -544,6 +655,15 @@ int main() {
     run_benchmark("boost::asio::post (1 thread)", [&] { return test_boost_post(1); });
     run_benchmark("boost::asio::post (4 threads)", [&] { return test_boost_post(4); });
     run_benchmark("boost::asio::post (8 threads)", [&] { return test_boost_post(8); });
+    
+    
+    run_benchmark("boost::asio::post fastswap queu (1 thread)", [&] { return test_boost_post_with_swap_queue(1); });
+    run_benchmark("boost::asio::post fastswap queu (4 thread)", [&] { return test_boost_post_with_swap_queue(4); });
+    run_benchmark("boost::asio::post fastswap queu (8 thread)", [&] { return test_boost_post_with_swap_queue(8); });
+    
+    run_benchmark("boost::asio::post batch post (1 thread)", [&] { return test_boost_post_with_batch_queue(1); });
+    run_benchmark("boost::asio::post batch post (4 thread)", [&] { return test_boost_post_with_batch_queue(4); });
+    run_benchmark("boost::asio::post batch post (8 thread)", [&] { return test_boost_post_with_batch_queue(8); });
     
     
     mainThread.join();
