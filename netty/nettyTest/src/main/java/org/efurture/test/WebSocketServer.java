@@ -130,10 +130,9 @@ class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
 
         // 处理文本消息
         String request = ((TextWebSocketFrame) frame).text();
-        //System.out.println("收到消息: " + request);
+        ///System.out.println("收到消息: " + request);
 
-        // 回显消息
-        //ctx.channel().write(new TextWebSocketFrame("服务器收到: " + request));
+        ctx.channel().write(new TextWebSocketFrame("服务器收到: " + request));
     }
 
     private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
