@@ -33,15 +33,15 @@ public:
         }
     }
 public:
-    std::string_view createStringViewInPool(const std::string& message) {
-        return createStringViewInPool(message.data(), message.size());
+    std::string_view allocateStringViewInPool(const std::string& message) {
+        return allocateStringViewInPool(message.data(), message.size());
     }
 
-    std::string_view createStringViewInPool(const std::string_view& message) {
-        return createStringViewInPool(message.data(), message.size());
+    std::string_view allocateStringViewInPool(const std::string_view& message) {
+        return allocateStringViewInPool(message.data(), message.size());
     }
 
-    std::string_view createStringViewInPool(const char* data, size_t length) {
+    std::string_view allocateStringViewInPool(const char* data, size_t length) {
         if (length > 4*1024) { //for bug message just alloc directly
             return std::string_view{};
         }
@@ -58,7 +58,7 @@ public:
         return std::string_view{};
     }
 
-    void releaseStringViewInPool(const std::string_view& message) {
+    void deallocateStringViewInPool(const std::string_view& message) {
         if (!message.empty()) {
             returnOffset += message.size();
             int64_t remainSize = returnOffset - allocOffset;
@@ -93,4 +93,4 @@ private:
 
 
 
-#endif //SLIDING_WINDOW_STRING_VIEW_POOL_H
+#endif //BIG_HEAP_STRING_VIEW_POOL_H

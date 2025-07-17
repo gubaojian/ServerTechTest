@@ -399,7 +399,7 @@ void testProduceOneConsume2() {
                   while (!queue->empty()) {
                       Message msg = queue->front();
                       if (msg.messageViewFromHeap) {
-                          poolRef->releaseStringViewInPool(msg.messageView);
+                          poolRef->deallocateStringViewInPool(msg.messageView);
                       }
                       consumeCount2++;
                       queue->pop();
@@ -415,7 +415,7 @@ void testProduceOneConsume2() {
     for(int i=0; i<10000*200; i++) {
         std::lock_guard<std::mutex> lock(mutex2);
         Message msg;
-        msg.messageView = pool.createStringViewInPool(message);
+        msg.messageView = pool.allocateStringViewInPool(message);
         msg.messageViewFromHeap = !msg.messageView.empty();
         if (msg.messageViewFromHeap) {
             msg.message = std::make_shared<std::string>(message);
@@ -448,7 +448,7 @@ void testProduceOneConsume3() {
                      found = queue->try_dequeue(msg);
                      if (found) {
                          if (msg.messageViewFromHeap) {
-                             poolRef->releaseStringViewInPool(msg.messageView);
+                             poolRef->deallocateStringViewInPool(msg.messageView);
                          }
                          consumeCount3++;
                      }
@@ -463,7 +463,7 @@ void testProduceOneConsume3() {
     start = std::chrono::high_resolution_clock::now();
     for(int i=0; i<10000*200; i++) {
         Message msg;
-        msg.messageView = pool.createStringViewInPool(message);
+        msg.messageView = pool.allocateStringViewInPool(message);
         msg.messageViewFromHeap = !msg.messageView.empty();
         if (!msg.messageViewFromHeap) {
             msg.message = std::make_shared<std::string>(message);
@@ -500,7 +500,7 @@ void testProduceOneConsume5() {
                      found = queue->try_dequeue(msg);
                      if (found) {
                          if (msg.messageViewFromHeap) {
-                             poolRef->releaseStringViewInPool(msg.messageView);
+                             poolRef->deallocateStringViewInPool(msg.messageView);
                          }
                          consumeCount5++;
                      }
@@ -515,7 +515,7 @@ void testProduceOneConsume5() {
     start = std::chrono::high_resolution_clock::now();
     for(int i=0; i<10000*200; i++) {
         Message msg;
-        msg.messageView = pool.createStringViewInPool(message);
+        msg.messageView = pool.allocateStringViewInPool(message);
         msg.messageViewFromHeap = !msg.messageView.empty();
         if (!msg.messageViewFromHeap) {
             msg.message = std::make_shared<std::string>(message);
