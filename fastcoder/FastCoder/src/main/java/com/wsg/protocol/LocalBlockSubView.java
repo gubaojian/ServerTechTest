@@ -1,9 +1,9 @@
 package com.wsg.protocol;
 
 public class LocalBlockSubView {
-    private byte[] block;
-    private int offset;
-    private int length;
+    private final byte[] block;
+    private final int offset;
+    private final int length;
 
     public LocalBlockSubView(byte[] block, int offset, int length) {
         this.block = block;
