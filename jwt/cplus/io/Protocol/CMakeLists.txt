@@ -20,7 +20,12 @@ include_directories(${PROJECT_SOURCE_DIR}/lib/Turbo-Base64-master)
 include_directories(${PROJECT_SOURCE_DIR}/lib/thread-pool-5.0.0/include)
 include_directories(${PROJECT_SOURCE_DIR}/lib/concurrentqueue)
 
-add_executable(protocol main.cpp)
+add_executable(protocol main.cpp
+        string_view_in_block.h
+        big_heap_string_view_pool.h
+        string_view_in_big_heap_pool.h
+        string_view_in_big_heap_pool.cc
+)
 
 target_link_libraries(
         protocol
