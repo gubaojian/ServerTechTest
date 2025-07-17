@@ -392,7 +392,7 @@ void testProduceOneConsume2() {
                   std::lock_guard<std::mutex> lock(mutex2);
                   while (!queue->empty()) {
                       auto& view = queue->front();
-                      view.releaseStringViewInHeapPool();
+                      poolRef->releaseStringViewInPool(view);
                       consumeCount2++;
                       queue->pop();
                   }
@@ -445,12 +445,18 @@ void testProduceOneConsume3() {
 
     start = std::chrono::high_resolution_clock::now();
     for(int i=0; i<10000*200; i++) {
-        queue->enqueue(pool.createStringViewInPool(message));
-    }
+        auto it = pool.createStringViewInPool(message);
+        queue->enqueue(it);
+   }
+    std::cout << "pool.createPoolStringView  " << pool.getTotalGet() << " hit " << pool.getCacheHit() << std::endl;
     consumeThread.join();
     end = std::chrono::high_resolution_clock::now();
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "BigBlockStringPool with lock free queue used " << used.count() << "ms" << std::endl;
+
+
+
+
 }
 
 
@@ -514,6 +520,8 @@ void testPoolOnly() {
     end = std::chrono::high_resolution_clock::now();
      used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "pool.createPoolStringView used " << used.count() << "ms" << std::endl;
+
+    std::cout << "pool.createPoolStringView  " << pool.getTotalGet() << " hit " << pool.getCacheHit() << std::endl;
 }
 
 
@@ -533,16 +541,16 @@ int main() {
     //testStringBlockSubView();
 
 
-    testProduceOneConsume();
+    //testProduceOneConsume();
 
-    testProduceOneConsume2();
+    //testProduceOneConsume2();
 
 
-    testProduceOneConsume4();
+   // testProduceOneConsume4();
 
     testProduceOneConsume3();
 
-    testPoolOnly();
+   // testPoolOnly();
 
 
 

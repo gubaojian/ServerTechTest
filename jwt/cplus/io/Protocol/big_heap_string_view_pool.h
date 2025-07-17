@@ -5,7 +5,10 @@
 #ifndef BIG_HEAP_STRING_VIEW_POOL_H
 #define BIG_HEAP_STRING_VIEW_POOL_H
 #include <cstdint>
+#include <iostream>
 #include <mutex>
+#include <__ostream/basic_ostream.h>
+
 #include "string_view_in_big_heap_pool.h"
 
 /**
@@ -34,22 +37,25 @@ public:
 
     StringViewInBigHeapPool createStringViewInPool(const char* data, size_t length) {
         if (length > 2*1024) {
-            return StringViewInBigHeapPool({data, length}, nullptr);
+            return StringViewInBigHeapPool({data, length}, false);
         }
         std::lock_guard<std::mutex> lock(mutex);
         int64_t remainSize = returnOffset - allocOffset;
         int64_t offset = allocOffset%poolSize;
+        totalGet++;
         if (remainSize > length) {
             char* from = buffer + offset;
             memcpy(from, data, length);
             allocOffset += length;
-            return StringViewInBigHeapPool({from, length}, this);
+            cacheHit++;
+            return StringViewInBigHeapPool({from, length}, true);
         } else {
-            return StringViewInBigHeapPool({data, length}, nullptr);
+            return StringViewInBigHeapPool({data, length}, false);
         }
     }
+    //需要手动释放
     void releaseStringViewInPool(const StringViewInBigHeapPool& message) {
-        if (message.pool == this && !message.messageView.empty()) {
+        if (message.inPool && !message.messageView.empty()) {
             std::lock_guard<std::mutex> lock(mutex);
             returnOffset += message.messageView.size();
             int64_t remainSize = returnOffset - allocOffset;
@@ -62,14 +68,25 @@ public:
             }
         }
     }
-    size_t remainSpace() const {
+    int64_t remainSpace() const {
         return returnOffset - allocOffset;
     }
+
+    uint64_t getTotalGet() const {
+        return totalGet;
+    }
+
+    uint64_t getCacheHit() const {
+        return cacheHit;
+    }
+
 private:
     char* buffer = nullptr;
     std::mutex mutex;
     int64_t allocOffset;
     int64_t returnOffset;
+    uint64_t totalGet = 0;
+    uint64_t cacheHit = 0;
     int64_t poolSize = 0;
 };
 

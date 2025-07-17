@@ -24,7 +24,6 @@ add_executable(protocol main.cpp
         string_view_in_block.h
         big_heap_string_view_pool.h
         string_view_in_big_heap_pool.h
-        string_view_in_big_heap_pool.cc
 )
 
 target_link_libraries(
