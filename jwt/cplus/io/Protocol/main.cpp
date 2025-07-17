@@ -426,11 +426,12 @@ void testProduceOneConsume2() {
     end = std::chrono::high_resolution_clock::now();
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "BigHeapStringViewPool used " << used.count() << "ms" << std::endl;
+    std::cout << "pool.createPoolStringView  " << pool.getTotalGet() << " hit " << pool.getCacheHit() << std::endl;
+
 }
 
 
 int64_t consumeCount3 = 0;
-std::mutex mutex3;
 void testProduceOneConsume3() {
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
@@ -479,8 +480,56 @@ void testProduceOneConsume3() {
     std::cout << "BigBlockStringPool with lock free queue used " << used.count() << "ms" << std::endl;
 
 
+}
 
 
+int64_t consumeCount5 = 0;
+void testProduceOneConsume5() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::shared_ptr<moodycamel::ConcurrentQueue<Message>> queue;
+    BigHeapStringViewPool pool(64*1024*1024);
+    BigHeapStringViewPool* poolRef = &pool;
+    queue = std::make_shared<moodycamel::ConcurrentQueue<Message>>();
+    std::thread consumeThread([queue, poolRef] {
+          while (consumeCount5 < 10000*200) {
+              {
+                  bool found = false;
+                 do {
+                     Message msg;
+                     found = queue->try_dequeue(msg);
+                     if (found) {
+                         if (msg.messageViewFromHeap) {
+                             poolRef->releaseStringViewInPool(msg.messageView);
+                         }
+                         consumeCount5++;
+                     }
+                 } while (found);
+
+              }
+              std::this_thread::sleep_for(std::chrono::microseconds(50));
+          }
+    });
+    std::string message(512, 'a');
+
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+        Message msg;
+        msg.messageView = pool.createStringViewInPool(message);
+        msg.messageViewFromHeap = !msg.messageView.empty();
+        if (!msg.messageViewFromHeap) {
+            msg.message = std::make_shared<std::string>(message);
+        }
+        queue->enqueue(msg);
+    }
+    auto end2 = std::chrono::high_resolution_clock::now();
+    auto used2 = std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start);
+    std::cout << "BigBlockStringPool with lock free queue submit " << used2.count() << "ms" << std::endl;
+    std::cout << "pool.createPoolStringView  " << pool.getTotalGet() << " hit " << pool.getCacheHit() << std::endl;
+    consumeThread.join();
+    end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "BigBlockStringPool with lock free queue 512 byte  used " << used.count() << "ms" << std::endl;
 }
 
 
@@ -515,6 +564,39 @@ void testProduceOneConsume4() {
     end = std::chrono::high_resolution_clock::now();
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "std::make_shared<std::string> lock free queue used " << used.count() << "ms" << std::endl;
+}
+
+int64_t consumeCount6 = 0;
+void testProduceOneConsume6() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::shared_ptr<moodycamel::ConcurrentQueue<std::shared_ptr<std::string>>> queue;
+    queue = std::make_shared<moodycamel::ConcurrentQueue<std::shared_ptr<std::string>>>();
+    std::thread consumeThread([queue] {
+          while (consumeCount6 < 10000*200) {
+              {
+                  bool found = false;
+                 do {
+                     std::shared_ptr<std::string> message;
+                     found = queue->try_dequeue(message);
+                     if (found) {
+                         consumeCount6++;
+                     }
+                 } while (found);
+              }
+
+              std::this_thread::sleep_for(std::chrono::microseconds(50));
+          }
+    });
+    std::string message(512, 'a');
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+        queue->enqueue(std::make_shared<std::string>(message));
+    }
+    consumeThread.join();
+    end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "std::make_shared<std::string> lock free queue 512 byte used " << used.count() << "ms" << std::endl;
 }
 
 
@@ -566,14 +648,18 @@ int main() {
     //testStringBlockSubView();
 
 
-    testProduceOneConsume();
+    //testProduceOneConsume();
 
-    testProduceOneConsume2();
+    //testProduceOneConsume2();
 
 
     testProduceOneConsume4();
 
     testProduceOneConsume3();
+
+    testProduceOneConsume6();
+
+    testProduceOneConsume5();
 
    // testPoolOnly();
 
