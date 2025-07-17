@@ -18,20 +18,20 @@
   * pool make ptr used 26ms
   * 针对短内存字符串
   */
-class ShortStringPool {
+class SmallStringPool {
     public:
-        ShortStringPool(int maxSize_):maxSize(maxSize_){
+        SmallStringPool(int maxSize_):maxSize(maxSize_){
             shortStrings = new std::shared_ptr<std::string>[maxSize];
         };
     
-        ~ShortStringPool() {
+        ~SmallStringPool() {
             if (shortStrings != nullptr) {
                 delete [] shortStrings;
                 shortStrings = nullptr;
             }
         }
-        ShortStringPool(const ShortStringPool&) = delete;
-        ShortStringPool& operator=(const ShortStringPool&) = delete;
+        SmallStringPool(const SmallStringPool&) = delete;
+        SmallStringPool& operator=(const SmallStringPool&) = delete;
     
     public:
         std::shared_ptr<std::string> getString(const std::string& key) {
@@ -78,7 +78,7 @@ int main(int argc, const char * argv[]) {
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "make ptr used " << used.count() << "ms" << std::endl;
     
-    ShortStringPool pool(1024);
+    SmallStringPool pool(1024);
     start = std::chrono::high_resolution_clock::now();
     for(int i=0; i<10000*200; i++) {
         ptr = pool.getString(wsgId.data(), wsgId.size());
