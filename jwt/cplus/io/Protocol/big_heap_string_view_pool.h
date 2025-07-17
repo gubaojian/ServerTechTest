@@ -66,11 +66,6 @@ public:
                 return;
             }
             returnOffset += message.size();
-            int64_t remainSize = returnOffset - allocOffset;
-            if (remainSize > poolSize) { //illegal return, ignore it
-                std::cout << "deallocateStringViewInPool call release message illegal" << std::endl;
-                returnOffset -= message.size();
-            }
         }
     }
 
