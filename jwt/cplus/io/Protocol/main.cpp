@@ -256,7 +256,7 @@ void testWsgPacker() {
     auto packText = packer.autoPackText(message, connId, wsgId);
     std::cout << "length " << packText->size() << " " << *packText << std::endl;
 
-
+    std::cout << "wsg unpack text length " << packText->size()  << std::endl;
     start = std::chrono::high_resolution_clock::now();
     for(int i=0; i<10000*200; i++) {
         wsg::gateway::UnPackProtocol unPacker(*packText);
@@ -265,6 +265,7 @@ void testWsgPacker() {
     used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "wsg unpack text used" << used.count() << "ms" << std::endl;
 
+    std::cout << "wsg unpack binary length " << packBinary->size()  << std::endl;
     start = std::chrono::high_resolution_clock::now();
     for(int i=0; i<10000*200; i++) {
         wsg::gateway::UnPackProtocol unPacker(*packBinary);
@@ -307,14 +308,14 @@ void learn_pool() {
 // TIP 要<b>Run</b>代码，请按 <shortcut actionId="Run"/> 或点击装订区域中的 <icon src="AllIcons.Actions.Execute"/> 图标。
 int main() {
 
-    testPacker();
+    //testPacker();
     std::cout << "wsg enableBinaryKV ----------------- "<< std::endl;
     testWsgPacker();
     std::cout << "wsg disable enableBinaryKV ----------------- "  << std::endl;
-    wsg::gateway::enableBinaryKV = false;
-    testWsgPacker();
+    //wsg::gateway::enableBinaryKV = false;
+    //testWsgPacker();
 
-    learn_pool();
+    //learn_pool();
 
 
 

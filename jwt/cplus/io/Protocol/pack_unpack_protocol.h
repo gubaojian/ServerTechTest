@@ -299,8 +299,7 @@ namespace wsg {
                 uint8_t version = buffer[1];
                 Input  input(buffer, 2, packMessage.length());
                 while (input.hasNext()) {
-                    char k = input.readByte();
-                    switch (k) {
+                    switch (input.readByte()) {
                         case 'w' :
                             wsgId = input.readBinary();
                             break;
@@ -311,11 +310,14 @@ namespace wsg {
                             {
                                 auto v = input.readBinary();
                                 //针对text和binary msg特殊优化。
-                                if ("t" == v) {
-                                    v = actionText;
-                                } else if ("b" == v) {
-                                    v = actionBinary;
+                                if (v.size() == 1) {
+                                    if (v[0] == 'b') {
+                                        v = actionBinary;
+                                    } else if (v[0] == 't') {
+                                        v = actionText;
+                                    }
                                 }
+
                                 action = v;
                             }
                             break;
