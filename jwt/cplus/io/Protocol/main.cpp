@@ -305,6 +305,51 @@ void learn_pool() {
 
 
 }
+
+
+class StringBlockSubView {
+public:
+    explicit StringBlockSubView(const std::shared_ptr<std::string>& message) {
+        block = message;
+        messageView = *message;
+    }
+    explicit StringBlockSubView(const std::shared_ptr<std::string>& block, const std::string_view& messageViewInBlock) {
+        this->block = block;
+        messageView = messageViewInBlock;
+    }
+    public:
+      std::string_view messageView;
+      std::shared_ptr<std::string> block;
+};
+
+void testStringBlockSubView() {
+     auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    wsg::gateway::PackProtocol packer;
+    std::string message(1024, 'a');
+    std::shared_ptr<std::string> block = std::make_shared<std::string>(message);
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+        std::string_view messageViewInBlock = std::string_view(block->data() + 8,  512);
+        std::make_shared<std::string>(messageViewInBlock);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "make string shared ptr " << used.count() << "ms" << std::endl;
+
+
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+        std::string_view messageViewInBlock = std::string_view(block->data() + 8,  512);
+        StringBlockSubView(block, messageViewInBlock);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "StringBlockSubView used " << used.count() << "ms" << std::endl;
+
+}
 // TIP 要<b>Run</b>代码，请按 <shortcut actionId="Run"/> 或点击装订区域中的 <icon src="AllIcons.Actions.Execute"/> 图标。
 int main() {
 
@@ -316,6 +361,8 @@ int main() {
     //testWsgPacker();
 
     //learn_pool();
+
+    testStringBlockSubView();
 
 
 
