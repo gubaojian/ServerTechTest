@@ -7,6 +7,9 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug")
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 ")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 ")
     MESSAGE("-----BUILD------ DEBUG OPTION")
+else()
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -o3 ")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -o3 ")
 endif()
 
 add_subdirectory(lib/Turbo-Base64-master)
@@ -23,7 +26,6 @@ include_directories(${PROJECT_SOURCE_DIR}/lib/concurrentqueue)
 add_executable(protocol main.cpp
         string_view_in_block.h
         big_heap_string_view_pool.h
-        string_view_in_big_heap_pool.h
 )
 
 target_link_libraries(

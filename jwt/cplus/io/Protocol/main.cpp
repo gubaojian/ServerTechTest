@@ -377,22 +377,30 @@ void testProduceOneConsume() {
     std::cout << "std::make_shared<std::string> used " << used.count() << "ms" << std::endl;
 }
 
+struct Message {
+    std::string_view messageView;
+    std::shared_ptr<std::string> message;
+    bool messageViewFromHeap;
+};
+
 int64_t consumeCount2 = 0;
 std::mutex mutex2;
 void testProduceOneConsume2() {
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
-    std::shared_ptr<std::queue<StringViewInBigHeapPool>> queue;
+    std::shared_ptr<std::queue<Message>> queue;
     BigHeapStringViewPool pool(64*1024*1024);
     BigHeapStringViewPool* poolRef = &pool;
-    queue = std::make_shared<std::queue<StringViewInBigHeapPool>>();
+    queue = std::make_shared<std::queue<Message>>();
     std::thread consumeThread([queue, poolRef] {
           while (consumeCount2 < 10000*200) {
               {
                   std::lock_guard<std::mutex> lock(mutex2);
                   while (!queue->empty()) {
-                      auto& view = queue->front();
-                      poolRef->releaseStringViewInPool(view);
+                      Message msg = queue->front();
+                      if (msg.messageViewFromHeap) {
+                          poolRef->releaseStringViewInPool(msg.messageView);
+                      }
                       consumeCount2++;
                       queue->pop();
                   }
@@ -406,12 +414,18 @@ void testProduceOneConsume2() {
     start = std::chrono::high_resolution_clock::now();
     for(int i=0; i<10000*200; i++) {
         std::lock_guard<std::mutex> lock(mutex2);
-        queue->push(pool.createStringViewInPool(message));
+        Message msg;
+        msg.messageView = pool.createStringViewInPool(message);
+        msg.messageViewFromHeap = !msg.messageView.empty();
+        if (msg.messageViewFromHeap) {
+            msg.message = std::make_shared<std::string>(message);
+        }
+        queue->push(msg);
     }
     consumeThread.join();
     end = std::chrono::high_resolution_clock::now();
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "BigBlockStringPool used " << used.count() << "ms" << std::endl;
+    std::cout << "BigHeapStringViewPool used " << used.count() << "ms" << std::endl;
 }
 
 
@@ -420,19 +434,21 @@ std::mutex mutex3;
 void testProduceOneConsume3() {
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
-    std::shared_ptr<moodycamel::ConcurrentQueue<StringViewInBigHeapPool>> queue;
+    std::shared_ptr<moodycamel::ConcurrentQueue<Message>> queue;
     BigHeapStringViewPool pool(64*1024*1024);
     BigHeapStringViewPool* poolRef = &pool;
-    queue = std::make_shared<moodycamel::ConcurrentQueue<StringViewInBigHeapPool>>();
+    queue = std::make_shared<moodycamel::ConcurrentQueue<Message>>();
     std::thread consumeThread([queue, poolRef] {
           while (consumeCount3 < 10000*200) {
               {
                   bool found = false;
                  do {
-                     StringViewInBigHeapPool poolStringView("");
-                     found = queue->try_dequeue(poolStringView);
+                     Message msg;
+                     found = queue->try_dequeue(msg);
                      if (found) {
-                         poolRef->releaseStringViewInPool(poolStringView);
+                         if (msg.messageViewFromHeap) {
+                             poolRef->releaseStringViewInPool(msg.messageView);
+                         }
                          consumeCount3++;
                      }
                  } while (found);
@@ -445,9 +461,17 @@ void testProduceOneConsume3() {
 
     start = std::chrono::high_resolution_clock::now();
     for(int i=0; i<10000*200; i++) {
-        auto it = pool.createStringViewInPool(message);
-        queue->enqueue(it);
-   }
+        Message msg;
+        msg.messageView = pool.createStringViewInPool(message);
+        msg.messageViewFromHeap = !msg.messageView.empty();
+        if (!msg.messageViewFromHeap) {
+            msg.message = std::make_shared<std::string>(message);
+        }
+        queue->enqueue(msg);
+    }
+    auto end2 = std::chrono::high_resolution_clock::now();
+    auto used2 = std::chrono::duration_cast<std::chrono::milliseconds>(end2 - start);
+    std::cout << "BigBlockStringPool with lock free queue submit " << used2.count() << "ms" << std::endl;
     std::cout << "pool.createPoolStringView  " << pool.getTotalGet() << " hit " << pool.getCacheHit() << std::endl;
     consumeThread.join();
     end = std::chrono::high_resolution_clock::now();
@@ -508,9 +532,10 @@ void testPoolOnly() {
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "std::make_shared<std::string> used " << used.count() << "ms" << std::endl;
 
+    /**
     BigHeapStringViewPool pool(32*1024*1024);
-    StringViewInBigHeapPool poolStringView("");
-    std::vector<StringViewInBigHeapPool> messages2;
+    StringViewInBigHeap poolStringView("");
+    std::vector<StringViewInBigHeap> messages2;
     start = std::chrono::high_resolution_clock::now();
     for(int i=0; i<10000*200; i++) {
         poolStringView = pool.createStringViewInPool(message);
@@ -520,8 +545,8 @@ void testPoolOnly() {
     end = std::chrono::high_resolution_clock::now();
      used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "pool.createPoolStringView used " << used.count() << "ms" << std::endl;
-
-    std::cout << "pool.createPoolStringView  " << pool.getTotalGet() << " hit " << pool.getCacheHit() << std::endl;
+    */
+    //std::cout << "pool.createPoolStringView  " << pool.getTotalGet() << " hit " << pool.getCacheHit() << std::endl;
 }
 
 
@@ -541,9 +566,9 @@ int main() {
     //testStringBlockSubView();
 
 
-    //testProduceOneConsume();
+    testProduceOneConsume();
 
-    //testProduceOneConsume2();
+    testProduceOneConsume2();
 
 
     testProduceOneConsume4();
@@ -552,6 +577,7 @@ int main() {
 
    // testPoolOnly();
 
+    testStringBlockSubView();
 
 
     return 0;

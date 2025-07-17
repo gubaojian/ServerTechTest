@@ -2,8 +2,8 @@
 // Created by baojian on 25-7-17.
 //
 
-#ifndef STRING_BLOCK_SUB_VIEW_H
-#define STRING_BLOCK_SUB_VIEW_H
+#ifndef STRING_VIEW_IN_BLOCK_H
+#define STRING_VIEW_IN_BLOCK_H
 #include <string>
 #include <memory>
 #include <string_view>
