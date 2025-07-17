@@ -60,10 +60,13 @@ public:
 
     void deallocateStringViewInPool(const std::string_view& message) {
         if (!message.empty()) {
+            if (message.data() < buffer && message.data() >= (buffer + poolSize + 8*1024)) {
+                std::cout << "deallocateStringViewInPool call release message not in pool" << std::endl;
+            }
             returnOffset += message.size();
             int64_t remainSize = returnOffset - allocOffset;
             if (remainSize > poolSize) { //illegal return, ignore it
-                std::cout << "illegal call release message not in pool" << std::endl;
+                std::cout << "deallocateStringViewInPool call release message illegal" << std::endl;
                 returnOffset -= message.size();
             }
         }
