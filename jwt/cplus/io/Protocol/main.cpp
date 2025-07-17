@@ -9,6 +9,8 @@
 
 #include "pack_unpack_protocol.h"
 #include "BS_thread_pool.hpp"
+#include "concurrentqueue.h"
+#include "lib/concurrentqueue/concurrentqueue.h"
 
 
 namespace test {
@@ -319,7 +321,89 @@ public:
     }
     public:
       std::string_view messageView;
+    private:
       std::shared_ptr<std::string> block;
+};
+
+class PoolStringView {
+public:
+    explicit PoolStringView(const std::string_view& messageView, bool fromPool = true) {
+        this->fromPool = fromPool;
+        if (fromPool) {
+            this->messageView = messageView;
+        } else {
+            if (!messageView.empty()) {
+                block = std::make_shared<std::string>(messageView);
+                this->messageView = *block;
+            }
+        }
+        if (messageView.empty()) {
+            this->fromPool = false;
+        }
+    }
+public:
+    std::string_view messageView;
+    bool fromPool;
+    std::shared_ptr<std::string> block = nullptr; //only valid
+};
+
+ /**
+ * one thread alloc, one thread consume and then return pool return
+ */
+class BigBlockStringPool {
+public:
+    explicit BigBlockStringPool(int size) {
+        buffer = new char[size + 4*1024]; //add padding to avoid check array bounds
+        this->pooSize = size;
+        allocOffset = 0;
+        returnOffset = pooSize;
+    }
+    ~BigBlockStringPool() {
+        if (buffer != nullptr) {
+            delete[] buffer;
+            buffer = nullptr;
+        }
+    }
+public:
+    PoolStringView createPoolStringView(const std::string& message) {
+        return createPoolStringView(message.data(), message.size());
+    }
+    PoolStringView createPoolStringView(const char* data, size_t length) {
+        if (length > 2*1024) {
+            return PoolStringView({data, length}, false);
+        }
+        std::lock_guard<std::mutex> lock(mutex);
+        int remainSize = returnOffset - allocOffset;
+        int offset = allocOffset%pooSize;
+        if (remainSize > length) {
+            char* from = buffer + offset;
+            memcpy(from, data, length);
+            allocOffset += length;
+            return PoolStringView({from, length});
+        } else {
+            return PoolStringView({data, length}, false);
+        }
+    }
+    void returnPoolStringView(const PoolStringView& message) {
+        if (message.fromPool) {
+            std::lock_guard<std::mutex> lock(mutex);
+            returnOffset += message.messageView.size();
+            int64_t remainSize = returnOffset - allocOffset;
+            if (remainSize > pooSize) { //illegal return, ignore it
+                returnOffset -= message.messageView.size();
+            }
+            if (returnOffset > pooSize*128) {
+                returnOffset -= pooSize*64;
+                allocOffset -= pooSize*64;
+            }
+        }
+    }
+private:
+    char* buffer = nullptr;
+    std::mutex mutex;
+    std::atomic<int64_t> allocOffset;
+    std::atomic<int64_t> returnOffset;
+    int64_t pooSize = 0;
 };
 
 void testStringBlockSubView() {
@@ -350,19 +434,188 @@ void testStringBlockSubView() {
     std::cout << "StringBlockSubView used " << used.count() << "ms" << std::endl;
 
 }
+
+int64_t consumeCount = 0;
+std::mutex mutex;
+void testProduceOneConsume() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::shared_ptr<std::queue<std::shared_ptr<std::string>>> queue;
+    queue = std::make_shared<std::queue<std::shared_ptr<std::string>>>();
+    std::thread consumeThread([queue] {
+          while (consumeCount < 10000*200) {
+              {
+                  std::lock_guard<std::mutex> lock(mutex);
+                  while (!queue->empty()) {
+                     queue->pop();
+                     consumeCount++;
+                 }
+              }
+
+              std::this_thread::sleep_for(std::chrono::microseconds(50));
+          }
+    });
+    std::string message(1024, 'a');
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+        std::lock_guard<std::mutex> lock(mutex);
+        queue->push(std::make_shared<std::string>(message));
+    }
+    consumeThread.join();
+    end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "std::make_shared<std::string> used " << used.count() << "ms" << std::endl;
+}
+
+int64_t consumeCount2 = 0;
+std::mutex mutex2;
+void testProduceOneConsume2() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::shared_ptr<std::queue<PoolStringView>> queue;
+    BigBlockStringPool pool(64*1024*1024);
+    BigBlockStringPool* poolRef = &pool;
+    queue = std::make_shared<std::queue<PoolStringView>>();
+    std::thread consumeThread([queue, poolRef] {
+          while (consumeCount2 < 10000*200) {
+              bool needBreak = false;
+              for (int i=0; i<10000*200; i++)
+              {
+                  std::lock_guard<std::mutex> lock(mutex2);
+                  PoolStringView view("");
+                  for (int m=0; m<256; m++) {
+                      if (!queue->empty()) {
+                        view = queue->front();
+                        queue->pop();
+                     } else {
+                         needBreak = true;
+                     }
+                      if (!view.messageView.empty()) {
+                          poolRef->returnPoolStringView(view);
+                         consumeCount2++;
+                      }
+                      if (needBreak) {
+                        break;
+                     }
+                  }
+              }
+
+              std::this_thread::sleep_for(std::chrono::microseconds(50));
+          }
+    });
+    std::string message(1024, 'a');
+
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000; i++) {
+        std::lock_guard<std::mutex> lock(mutex2);
+        for (int j=0; j<200; j++) {
+            queue->push(pool.createPoolStringView(message));
+        }
+    }
+    consumeThread.join();
+    end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "BigBlockStringPool used " << used.count() << "ms" << std::endl;
+}
+
+
+int64_t consumeCount3 = 0;
+std::mutex mutex3;
+void testProduceOneConsume3() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::shared_ptr<moodycamel::ConcurrentQueue<PoolStringView>> queue;
+    BigBlockStringPool pool(64*1024*1024);
+    BigBlockStringPool* poolRef = &pool;
+    queue = std::make_shared<moodycamel::ConcurrentQueue<PoolStringView>>();
+    std::thread consumeThread([queue, poolRef] {
+          while (consumeCount3 < 10000*200) {
+              {
+                  bool found = false;
+                 do {
+                     PoolStringView poolStringView("");
+                     found = queue->try_dequeue(poolStringView);
+                     if (found) {
+                         poolRef->returnPoolStringView(poolStringView);
+                         consumeCount3++;
+                     }
+                 } while (found);
+
+              }
+              std::this_thread::sleep_for(std::chrono::microseconds(50));
+          }
+    });
+    std::string message(1024, 'a');
+
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+        queue->enqueue(pool.createPoolStringView(message));
+    }
+    consumeThread.join();
+    end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "BigBlockStringPool with lock free queue used " << used.count() << "ms" << std::endl;
+}
+
+
+int64_t consumeCount4 = 0;
+void testProduceOneConsume4() {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::shared_ptr<moodycamel::ConcurrentQueue<std::shared_ptr<std::string>>> queue;
+    queue = std::make_shared<moodycamel::ConcurrentQueue<std::shared_ptr<std::string>>>();
+    std::thread consumeThread([queue] {
+          while (consumeCount4 < 10000*200) {
+              {
+                  bool found = false;
+                 do {
+                     std::shared_ptr<std::string> message;
+                     found = queue->try_dequeue(message);
+                     if (found) {
+                         consumeCount4++;
+                     }
+                 } while (found);
+              }
+
+              std::this_thread::sleep_for(std::chrono::microseconds(50));
+          }
+    });
+    std::string message(1024, 'a');
+    start = std::chrono::high_resolution_clock::now();
+    for(int i=0; i<10000*200; i++) {
+         queue->enqueue(std::make_shared<std::string>(message));
+    }
+    consumeThread.join();
+    end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "std::make_shared<std::string> lock free queue used " << used.count() << "ms" << std::endl;
+}
+
+
+
 // TIP 要<b>Run</b>代码，请按 <shortcut actionId="Run"/> 或点击装订区域中的 <icon src="AllIcons.Actions.Execute"/> 图标。
 int main() {
 
     //testPacker();
     std::cout << "wsg enableBinaryKV ----------------- "<< std::endl;
-    testWsgPacker();
+    //testWsgPacker();
     std::cout << "wsg disable enableBinaryKV ----------------- "  << std::endl;
     //wsg::gateway::enableBinaryKV = false;
     //testWsgPacker();
 
     //learn_pool();
 
-    testStringBlockSubView();
+    //testStringBlockSubView();
+
+
+    testProduceOneConsume();
+
+    testProduceOneConsume2();
+
+
+    testProduceOneConsume4();
+
+    testProduceOneConsume3();
 
 
 

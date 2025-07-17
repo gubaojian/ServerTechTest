@@ -13,10 +13,12 @@ add_subdirectory(lib/Turbo-Base64-master)
 
 set(YYJSON_INSTALL OFF CACHE BOOL "" FORCE)
 add_subdirectory(lib/yyjson-master)
+add_subdirectory(lib/concurrentqueue)
 
 include_directories(${PROJECT_SOURCE_DIR}/lib/yyjson-master/src)
 include_directories(${PROJECT_SOURCE_DIR}/lib/Turbo-Base64-master)
 include_directories(${PROJECT_SOURCE_DIR}/lib/thread-pool-5.0.0/include)
+include_directories(${PROJECT_SOURCE_DIR}/lib/concurrentqueue)
 
 add_executable(protocol main.cpp)
 
