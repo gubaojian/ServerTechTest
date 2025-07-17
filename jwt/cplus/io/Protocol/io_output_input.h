@@ -95,7 +95,7 @@ namespace wsg {
             }
 
             void writeBinary(const char* data, size_t length) {
-                writeVarInt(static_cast<int32_t>(length));  // 显式转换为int32_t
+                writeVarInt(length);  // 显式转换为int32_t
                 memcpy(buffer + position, data, length);
                 position += length;
             }
