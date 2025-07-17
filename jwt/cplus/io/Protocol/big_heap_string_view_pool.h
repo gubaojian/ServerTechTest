@@ -15,7 +15,7 @@
   * put many small message in big preallocate heap array.
   * reduce memory alloc. first alloc, first return as queue
  * only support one thread alloc, one thread consume and then return pool return.
- * suitable for small message less than 1kb
+ * suitable for many small message less than 1kb
  * must be lock free, if not it will slow than std malloc。
  */
 class BigHeapStringViewPool {
