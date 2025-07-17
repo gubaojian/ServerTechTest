@@ -1,6 +1,7 @@
 package org.example;
 
 import com.alibaba.fastjson2.JSON;
+import com.wsg.protocol.LocalBlockSubView;
 import com.wsg.protocol.PackProtocol;
 import com.wsg.protocol.UnPackProtocol;
 import org.apache.commons.io.FileUtils;
@@ -27,7 +28,9 @@ public class Main {
        //testTextBinary();
        //testBinaryJson();
        //testBinaryBinary();
-       testKVBinaryBinary();
+       //testKVBinaryBinary();
+
+        testBinaryBinary();
     }
 
 
@@ -106,19 +109,28 @@ public class Main {
     }
 
     public static void testBinaryBinary() throws IOException {
-        long start = System.currentTimeMillis();
+
         PackProtocol packProtocol = new PackProtocol();
         UnPackProtocol unPackProtocol = new UnPackProtocol();
         String wsgId = "wsg_88448848322";
         String connId = UUID.randomUUID().toString();
         String message = RandomStringUtils.insecure().nextAlphabetic(1024);
         byte[] bts = message.getBytes(StandardCharsets.UTF_8);
+        long start = System.currentTimeMillis();
         byte[] packMessgae = null;
         for(int i=0; i<1024*10*200; i++) {
             packMessgae = packProtocol.binaryPackBinary(wsgId, connId, bts);
         }
         long end = System.currentTimeMillis();
         System.out.println("binary binary use "  + (end -start)+ " length " + packMessgae.length);
+
+        LocalBlockSubView localBlockSubView = null;
+        start = System.currentTimeMillis();
+        for(int i=0; i<1024*10*200; i++) {
+            localBlockSubView = packProtocol.binaryPackBinaryView(wsgId, connId, bts);
+        }
+        end = System.currentTimeMillis();
+        System.out.println("LocalBlockSubView use "  + (end -start)+ " length " + localBlockSubView.getLength());
 
         Map<String,Object> map = null;
         start = System.currentTimeMillis();

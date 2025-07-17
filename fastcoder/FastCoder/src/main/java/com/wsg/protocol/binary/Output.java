@@ -71,4 +71,8 @@ public class Output {
         buffer[position] = (byte) (val >>> 24);
         position += 4;
     }
+
+    public int getPosition() {
+        return position;
+    }
 }

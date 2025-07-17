@@ -68,7 +68,7 @@ public class PackProtocol {
         output.writeByte((byte) 0);
         //按kv顺序写入内容, 注意k不要重复，unpack中增加相应处理方法。
         output.writeByte((byte) 'w');
-        StringExt.writeString(output, wsgId);
+        StringExt.writeStringWithCachePool(output, wsgId);
         output.writeByte((byte) 'c');
         StringExt.writeString(output, connId);
         output.writeByte((byte) 'a');
@@ -90,6 +90,20 @@ public class PackProtocol {
         StringExt.writeString(output, ProtocolConstants.ACTION_BINARY_MSG);
         output.writeBinary(message);
         return output.toBytes();
+    }
+
+    public LocalBlockSubView binaryPackBinaryView(String wsgId, String connId, byte[] message) {
+        byte[] buffer = kvLocalBuffer.get();
+        Output output = new Output(buffer, 0);
+        //协议头部及版本号
+        output.writeByte((byte) 'b');
+        output.writeByte((byte) 0);
+        //按顺序写入内容
+        StringExt.writeStringWithCachePool(output, wsgId);
+        StringExt.writeString(output, connId);
+        StringExt.writeString(output, ProtocolConstants.ACTION_BINARY_MSG);
+        output.writeBinary(message);
+        return new LocalBlockSubView(buffer, 0, output.getPosition());
     }
 
 
