@@ -546,7 +546,7 @@ int main() {
     //testProduceOneConsume2();
 
 
-   // testProduceOneConsume4();
+    testProduceOneConsume4();
 
     testProduceOneConsume3();
 

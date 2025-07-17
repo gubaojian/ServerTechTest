@@ -55,7 +55,7 @@ public:
     }
     //需要手动释放
     void releaseStringViewInPool(const StringViewInBigHeapPool& message) {
-        if (message.inPool && !message.messageView.empty()) {
+        if (message.inPool) {
             std::lock_guard<std::mutex> lock(mutex);
             returnOffset += message.messageView.size();
             int64_t remainSize = returnOffset - allocOffset;
