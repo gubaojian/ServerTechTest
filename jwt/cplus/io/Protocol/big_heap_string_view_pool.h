@@ -46,9 +46,9 @@ public:
             return std::string_view{};
         }
         totalGet++;
-        size_t remainSize = returnOffset - allocOffset;
-        size_t offset = allocOffset%poolSize;
+        int64_t remainSize = returnOffset - allocOffset;
         if (remainSize > length) {
+            int64_t offset = allocOffset%poolSize;
             char* from = buffer + offset;
             memcpy(from, data, length);
             allocOffset += length;
@@ -60,8 +60,10 @@ public:
 
     void deallocateStringViewInPool(const std::string_view& message) {
         if (!message.empty()) {
-            if (message.data() < buffer && message.data() >= (buffer + poolSize + 8*1024)) {
+            //加入debug选项。
+            if (message.data() < buffer || message.data() >= (buffer + poolSize + 8*1024)) {
                 std::cout << "deallocateStringViewInPool call release message not in pool" << std::endl;
+                return;
             }
             returnOffset += message.size();
             int64_t remainSize = returnOffset - allocOffset;
