@@ -22,4 +22,11 @@ public class ThreadLocalSharedBuffer {
     public int getLength() {
         return length;
     }
+
+    public final byte[] toBytes() {
+        byte[] bts = new byte[length];
+        System.arraycopy(sharedBuffer, offset, bts, 0, length);
+        return bts;
+    }
+    
 }
