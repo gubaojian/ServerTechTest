@@ -61,7 +61,7 @@ namespace wsg {
             }
 
             void writeVarInt(size_t value) {
-                uint8_t* uint8_buffer = ((uint8_t*)(buffer +  position));
+                char* uint8_buffer = ((buffer +  position));
                 if (value <= 0x7F) {
                     uint8_buffer[0] = value;
                     position +=1;
