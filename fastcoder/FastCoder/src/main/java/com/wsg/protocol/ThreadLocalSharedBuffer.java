@@ -1,18 +1,18 @@
 package com.wsg.protocol;
 
-public class LocalBlockSubView {
-    private final byte[] block;
+public class ThreadLocalSharedBuffer {
+    private final byte[] sharedBuffer;
     private final int offset;
     private final int length;
 
-    public LocalBlockSubView(byte[] block, int offset, int length) {
-        this.block = block;
+    public ThreadLocalSharedBuffer(byte[] buffer, int offset, int length) {
+        this.sharedBuffer = buffer;
         this.offset = offset;
         this.length = length;
     }
 
-    public byte[] getBlock() {
-        return block;
+    public byte[] getSharedBufferView() {
+        return sharedBuffer;
     }
 
     public int getOffset() {

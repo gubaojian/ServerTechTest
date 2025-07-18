@@ -1,7 +1,6 @@
 package org.example;
 
-import com.alibaba.fastjson2.JSON;
-import com.wsg.protocol.LocalBlockSubView;
+import com.wsg.protocol.ThreadLocalSharedBuffer;
 import com.wsg.protocol.PackProtocol;
 import com.wsg.protocol.UnPackProtocol;
 import org.apache.commons.io.FileUtils;
@@ -9,6 +8,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
@@ -124,10 +124,11 @@ public class Main {
         long end = System.currentTimeMillis();
         System.out.println("binary binary use "  + (end -start)+ " length " + packMessgae.length);
 
-        LocalBlockSubView localBlockSubView = null;
+        ThreadLocalSharedBuffer localBlockSubView = null;
         start = System.currentTimeMillis();
         for(int i=0; i<1024*10*200; i++) {
             localBlockSubView = packProtocol.binaryPackBinaryView(wsgId, connId, bts);
+            ByteBuffer.wrap(localBlockSubView.getSharedBufferView(), localBlockSubView.getOffset(), localBlockSubView.getLength());
         }
         end = System.currentTimeMillis();
         System.out.println("LocalBlockSubView use "  + (end -start)+ " length " + localBlockSubView.getLength());

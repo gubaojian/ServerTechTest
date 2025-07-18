@@ -92,7 +92,7 @@ public class PackProtocol {
         return output.toBytes();
     }
 
-    public LocalBlockSubView binaryPackBinaryView(String wsgId, String connId, byte[] message) {
+    public ThreadLocalSharedBuffer binaryPackBinaryView(String wsgId, String connId, byte[] message) {
         byte[] buffer = kvLocalBuffer.get();
         Output output = new Output(buffer, 0);
         //协议头部及版本号
@@ -103,7 +103,7 @@ public class PackProtocol {
         StringExt.writeString(output, connId);
         StringExt.writeString(output, ProtocolConstants.ACTION_BINARY_MSG);
         output.writeBinary(message);
-        return new LocalBlockSubView(buffer, 0, output.getPosition());
+        return new ThreadLocalSharedBuffer(buffer, 0, output.getPosition());
     }
 
 

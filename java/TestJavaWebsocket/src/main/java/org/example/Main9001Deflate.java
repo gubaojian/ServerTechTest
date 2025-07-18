@@ -16,6 +16,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 /**
  * tcp接收端的速度，也会影响发送端的速度。
@@ -73,7 +74,6 @@ public class Main9001Deflate {
         for(int i=0; i<1000*1000*10; i++) {
             client.send(text);
         }
-
 
 
         System.out.println("send complete " + (System.currentTimeMillis() - start));
