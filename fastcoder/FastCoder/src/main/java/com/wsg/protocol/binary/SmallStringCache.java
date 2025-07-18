@@ -25,13 +25,9 @@ public class SmallStringCache {
         int index = SmallStringCache.getTableIndex(target);
         SmallStringCache cacheEntry = stringStable[index];
         if (SmallStringCache.isCacheEntryMiss(cacheEntry, target)) {
-            if (cacheEntry == null) {
-                cacheEntry = new SmallStringCache(target);
-                stringStable[index] = cacheEntry;
-                stringStable[getTableIndex(cacheEntry.bts)] = cacheEntry;
-            } else {
-                return target.getBytes(StandardCharsets.UTF_8);
-            }
+            cacheEntry = new SmallStringCache(target);
+            stringStable[index] = cacheEntry;
+            stringStable[getTableIndex(cacheEntry.bts)] = cacheEntry;
         }
         return cacheEntry.bts;
     }
@@ -47,14 +43,10 @@ public class SmallStringCache {
         int index = SmallStringCache.getTableIndex(bts, offset, length);
         SmallStringCache cacheEntry = stringStable[index];
         if (SmallStringCache.isCacheEntryMiss(cacheEntry, bts, offset, length)) {
-            if (cacheEntry == null) {
-                String target = new String(bts, offset, length, StandardCharsets.UTF_8);
-                cacheEntry = new SmallStringCache(target);
-                stringStable[index] = cacheEntry;
-                stringStable[getTableIndex(target)] = cacheEntry;
-            } else {
-                return new String(bts, offset, length, StandardCharsets.UTF_8);
-            }
+            String target = new String(bts, offset, length, StandardCharsets.UTF_8);
+            cacheEntry = new SmallStringCache(target);
+            stringStable[index] = cacheEntry;
+            stringStable[getTableIndex(target)] = cacheEntry;
         }
         return cacheEntry.value;
     }
