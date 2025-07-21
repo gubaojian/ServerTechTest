@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>表单提交示例</title>
+    <style>
+        .container { max-width: 300px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; }
+        .form-group { margin-bottom: 15px; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        .result { margin-top: 15px; padding: 10px; }
+        .success { color: green; border: 1px solid green; }
+        .error { color: red; border: 1px solid red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="text" name="username" placeholder="用户名" required>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="密码" required>
+            </div>
+            <button type="submit">提交</button>
+        </form>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        // 获取表单和结果容器
+        const form = document.getElementById('loginForm');
+        const result = document.getElementById('result');
+
+        // 监听表单提交事件
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // 阻止表单默认刷新提交
+
+            // 1. 收集表单数据（两种方式任选）
+            // 方式A: 手动构造对象（适合字段少的情况）
+            const formData = {
+                username: form.username.value,
+                password: form.password.value
+            };
+
+            // 方式B: 使用FormData（自动收集所有字段，更通用）
+            // const formData = new FormData(form);
+            // 注意：如果用FormData，下面fetch的headers需要去掉Content-Type
+
+            try {
+                // 2. 发送AJAX请求
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // JSON格式
+                        // 若用FormData提交，不需要设置Content-Type
+                    },
+                    body: JSON.stringify(formData) // 转为JSON字符串
+                    // 若用FormData，直接传 body: formData
+                });
+
+                // 3. 处理响应
+                if (!response.ok) {
+                    throw new Error(`服务器错误: ${response.status}`);
+                }
+
+                const data = await response.json(); // 解析JSON响应
+                result.textContent = `登录成功！欢迎，${data.username}`;
+                result.className = 'result success';
+                
+                // 清空表单
+                form.reset();
+            } catch (error) {
+                result.textContent = `提交失败: ${error.message}`;
+                result.className = 'result error';
+            }
+        });
+    </script>
+</body>
+</html>

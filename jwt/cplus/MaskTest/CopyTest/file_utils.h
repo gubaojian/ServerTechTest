@@ -40,6 +40,28 @@ public:
         
         return content;
     }
+    
+    static void writeFile(const std::string& filePath, const std::string& content, bool binary = false) {
+        std::ios_base::openmode mode = std::ios::out | std::ios::trunc; // 默认覆盖写入
+        if (binary) {
+            mode |= std::ios::binary;
+        }
+        
+        std::ofstream file(filePath, mode);
+        if (!file.is_open()) {
+            throw std::runtime_error("Failed to open file for writing: " + filePath);
+        }
+        
+        // 使用流迭代器写入内容
+        std::copy(content.begin(), content.end(), std::ostreambuf_iterator<char>(file));
+        
+        if (file.bad()) {
+            throw std::runtime_error("Error writing to file: " + filePath);
+        }
+        
+        // 可选：显式刷新缓冲区
+        file.flush();
+    }
 };
 
 #endif // FILE_UTILS_H    
