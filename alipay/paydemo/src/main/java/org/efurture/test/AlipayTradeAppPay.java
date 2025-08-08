@@ -19,7 +19,7 @@ public class AlipayTradeAppPay {
     static final  String appPublicKey  =  "";
     static final  String alipayPublicKey = "";
 
-    
+
     public static void main(String[] args) throws AlipayApiException {
         // 初始化SDK
         DefaultAlipayClient alipayClient = new DefaultAlipayClient(getAlipayConfig());
