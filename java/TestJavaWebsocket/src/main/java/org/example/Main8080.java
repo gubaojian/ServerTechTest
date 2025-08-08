@@ -3,6 +3,7 @@ package org.example;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.java_websocket.WebSocketImpl;
+import org.java_websocket.client.DnsResolver;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.framing.BinaryFrame;
 import org.java_websocket.framing.TextFrame;
@@ -10,8 +11,10 @@ import org.java_websocket.handshake.ServerHandshake;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -43,6 +46,13 @@ public class Main8080 {
 
             }
         };
+        client.setDnsResolver(new DnsResolver() {
+            @Override
+            public InetAddress resolve(URI uri) throws UnknownHostException {
+                InetAddress.getByName()
+                return InetAddress.getByName(uri.getHost());
+            }
+        });
         client.setReceiveBufferSize(512*1024);
         client.connectBlocking();
         Thread.sleep(100);
