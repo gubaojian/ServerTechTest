@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Objects;
-
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 
@@ -49,6 +48,8 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * <p> Unless otherwise noted, passing a {@code null} argument to a
  * method of this class will cause a {@link java.lang.NullPointerException
  * NullPointerException} to be thrown.
+ *
+ * 兼容 Android 5.0+，替代 Java 8 java.util.Base64
  *
  * @author  Xueming Shen
  * @since   1.8
