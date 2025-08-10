@@ -16,8 +16,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "105"
             endingLineNumber = "105"
-            landmarkName = "masked_copy_simd64(i, o, key)"
-            landmarkType = "9">
+            landmarkName = "handleFragment(data, length, remainingBytes, opCode, fin, webSocketState, s)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -32,8 +32,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "104"
             endingLineNumber = "104"
-            landmarkName = "masked_copy_simd64(i, o, key)"
-            landmarkType = "9">
+            landmarkName = "handleFragment(data, length, remainingBytes, opCode, fin, webSocketState, s)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -48,8 +48,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "110"
             endingLineNumber = "110"
-            landmarkName = "masked_copy_simd64(i, o, key)"
-            landmarkType = "9">
+            landmarkName = "handleFragment(data, length, remainingBytes, opCode, fin, webSocketState, s)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -64,8 +64,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "114"
             endingLineNumber = "114"
-            landmarkName = "masked_copy_simd64(i, o, key)"
-            landmarkType = "9">
+            landmarkName = "handleFragment(data, length, remainingBytes, opCode, fin, webSocketState, s)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -80,8 +80,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "113"
             endingLineNumber = "113"
-            landmarkName = "masked_copy_simd64(i, o, key)"
-            landmarkType = "9">
+            landmarkName = "handleFragment(data, length, remainingBytes, opCode, fin, webSocketState, s)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -96,8 +96,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "136"
             endingLineNumber = "136"
-            landmarkName = "masked_copy_simd32(i, o, key)"
-            landmarkType = "9">
+            landmarkName = "unknown"
+            landmarkType = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -112,7 +112,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "221"
             endingLineNumber = "221"
-            landmarkName = "testCopyBench()"
+            landmarkName = "masked_copy_simd128(i, o, key)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>

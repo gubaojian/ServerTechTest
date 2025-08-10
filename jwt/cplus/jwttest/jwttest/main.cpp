@@ -11,7 +11,8 @@
 #include <iomanip>
 #include <iostream>
 
-int main(int argc, const char * argv[]) {
+int demo_code() {
+    
     std::string const token = "eyJhbGciOiJIUzI1NiJ9.eyJjb25uSWQiOiI3ZDIyOTZjZi1hMzFlLTQ5YjctYWQwZi1hOGRhODlhOWI4NjkiLCJpYXQiOjE3NDc4ODEwODl9.bY72ZsXHB4KjnsJTFyyXV0ygZznmAuf4H51MSYGqjZU";
     std::string secret = "i8zIHoTLy2t4uMIztIUi3vA129xYVKAE";
        auto decoded = jwt::decode(token);
@@ -65,6 +66,41 @@ int main(int argc, const char * argv[]) {
     
        //std::cout.imbue(std::locale("ja_JP.utf8"));
     std::cout << "ja_JP: " << std::put_time(&tm, "%Y-%m-%d %H:%M:%S %Z") << '\n';
+    return 0;
+}
+
+
+void  verify_speed_test() {
+    std::string const token = "eyJhbGciOiJIUzI1NiJ9.eyJjb25uSWQiOiJmZjg4NjYwMC01MmRkLTQ0Y2UtOWI2Ni03NjJjNDQyYzEyZWMiLCJpYXQiOjE3NTQ4MjI2NjksImV4cCI6MTc1NDgyNDQ2OX0.XVJtcHmeyFHdbAIh7zTVQqjkbjhOwY7Cnk4D1Z2Svy0";
+    std::string secret = "i8zIHoTLy2t4uMIztIUi3vA129xYVKAE";
+    
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    
+    auto verifier = jwt::verify();
+    verifier = verifier.allow_algorithm(jwt::algorithm::hs256{secret});
+    
+        
+    
+    start = std::chrono::high_resolution_clock::now();
+    auto decoded = jwt::decode(token);
+    for(int i=0; i<10000*100; i++) {
+        std::error_code ec;
+        verifier.verify(decoded, ec);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "jwt verify used " << used.count() << std::endl;
+    
+    
+   
+
+}
+
+int main(int argc, const char * argv[]) {
+    
+    verify_speed_test();
     
     return 0;
 }

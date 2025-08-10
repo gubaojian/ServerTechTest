@@ -1413,9 +1413,10 @@ namespace jwt {
 				if (ec) return;
 
 				bool matched = true;
-				for (size_t i = 0; i < std::min<size_t>(res.size(), signature.size()); i++)
-					if (res[i] != signature[i]) matched = false;
-				if (res.size() != signature.size()) matched = false;
+                if (res.size() != signature.size()
+                    || !std::equal(res.begin(), res.end(), signature.begin())) {
+                    matched = false;
+                }
 				if (!matched) {
 					ec = error::signature_verification_error::invalid_signature;
 					return;
