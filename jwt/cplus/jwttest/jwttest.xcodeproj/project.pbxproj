@@ -263,6 +263,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = (
+					/Users/efurture/code/ServerTechTest/jwt/cplus/jwttest/jwttest/include,
+					"/usr/local/Cellar/openssl@3/3.5.0/include",
+					/Users/baojian/code/ServerTechTest/jwt/cplus/jwttest/jwttest/include,
+					/Users/baojian/cdeps/openssl/include,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"/usr/local/Cellar/openssl@3/3.5.0/lib",
+					/Users/baojian/cdeps/openssl/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -271,6 +281,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = (
+					/Users/efurture/code/ServerTechTest/jwt/cplus/jwttest/jwttest/include,
+					"/usr/local/Cellar/openssl@3/3.5.0/include",
+					/Users/baojian/code/ServerTechTest/jwt/cplus/jwttest/jwttest/include,
+					/Users/baojian/cdeps/openssl/include,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"/usr/local/Cellar/openssl@3/3.5.0/lib",
+					/Users/baojian/cdeps/openssl/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

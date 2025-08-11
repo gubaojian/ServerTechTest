@@ -78,14 +78,16 @@ void  verify_speed_test() {
     auto end = std::chrono::high_resolution_clock::now();
     auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     
-    auto verifier = jwt::verify();
-    verifier = verifier.allow_algorithm(jwt::algorithm::hs256{secret});
+    
     
         
     
     start = std::chrono::high_resolution_clock::now();
-    auto decoded = jwt::decode(token);
+   
     for(int i=0; i<10000*100; i++) {
+        auto verifier = jwt::verify();
+        verifier = verifier.allow_algorithm(jwt::algorithm::hs256{secret});
+        auto decoded = jwt::decode(token);
         std::error_code ec;
         verifier.verify(decoded, ec);
     }
