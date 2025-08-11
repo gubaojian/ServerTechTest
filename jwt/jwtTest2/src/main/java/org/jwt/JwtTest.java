@@ -3,6 +3,7 @@ package org.jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -20,6 +21,8 @@ public class JwtTest {
         testHMACSpeed();
 
         testRSASignSpeed();
+
+        testRSAEncryptionSpeed();
 
     }
 
@@ -91,6 +94,62 @@ public class JwtTest {
 
         System.out.println("RSA2048 耗时: " + (end - start) + "ms");
         System.out.println("RSA2048 签名结果: " + sign);
+    }
+
+
+    public static void testRSAEncryptionSpeed() throws Exception {
+        KeyPair keyPair = generateRSAKeyPair();
+        PublicKey publicKey = keyPair.getPublic();
+        PrivateKey privateKey = keyPair.getPrivate();
+        String text = "hello world中国";
+        byte[] encrptedData = null;
+        {
+            byte[] data = text.getBytes(StandardCharsets.UTF_8);
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+
+            long start = System.currentTimeMillis();
+            int iterations = 1000; // 加密次数
+
+            for (int i = 0; i < iterations; i++) {
+                byte[] encrypted = cipher.doFinal(data);
+                encrptedData = encrypted;
+            }
+
+            long end = System.currentTimeMillis();
+            long totalTime = end - start;
+
+            System.out.println("RSA加密测试:");
+            System.out.println("执行次数: " + iterations);
+            System.out.println("总耗时: " + totalTime + "ms");
+            System.out.println("平均每次耗时: " + (totalTime * 1.0 / iterations) + "ms");
+            System.out.println("每秒可执行: " + (iterations * 1000.0 / totalTime) + "次");
+        }
+
+        {
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+
+            long start = System.currentTimeMillis();
+            int iterations = 1000; // 解密次数
+
+            for (int i = 0; i < iterations; i++) {
+                // 执行解密
+                byte[] decrypted = cipher.doFinal(encrptedData);
+                // 可以在这里将字节数组转换为字符串模拟实际使用场景
+                // String decryptedStr = new String(decrypted, StandardCharsets.UTF_8);
+            }
+
+            long end = System.currentTimeMillis();
+            long totalTime = end - start;
+
+            System.out.println("\nRSA解密测试:");
+            System.out.println("执行次数: " + iterations);
+            System.out.println("总耗时: " + totalTime + "ms");
+            System.out.println("平均每次耗时: " + (totalTime * 1.0 / iterations) + "ms");
+            System.out.println("每秒可执行: " + (iterations * 1000.0 / totalTime) + "次");
+        }
+
     }
 
     public static String generateToken(String connId, long expireTime, Key key) {
