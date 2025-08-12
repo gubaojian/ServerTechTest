@@ -5,8 +5,10 @@ import jdkx.util.compat.Compat;
 
 import java.nio.charset.StandardCharsets;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+/**
+ * aGVsbG8g5Lit5Zu95ZWK5biI5YKFMw==
+ * aGVsbG8g5Lit5Zu9ODg=
+ */
 public class Main {
     public static void main(String[] args) {
         Compat.Math.addExact(0, 0);
