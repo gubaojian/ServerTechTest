@@ -2,7 +2,7 @@ package org.jwt;
 
 import java.security.KeyPair;
 
-public class CplusRsa {
+public class CplusRsaCryptTest {
 
     public static void main(String[] args) throws Exception {
         {
