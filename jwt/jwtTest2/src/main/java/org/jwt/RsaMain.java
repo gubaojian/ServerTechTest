@@ -23,6 +23,8 @@ public class RsaMain {
         System.out.println(connId);
         System.out.println(token);
         System.out.println(parseToken(token, secretKey));
+        String plainText = "hello world rsa";
+        System.out.println(RsaUtil.encrypt(plainText, RsaUtil.PUBLIC_KEY));
     }
 
     /**

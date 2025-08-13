@@ -20,6 +20,8 @@ public class JwtTest {
 
         testHMACSpeed();
 
+        testHMACSpeedForCplus();
+
         testRSASignSpeed();
 
         testRSAEncryptionSpeed();
@@ -65,6 +67,22 @@ public class JwtTest {
 
         System.out.println("hmac used " + (end - start));
         System.out.println("hmac sign " +  sign);
+    }
+
+    public static void testHMACSpeedForCplus() throws NoSuchAlgorithmException, InvalidKeyException {
+        String key = "hello world"; //RandomStringUtils.randomAlphanumeric(32); //32最小
+        Mac mac = Mac.getInstance("HmacSHA256");
+        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        mac.init(secretKey);
+
+        String data = "test sign";
+        byte[] dataBytes = data.getBytes(StandardCharsets.UTF_8);
+
+        String sign = null;
+        byte[] bts = mac.doFinal(dataBytes); // 仅计算 HMAC-SHA256
+        sign = Base64.getEncoder().encodeToString(bts);
+
+        System.out.println("hmac sign result " + sign);
     }
 
     public static void testRSASignSpeed() throws Exception {
