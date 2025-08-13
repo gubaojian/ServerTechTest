@@ -3,6 +3,7 @@ package org.efurture.test;
 import jdkx.compat.util.Base64;
 import jdkx.compat.util.Compat;
 import jdkx.compat.util.HexFormat;
+import okio.ByteString;
 
 import java.nio.charset.StandardCharsets;
 
@@ -44,13 +45,31 @@ public class Main {
             long end = System.currentTimeMillis();
             System.out.println("jdkx.bouncycastle.util.Base64 used " + (end -start ));
         }
+        {
+            long start = System.currentTimeMillis();
+            for(int i=0; i<10000*100; i++) {
+                kotlin.io.encoding.Base64.Default.encode(bts, 0, bts.length);
+            }
+            long end = System.currentTimeMillis();
+            System.out.println("kotlin.io.encoding.Base64 used " + (end -start ));
+        }
+        {
+            long start = System.currentTimeMillis();
+            for(int i=0; i<10000*100; i++) {
+                jdkx.okio.Base64.encode(bts);
+            }
+            long end = System.currentTimeMillis();
+            System.out.println("jdkx.okio.Base64 used " + (end -start ));
+        }
         System.out.println(Base64.getEncoder().encodeToString(bts));
         System.out.println(jdkx.bouncycastle.util.Base64.toBase64String(bts));
+        System.out.println(kotlin.io.encoding.Base64.Default.encode(bts, 0, bts.length));
+        System.out.println(jdkx.okio.Base64.encode(bts));
     }
-
     /**
-     * jdk HexFormat used 81
-     * jdkx.bouncycastle.util.hex.Hex used 557
+     * jdk HexFormat used 80
+     * jdkx.bouncycastle.util.hex.Hex used 551
+     * okio Hex used 80
      * */
     private static void testHex() {
         String text = "hello 中国啊师傅3hello 中国啊师傅3hello 中国啊师傅3hello 中国啊师傅3hello 中国啊师傅3";
@@ -71,8 +90,17 @@ public class Main {
             long end = System.currentTimeMillis();
             System.out.println("jdkx.bouncycastle.util.hex.Hex used " + (end -start ));
         }
+        {
+            long start = System.currentTimeMillis();
+            for(int i=0; i<10000*100; i++) {
+                ByteString.of(bts).hex();
+            }
+            long end = System.currentTimeMillis();
+            System.out.println("okio Hex used " + (end -start ));
+        }
         System.out.println(HexFormat.of().formatHex(bts));
         System.out.println(jdkx.bouncycastle.util.hex.Hex.toHexString(bts));
         System.out.println(HexFormat.of().withUpperCase().formatHex(bts));
+        System.out.println(ByteString.of(bts).hex());
     }
 }
