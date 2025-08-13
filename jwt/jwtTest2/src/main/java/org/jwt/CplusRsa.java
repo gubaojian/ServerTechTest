@@ -45,9 +45,9 @@ public class CplusRsa {
 
 
             {
-                String encryptOAEPPadding = RsaOAEPPaddingAllSha256Util.encrypt(plainText, publicKey);
+                String encryptOAEPPadding = RsaOAEPPaddingSha3256Util.encrypt(plainText, publicKey);
                 System.out.println(encryptOAEPPadding);
-                System.out.println(RsaOAEPPaddingAllSha256Util.decrypt(encryptOAEPPadding, privateKey));
+                System.out.println(RsaOAEPPaddingSha3256Util.decrypt(encryptOAEPPadding, privateKey));
             }
 
         }

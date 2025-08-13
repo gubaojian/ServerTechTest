@@ -11,7 +11,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-public class RsaOAEPPaddingAllSha256Util {
+public class RsaOAEPPaddingSha3256Util {
     private static final String algorithm = "RSA";
 
     private static final int keySize = 2048;
@@ -64,9 +64,9 @@ public class RsaOAEPPaddingAllSha256Util {
         Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPPadding");
         {
             OAEPParameterSpec oaepParams = new OAEPParameterSpec(
-                    "SHA-256",  // 主哈希函数
+                    "SHA3-256",  // 主哈希函数
                     "MGF1",     // 掩码生成函数
-                    new MGF1ParameterSpec("SHA-256"),  // MGF1 使用 SHA-256
+                    new MGF1ParameterSpec("SHA3-256"),  // MGF1 使用 SHA-256
                     PSource.PSpecified.DEFAULT         // 默认空标签（PSource）
             );
             cipher.init(Cipher.ENCRYPT_MODE, publicKey, oaepParams);
@@ -97,13 +97,12 @@ public class RsaOAEPPaddingAllSha256Util {
         PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
         //不通库默认参数不一样：
         // https://github.com/bcgit/bc-java/blob/d85840365a973e5cb2520eba5aba91f4458d47cb/prov/src/main/java/org/bouncycastle/jcajce/provider/asymmetric/rsa/CipherSpi.java#L234
-
-        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPwithSHA-256andMGF1Padding");
+        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPPadding");
         {
             OAEPParameterSpec oaepParams = new OAEPParameterSpec(
-                    "SHA-256",  // 主哈希函数
+                    "SHA3-256",  // 主哈希函数
                     "MGF1",     // 掩码生成函数
-                    new MGF1ParameterSpec("SHA-256"),  // MGF1 使用 SHA-256
+                    new MGF1ParameterSpec("SHA3-256"),  // MGF1 使用 SHA-256
                     PSource.PSpecified.DEFAULT         // 默认空标签（PSource）
             );
             cipher.init(Cipher.DECRYPT_MODE, privateKey, oaepParams);
