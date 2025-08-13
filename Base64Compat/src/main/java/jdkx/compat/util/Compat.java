@@ -1,4 +1,7 @@
-package jdkx.util.compat;
+package jdkx.compat.util;
+
+
+import java.nio.charset.Charset;
 
 public class Compat {
 
@@ -32,12 +35,47 @@ public class Compat {
     }
 
     public static  class Objects {
+
+        public static <T> T requireNonNull(T obj) {
+            if (obj == null)
+                throw new NullPointerException();
+            return obj;
+        }
+
         public static int checkFromIndexSize(int off, int len, int length) {
             if (off < 0 || len < 0 || (long) off + len > length) {
                 throw new IndexOutOfBoundsException("Range [off=" + off + ", len=" + len + "] out of bounds for length " + length);
             }
             return off;
         }
+
+        public static
+        int checkFromToIndex(int fromIndex, int toIndex, int length) {
+            if (fromIndex < 0 || fromIndex > toIndex || toIndex > length)
+                throw new IndexOutOfBoundsException("fromIndex" + fromIndex + ", toIndex" + toIndex + ", length" + length);
+            return fromIndex;
+        }
     }
+
+    public static class Boolean {
+        public static int hashCode(boolean value) {
+            return value ? 1231 : 1237;
+        }
+    }
+
+
+    public static final class StandardCharsets {
+
+        public static final Charset ISO_8859_1 = Charset.forName("ISO8859_1");
+
+        /**
+         * Eight-bit UCS Transformation Format.
+         */
+        public static final Charset UTF_8 =  Charset.forName("UTF-8");
+
+    }
+
+
+
 
 }

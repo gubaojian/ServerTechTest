@@ -1,5 +1,5 @@
 
-package jdkx.util.compat;
+package jdkx.compat.util;
 
 import java.io.FilterOutputStream;
 import java.io.InputStream;
