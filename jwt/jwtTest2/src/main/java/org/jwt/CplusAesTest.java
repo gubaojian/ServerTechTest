@@ -87,6 +87,18 @@ public class CplusAesTest {
             System.out.println(AesEncryptUtil.decryptCTR(encryptText, key128));
         }
 
+        {
+            String key128 = "E7BpQCZlD1hNJYeDUk4RBw==";
+            String plainText = "hello world rsa";
+            System.out.println("------------- CTR ----------------");
+            String encryptText = AesEncryptUtil.encryptCTR(plainText, key128);
+            System.out.println(encryptText);
+            System.out.println(plainText.length());
+            System.out.println(AesEncryptUtil.decryptCTR(encryptText, key128));
+        }
+
+
+
 
 
         {
@@ -97,6 +109,9 @@ public class CplusAesTest {
             System.out.println(encryptText);
             System.out.println(AesEncryptUtil.decryptGCMADD(encryptText, key128));
         }
+
+
+
 
     }
 }

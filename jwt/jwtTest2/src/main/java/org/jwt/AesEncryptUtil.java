@@ -1,8 +1,12 @@
 package org.jwt;
 
 
+import org.bouncycastle.jcajce.spec.AEADParameterSpec;
+import org.cryptomator.siv.SivMode;
+
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
@@ -536,6 +540,8 @@ public class AesEncryptUtil {
             System.arraycopy(iv, 0, result, 0, iv.length);
             System.arraycopy(encryptedBytes, 0, result, iv.length, encryptedBytes.length);
 
+
+
             return Base64.getEncoder().encodeToString(result);
         } catch (Exception e) {
             throw new RuntimeException("AES 加密失败", e);
@@ -630,6 +636,101 @@ public class AesEncryptUtil {
             throw new RuntimeException("AES 解密失败", e);
         }
     }
+
+
+
+    public static String encryptCCM(String plainText, String base64Key) {
+        try {
+            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64.getDecoder().decode(base64Key), "AES");
+            Cipher cipher = Cipher.getInstance("AES/CCM/NoPadding");
+
+            byte[] iv = new byte[GCM_IV_LENGTH];
+            SecureRandom random = new SecureRandom();
+            random.nextBytes(iv); // 随机生成IV
+            //for(int i=0; i<iv.length; i++) {
+                //iv[i] = 'a';
+            //}
+            AEADParameterSpec ivSpec = new AEADParameterSpec(iv, 128);
+
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivSpec);
+
+            byte[] encryptedBytes = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+
+
+            byte[] result = new byte[iv.length + encryptedBytes.length];
+            System.arraycopy(iv, 0, result, 0, iv.length);
+            System.arraycopy(encryptedBytes, 0, result, iv.length, encryptedBytes.length);
+
+            return Base64.getEncoder().encodeToString(result);
+        } catch (Exception e) {
+            throw new RuntimeException("AES 加密失败", e);
+        }
+    }
+
+    /**
+     * 解密方法
+     *
+     * @param encryptedText
+     * @return
+     */
+    public static String decryptCCM(String encryptedText, String base64Key) {
+        try {
+            SecretKeySpec secretKeySpec = new SecretKeySpec(Base64.getDecoder().decode(base64Key), "AES");
+
+            byte[] decoded = Base64.getDecoder().decode(encryptedText);
+
+            // 3. 提取IV（前16字节）和密文（剩余部分）
+            byte[] iv = new byte[GCM_IV_LENGTH];
+            System.arraycopy(decoded, 0, iv, 0, iv.length);
+            AEADParameterSpec ivSpec = new AEADParameterSpec(iv, 128);
+
+            Cipher cipher = Cipher.getInstance("AES/CCM/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivSpec);
+
+            byte[] encryptedBytes = new byte[decoded.length - GCM_IV_LENGTH];
+            System.arraycopy(decoded, GCM_IV_LENGTH, encryptedBytes, 0, encryptedBytes.length);
+
+            byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+            return new String(decryptedBytes, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException("AES 解密失败", e);
+        }
+    }
+
+
+    public static String encryptSIV(String plainText, String base64Key) {
+        try {
+
+            final SivMode AES_SIV = new SivMode();
+            byte[] key = Base64.getDecoder().decode(base64Key);
+            byte[] ctrl = Arrays.copyOf(key, key.length/2);
+            byte[] mac =  Arrays.copyOfRange(key, key.length/2, key.length);
+            byte[] result = AES_SIV.encrypt(ctrl, mac, plainText.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(result);
+        } catch (Exception e) {
+            throw new RuntimeException("AES 加密失败", e);
+        }
+    }
+
+    /**
+     * 解密方法
+     *
+     * @param encryptedText
+     * @return
+     */
+    public static String decryptSIV(String encryptedText, String base64Key) {
+        try {
+            final SivMode AES_SIV = new SivMode();
+            byte[] key = Base64.getDecoder().decode(base64Key);
+            byte[] ctrl = Arrays.copyOf(key, key.length/2);
+            byte[] mac =  Arrays.copyOfRange(key, key.length/2, key.length);
+            byte[] decryptedBytes = AES_SIV.decrypt(ctrl, mac,Base64.getDecoder().decode(encryptedText));
+            return new String(decryptedBytes, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException("AES 解密失败", e);
+        }
+    }
+
 
 
 }
