@@ -50,9 +50,7 @@ public class JwtTest {
 
     public static void testHMACSpeed() throws NoSuchAlgorithmException, InvalidKeyException {
         String key = "i8zIHoTLy2t4uMIztIUi3vA129xYVKAE"; //RandomStringUtils.randomAlphanumeric(32); //32最小
-        Mac mac = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        mac.init(secretKey);
+
 
         String data = "{\"alg\":\"HS256\",\"typ\":\"JWT\"}.{\"connId\":\"abc123\",\"iat\":1620000000,\"exp\":1620000000+1800}";
         byte[] dataBytes = data.getBytes(StandardCharsets.UTF_8);
@@ -60,6 +58,9 @@ public class JwtTest {
         String sign = null;
         long start = System.currentTimeMillis();
         for (int i = 0; i < 10000*100; i++) {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            mac.init(secretKey);
             byte[] bts = mac.doFinal(dataBytes); // 仅计算 HMAC-SHA256
             sign = Base64.getUrlEncoder().encodeToString(bts);
         }

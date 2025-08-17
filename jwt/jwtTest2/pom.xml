@@ -47,6 +47,13 @@
             <version>1.81</version>
         </dependency>
         <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.81</version>
+            <classifier>sources</classifier> <!-- 源码包 -->
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.cryptomator</groupId>
             <artifactId>siv-mode</artifactId>
             <version>1.4.0</version>
