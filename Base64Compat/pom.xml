@@ -20,6 +20,18 @@
             <artifactId>okio</artifactId>
             <version>3.16.0</version>
         </dependency>
+        <!-- Jersey核心依赖，包含UriBuilder -->
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+            <version>3.1.6</version> <!-- 版本可按需更新，截至2024年5月稳定版 -->
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-core-spi -->
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-core-spi</artifactId>
+            <version>6.2.12.Final</version>
+        </dependency>
     </dependencies>
 
 </project>
