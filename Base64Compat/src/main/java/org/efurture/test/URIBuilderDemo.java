@@ -45,5 +45,11 @@ public class URIBuilderDemo {
             System.out.println(processor.toURL());
         }
 
+        {
+            URIProcessor processor = URIProcessor.fromURI("https://a.com:8080/api?name=test&name=test&id=1");
+            processor.setQueryParameter("name&", "update&name");
+            System.out.println(processor.getQueryParameters("name"));
+        }
+
     }
 }

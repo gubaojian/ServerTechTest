@@ -7,6 +7,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
+/**
+ * Helper class for building or manipulating URI references. Not safe for concurrent use.
+ * */
 public class URIProcessor {
     private final URI sourceUri;
     private final Map<String, List<String>> queryMap;
