@@ -17,6 +17,9 @@ public class Main {
         System.out.println(Base64.getEncoder().encodeToString("hello 中国啊师傅3".getBytes(StandardCharsets.UTF_8)));
         System.out.println(Base64.getUrlEncoder().encodeToString("hello 中国88".getBytes(StandardCharsets.UTF_8)));
 
+        System.out.println(new String(Base64.getDecoder().decode("aGVsbG8g5Lit5Zu9ODg")));
+
+
         testBase64();
 
         testHex();

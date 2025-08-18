@@ -41,18 +41,20 @@
             <version>1.18.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+        <!---
+               <dependency>
+                   <groupId>org.bouncycastle</groupId>
+                   <artifactId>bcprov-jdk18on</artifactId>
+                   <version>1.81</version>
+               </dependency>
+               -->
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-debug-jdk18on -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
+            <artifactId>bcprov-debug-jdk18on</artifactId>
             <version>1.81</version>
         </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.81</version>
-            <classifier>sources</classifier> <!-- 源码包 -->
-            <scope>provided</scope>
-        </dependency>
+
         <dependency>
             <groupId>org.cryptomator</groupId>
             <artifactId>siv-mode</artifactId>
