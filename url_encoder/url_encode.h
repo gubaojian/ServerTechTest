@@ -9,11 +9,11 @@
 
 
 inline size_t  max_url_encode_len(size_t length) {
-    return length * 3 + 1; //length * 3 + 1, 1 for \n space
+    return length * 3 + 1; //length * 3 + 1, 1 for \0 space
 }
 
 inline size_t  max_url_decode_len(size_t length) {
-    return length + 1; // 1 for \n space
+    return length + 1; // 1 for \0 space
 }
 
 /**
