@@ -1,5 +1,10 @@
 //
-// Created by baojian on 2025/8/18.
+// This software is licensed under the MIT License.
+// For details, see the LICENSE file in the project root.
+//
+// Modified by baojian on 2025/8/18:
+// - Refactored internal identifiers to avoid naming conflicts;
+// - Optimized code readability while preserving core functionality.
 //
 
 #include "url_encode.h"
