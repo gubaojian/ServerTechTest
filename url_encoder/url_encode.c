@@ -8,7 +8,9 @@
 
 /**
  * https://github.com/curl/curl/blob/master/lib/escape.c
- * url 参考curl及java代码实现。
+ * https://github.com/ada-url/ada/tree/main
+ * https://github.com/cpp-netlib/cpp-netlib
+ * url 参考curl及java代码实现。独立类，零依赖，方便外部工程使用
  */
 #define INNER_ISLOWHEXALHA(x) (((x) >= 'a') && ((x) <= 'f'))
 #define INNER_ISUPHEXALHA(x) (((x) >= 'A') && ((x) <= 'F'))
