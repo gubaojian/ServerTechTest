@@ -1,5 +1,7 @@
 package org.jwt;
 
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.internal.util.asymmetric.SM2Encryptor;
 import org.bouncycastle.asn1.gm.GMNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
@@ -12,6 +14,7 @@ import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.SM2Signer;
+import org.bouncycastle.jcajce.spec.SM2ParameterSpec;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
@@ -136,30 +139,41 @@ public class SM2Utils {
      * @param data 待签名数据
      * @return 签名结果（十六进制）
      */
-    public static String sign(ECPrivateKeyParameters privateKey, byte[] data) throws CryptoException {
-        SM2Signer signer = new SM2Signer();
-        signer.init(true, new ParametersWithRandom(privateKey, new SecureRandom()));
-        signer.update(data, 0, data.length);
-        byte[] signature = signer.generateSignature();
-        return Hex.toHexString(signature);
+    public static String sign(PrivateKey privateKey, byte[] data) throws CryptoException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidAlgorithmParameterException {
+        // 1. 获取标准Signature实例，算法为"SM3withSM2"（SM2签名必须搭配SM3哈希）
+        Signature signature = Signature.getInstance("SM3withSM2", "BC");
+        // 2. 初始化签名模式：传入私钥和随机数（SM2签名需随机性）
+        signature.initSign(privateKey, new SecureRandom());
+        signature.setParameter(new SM2ParameterSpec(USER_ID.getBytes()));
+        // 3. 更新待签名数据
+        signature.update(data);
+        // 4. 生成签名字节数组，转为十六进制返回
+        byte[] signBytes = signature.sign();
+        return Hex.toHexString(signBytes);
     }
 
     /**
      * 验证签名
      * @param publicKey 公钥
      * @param data 原始数据
-     * @param signature 签名（十六进制）
+     * @param signatureHex 签名（十六进制）
      * @return 验证结果
      */
-    public static boolean verify(ECPublicKeyParameters publicKey, byte[] data, String signature) {
-        SM2Signer signer = new SM2Signer();
-        signer.init(false, publicKey);
-        signer.update(data, 0, data.length);
-        return signer.verifySignature(Hex.decode(signature));
+    public static boolean verify(PublicKey publicKey, byte[] data, String signatureHex) throws NoSuchAlgorithmException, NoSuchProviderException, InvalidKeyException, SignatureException, InvalidAlgorithmParameterException {
+        // 1. 获取标准Signature实例，算法与签名一致
+        Signature signature = Signature.getInstance("SM3withSM2", "BC");
+        // 2. 初始化为验证模式：传入公钥
+        signature.initVerify(publicKey);
+        signature.setParameter(new SM2ParameterSpec(USER_ID.getBytes()));
+        // 3. 更新原始数据（需与签名时的原始数据完全一致）
+        signature.update(data);
+        // 4. 解码十六进制签名，验证结果
+        byte[] signBytes = Hex.decode(signatureHex);
+        return signature.verify(signBytes);
     }
 
     // 测试方法
-    public static void main(String[] args) {
+    public static void main(String[] args) throws AlipayApiException {
         try {
             // 生成密钥对
             KeyPair keyPair = generateKeyPair();
@@ -182,17 +196,33 @@ public class SM2Utils {
             // 解密
             byte[] decryptedData = decrypt(privateKey, encryptedData);
             System.out.println("解密后: " + new String(decryptedData, "UTF-8"));
-            /**
+
             // 签名
             String signature = sign(privateKey, originalData.getBytes("UTF-8"));
             System.out.println("签名: " + signature);
 
             // 验证签名
             boolean verifyResult = verify(publicKey, originalData.getBytes("UTF-8"), signature);
-            System.out.println("签名验证结果: " + verifyResult);*/
+            System.out.println("签名验证结果: " + verifyResult);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        {
+            SM2Encryptor sm2 = new SM2Encryptor();
+            String privateKey = "MIGHAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBG0wawIBAQQgTKwFtNzANfbXyLjMZsfQVKdRJniH29LrYlsMPpP4JQGhRANCAASfROCTf3PbQ4sHNMwOAyMUYrQ5hGdXQWcy9Gp4qjF/77XgiAVq8jUNk/7+YeH/fLf7epFX63qNDEy1HcuPSV9l";
+            String publicKey = "MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAEn0Tgk39z20OLBzTMDgMjFGK0OYRnV0FnMvRqeKoxf++14IgFavI1DZP+/mHh/3y3+3qRV+t6jQxMtR3Lj0lfZQ==";
+            String originalData = "hello world sm2";
+            String sign = sm2.sign(originalData, "UTF-8", privateKey);
+
+            System.out.println(sign);
+            System.out.println("验证结果");
+
+            System.out.println(sm2.verify(originalData, "UTF-8", publicKey, sign));
+
+        }
     }
+
+    private static final String USER_ID = "1234567812345678";
 }
