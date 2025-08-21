@@ -1,3 +1,5 @@
+package org.jwt;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -14,7 +16,10 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 public class ChaCha20CipherExample {
     // ChaCha20密钥长度为256位(32字节)
     private static final int KEY_SIZE = 256;
-    // 非ce长度为96位(12字节) - 符合IETF标准
+    /**
+     * The ChaCha20 stream cipher. The key length is 256 bits, the IV is 128 bits long.
+     * https://docs.openssl.org/3.1/man3/EVP_chacha20/#synopsis
+     * */
     private static final int NONCE_SIZE = 12;
     // 算法名称
     private static final String ALGORITHM = "ChaCha20";
@@ -108,18 +113,19 @@ public class ChaCha20CipherExample {
             // 2. 生成非ce
             byte[] nonce = generateNonce();
             String nonceBase64 = Base64.getEncoder().encodeToString(nonce);
-            System.out.println("生成的非ce(Base64): " + nonceBase64);
+            System.out.println("生成的nonce(Base64): " + nonceBase64);
 
             // 3. 原始数据
             String originalText = "这是一个使用标准Cipher API的ChaCha20加密解密示例";
             System.out.println("原始文本: " + originalText);
 
             // 4. 加密
+            byte[] opensslCompat = new byte[4];
             byte[] ciphertext = encrypt(originalText.getBytes(StandardCharsets.UTF_8), restoredKey, nonce);
             String ciphertextBase64 = Base64.getEncoder().encodeToString(ciphertext);
             System.out.println("加密后的文本(Base64): " + ciphertextBase64);
             System.out.println("加密后的文本带once(Base64): " + Base64.getEncoder().encodeToString(
-                    org.bouncycastle.util.Arrays.concatenate(nonce, ciphertext)
+                    org.bouncycastle.util.Arrays.concatenate(opensslCompat, nonce, ciphertext)
             ));
 
             // 5. 解密
