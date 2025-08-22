@@ -17,6 +17,11 @@ public class ECDHExample {
         KeyPair aliceKeyPair = keyPairGenerator.generateKeyPair();
         KeyPair bobKeyPair = keyPairGenerator.generateKeyPair();
 
+        System.out.println(Base64.getEncoder().encodeToString(aliceKeyPair.getPrivate().getEncoded()));
+        System.out.println(Base64.getEncoder().encodeToString(aliceKeyPair.getPublic().getEncoded()));
+        System.out.println(Base64.getEncoder().encodeToString(bobKeyPair.getPrivate().getEncoded()));
+        System.out.println(Base64.getEncoder().encodeToString(bobKeyPair.getPublic().getEncoded()));
+
         // 3. 初始化 ECDH 密钥协商对象
         KeyAgreement aliceAgreement = KeyAgreement.getInstance("ECDH");
         KeyAgreement bobAgreement = KeyAgreement.getInstance("ECDH");
