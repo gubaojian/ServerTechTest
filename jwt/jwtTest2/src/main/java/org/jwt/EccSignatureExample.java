@@ -74,13 +74,29 @@ public class EccSignatureExample {
             System.out.println("ECC公钥（Base64）：" + Base64.getEncoder().encodeToString(publicKey.getEncoded()));
             System.out.println("ECC私钥（Base64）：" + Base64.getEncoder().encodeToString(privateKey.getEncoded()));
 
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.append("std::string publicKey =\"");
+                sb.append(Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+                sb.append("\";\n\n");
+
+                sb.append("std::string privateKey = \"");
+                sb.append(Base64.getEncoder().encodeToString(privateKey.getEncoded()));
+                sb.append("\";\n\n");
+                System.out.println(sb.toString());
+            }
+
+
+
+
             // 2. 待签名的原始数据
-            String originalData = "Hello, ECC Signature!";
+            String originalData = "Hello ECC Signature";
             System.out.println("\n原始数据：" + originalData);
             byte[] data = originalData.getBytes("UTF-8");
 
             // 3. 用私钥对数据进行签名
             byte[] signature = sign(data, privateKey);
+            System.out.println("签名结果（长度）：" + signature.length);
             System.out.println("签名结果（Base64）：" + Base64.getEncoder().encodeToString(signature));
 
             // 4. 用公钥验证签名
