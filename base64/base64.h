@@ -10,6 +10,10 @@ static inline size_t base64_encode_len(size_t inlen) {
     return ((inlen + 2) / 3) * 4;
 }
 
+static inline size_t base64_decode_max_len(size_t inlen) {
+    return ((inlen + 3) / 4) * 3;
+}
+
 
 int base64_encode(const unsigned char *in, size_t inlen, unsigned char *out);
 int base64_encode_url_safe(const unsigned char *in, size_t inlen, unsigned char *out);
