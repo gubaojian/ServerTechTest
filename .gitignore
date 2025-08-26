@@ -59,3 +59,7 @@ rust/ws/hello-ws/target/
 
 jwt/cplus/io/simdjsontest/build/
 
+base64/cmake-build-debug/*
+base64/cmake-build-release/*
+base64/.idea/*
+
