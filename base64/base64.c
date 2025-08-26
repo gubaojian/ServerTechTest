@@ -5,10 +5,9 @@
 #include "base64.h"
 
 #include <stddef.h>
+#include <stdbool.h>
+#include <stdio.h>
 
-typedef int cdk_bool;
-#define cdk_true 1
-#define cdk_false 0
 
 static const unsigned char cdk_data_bin2ascii[65] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -21,13 +20,13 @@ static const unsigned char cdk_url_safe_data_bin2ascii[65] =
 
 #define cdk_conv_bin2ascii(a, table)       ((table)[(a)&0x3f])
 
-#define B64_EOLN                0xF0
-#define B64_CR                  0xF1
-#define B64_EOF                 0xF2
-#define B64_WS                  0xE0
-#define B64_ERROR               0xFF
-#define B64_NOT_BASE64(a)       (((a)|0x13) == 0xF3)
-#define B64_BASE64(a)           (!B64_NOT_BASE64(a))
+#define CDK_B64_EOLN                0xF0
+#define CDK_B64_CR                  0xF1
+#define CDK_B64_EOF                 0xF2
+#define CDK_B64_WS                  0xE0
+#define CDK_B64_ERROR               0xFF
+#define CDK_B64_NOT_BASE64(a)       (((a)|0x13) == 0xF3)
+#define CDK_B64_BASE64(a)           (!CDK_B64_NOT_BASE64(a))
 
 static const unsigned char cdk_data_ascii2bin[128] = {
        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -67,7 +66,7 @@ static const unsigned char cdk_url_safe_data_ascii2bin[128] = {
     0x31, 0x32, 0x33, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 };
 
-// 混合映射表：让URL-safe解码器同时兼容标准Base64（+/-）和URL-safe Base64（-/_）
+// 混合映射表：兼容 标准Base64（+/-）和URL-safe Base64（-/_）
 static const unsigned char cdk_url_safe_combine_data_ascii2bin[128] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
     0xFF, 0xE0, 0xF0, 0xFF, 0xFF, 0xF1, 0xFF, 0xFF,
@@ -90,12 +89,12 @@ static const unsigned char cdk_url_safe_combine_data_ascii2bin[128] = {
 static unsigned char cdk_conv_ascii2bin(unsigned char a, const unsigned char *table)
 {
     if (a & 0x80)
-        return B64_ERROR;
+        return CDK_B64_ERROR;
     return table[a];
 }
 
 static int base64_encodeblock(unsigned char *out,
-                               const unsigned char *in, int dlen, cdk_bool url_safe)
+                               const unsigned char *in, int dlen, bool url_safe)
 {
     int i, ret = 0;
     unsigned long l;
@@ -128,20 +127,17 @@ static int base64_encodeblock(unsigned char *out,
         in += 3;
     }
 
-    *out = '\0';
     return ret;
 }
 
 static int base64_decodeblock(unsigned char *out,
-                               const unsigned char *in, int n,
-                               int eof, size_t tableId)
+                               const unsigned char *in, int n, size_t tableId)
 {
     int i, ret = 0, a, b, c, d;
     unsigned long l;
     const unsigned char *table;
 
-    if (eof < -1 || eof > 2)
-        return -1;
+
 
     if (tableId == 1)
         table = cdk_url_safe_data_ascii2bin;
@@ -151,7 +147,7 @@ static int base64_decodeblock(unsigned char *out,
         table = cdk_data_ascii2bin;
 
     /* trim whitespace from the start of the line. */
-    while ((n > 0) && (cdk_conv_ascii2bin(*in, table) == B64_WS)) {
+    while ((n > 0) && (cdk_conv_ascii2bin(*in, table) == CDK_B64_WS)) {
         in++;
         n--;
     }
@@ -160,11 +156,11 @@ static int base64_decodeblock(unsigned char *out,
      * strip off stuff at the end of the line ascii2bin values B64_WS,
      * B64_EOLN, B64_EOLN and B64_EOF
      */
-    while ((n > 3) && (B64_NOT_BASE64(cdk_conv_ascii2bin(in[n - 1], table))))
+    while ((n > 0) && (CDK_B64_NOT_BASE64(cdk_conv_ascii2bin(in[n - 1], table))))
         n--;
 
-    if (n % 4 != 0)
-        return -1;
+    int remain = n % 4;
+
     if (n == 0)
         return 0;
 
@@ -185,21 +181,43 @@ static int base64_decodeblock(unsigned char *out,
         ret += 3;
     }
 
-    /* process the last block that may have padding. */
-    a = cdk_conv_ascii2bin(*(in++), table);
-    b = cdk_conv_ascii2bin(*(in++), table);
-    c = cdk_conv_ascii2bin(*(in++), table);
-    d = cdk_conv_ascii2bin(*(in++), table);
+    /* process the last block with auto padding. */
+    int  autoPadding = 0;
+    if (remain == 0) {
+        a = cdk_conv_ascii2bin(*(in++), table);
+        b = cdk_conv_ascii2bin(*(in++), table);
+        c = cdk_conv_ascii2bin(*(in++), table);
+        d = cdk_conv_ascii2bin(*(in++), table);
+        autoPadding = 0;
+    } else if (remain == 1) {
+        a = cdk_conv_ascii2bin(*(in++), table);
+        b = cdk_conv_ascii2bin('=', table);
+        c = cdk_conv_ascii2bin('=', table);
+        d = cdk_conv_ascii2bin('=', table);
+        autoPadding = 3;
+    } else if (remain == 2) {
+        a = cdk_conv_ascii2bin(*(in++), table);
+        b = cdk_conv_ascii2bin(*(in++), table);
+        c = cdk_conv_ascii2bin('=', table);
+        d = cdk_conv_ascii2bin('=', table);
+        autoPadding = 2;
+    } else if (remain == 3) {
+        a = cdk_conv_ascii2bin(*(in++), table);
+        b = cdk_conv_ascii2bin(*(in++), table);
+        c = cdk_conv_ascii2bin(*(in++), table);
+        d = cdk_conv_ascii2bin('=', table);
+        autoPadding = 1;
+    }
     if ((a | b | c | d) & 0x80)
         return -1;
     l = ((((unsigned long)a) << 18L) |
          (((unsigned long)b) << 12L) |
          (((unsigned long)c) << 6L) | (((unsigned long)d)));
 
-    if (eof == -1)
-        eof = (in[2] == '=') + (in[3] == '=');
+    if (autoPadding > 2)
+        return -1;
 
-    switch (eof) {
+    switch (autoPadding) {
     case 2:
         *(out++) = (unsigned char)(l >> 16L) & 0xff;
         break;
@@ -213,27 +231,92 @@ static int base64_decodeblock(unsigned char *out,
         *(out++) = (unsigned char)(l) & 0xff;
         break;
     }
-    ret += 3 - eof;
+    ret += 3 - autoPadding;
     return ret;
 }
 
 
-int base64_encode(const unsigned char *in, size_t inlen, unsigned char *out) {
-    return base64_encodeblock(out, in, inlen, cdk_false);
+int base64_encode(const unsigned char *in, size_t inlen, unsigned char *out, size_t* outlen) {
+    if (outlen == NULL) {
+        return -1;
+    }
+    if (in == NULL || out == NULL) {
+        *outlen = 0;
+        return -1;
+    }
+    int ret = base64_encodeblock(out, in, inlen, false);
+    if (ret >= 0) {
+        *outlen = ret;
+        return 0;
+    }
+    *outlen = 0;
+    return ret;
 }
-int base64_encode_url_safe(const unsigned char *in, size_t inlen, unsigned char *out) {
-    return base64_encodeblock(out, in, inlen, cdk_true);
+int base64_encode_url_safe(const unsigned char *in, size_t inlen, unsigned char *out, size_t* outlen) {
+    if (outlen == NULL) {
+        return -1;
+    }
+    if (in == NULL || out == NULL) {
+        *outlen = 0;
+        return -1;
+    }
+    int ret = base64_encodeblock(out, in, inlen, true);
+    if (ret >= 0) {
+        *outlen = ret;
+        return 0;
+    }
+    *outlen = 0;
+    return ret;
 }
 
-int base64_decode(const unsigned char *in, size_t inlen, unsigned char *out) {
-    return base64_decodeblock(out, in, inlen, -1, 0);
+int base64_decode(const unsigned char *in, size_t inlen, unsigned char *out, size_t* outlen) {
+    if (outlen == NULL) {
+        return -1;
+    }
+    if (in == NULL || out == NULL) {
+        *outlen = 0;
+        return -1;
+    }
+    int ret = base64_decodeblock(out, in, inlen,  0);
+    if (ret >= 0) {
+        *outlen = ret;
+        return 0;
+    }
+    *outlen = 0;
+    return ret;
 }
 
-int base64_decode_url_safe(const unsigned char *in, size_t inlen, unsigned char *out) {
-    return base64_decodeblock(out, in, inlen, -1, 1);
+int base64_decode_url_safe(const unsigned char *in, size_t inlen, unsigned char *out, size_t* outlen) {
+    if (outlen == NULL) {
+        return -1;
+    }
+    if (in == NULL || out == NULL) {
+        *outlen = 0;
+        return -1;
+    }
+    int ret = base64_decodeblock(out, in, inlen,  1);
+    if (ret >= 0) {
+        *outlen = ret;
+        return 0;
+    }
+    *outlen = 0;
+    return ret;
 }
 
 //自动解码, 支持标准base64 和 urlsafe 模式的base64
-int base64_auto_decode(const unsigned char *in, size_t inlen, unsigned char *out) {
-    return base64_decodeblock(out, in, inlen, -1, 2);
+int base64_auto_decode(const unsigned char *in, size_t inlen, unsigned char *out, size_t* outlen) {
+    if (outlen == NULL) {
+        return -1;
+    }
+    if (in == NULL || out == NULL) {
+        *outlen = 0;
+        return -1;
+    }
+    int ret = base64_decodeblock(out, in, inlen, 2);
+    if (ret >= 0) {
+        *outlen = ret;
+        return 0;
+    }
+    *outlen = 0;
+    return ret;
 }

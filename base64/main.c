@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "base64.h"
 
@@ -80,14 +81,15 @@ void print_url_safe_table() {
 void testBase64() {
     char out[1024];
     char dout[1024];
-    char* in = " +/=中国你好 base64 测试 ";
-
+    char* in = " +/=你好 base64 测试 ";
+    size_t outlen;
+    size_t dlen;
     {
         printf("base64 encode decode \n");
         size_t inlen = strlen(in);
-        size_t outlen = base64_encode(in, inlen, out);
+        base64_encode(in, inlen, out, &outlen);
         printf("%s %ld %ld\n", out, outlen,  base64_encode_len(inlen));
-        size_t dlen = base64_decode(out, outlen, dout);
+        base64_decode(out, outlen, dout, &dlen);
         dout[dlen] = '\0';
         printf("%s %ld\n", dout, dlen);
     }
@@ -95,9 +97,9 @@ void testBase64() {
     {
         printf("base64 encode decode \n");
         size_t inlen = strlen(in);
-        size_t outlen = base64_encode_url_safe(in, inlen, out);
+        base64_encode_url_safe(in, inlen, out, &outlen);
         printf("%s %ld %ld\n", out, outlen,  base64_encode_len(inlen));
-        size_t dlen = base64_decode_url_safe(out, outlen, dout);
+        base64_decode_url_safe(out, outlen, dout, &dlen);
         dout[dlen] = '\0';
         printf("%s %ld\n", dout, dlen);
     }
@@ -105,9 +107,9 @@ void testBase64() {
     {
         printf("base64 encode auto decode \n");
         size_t inlen = strlen(in);
-        size_t outlen = base64_encode_url_safe(in, inlen, out);
+        base64_encode_url_safe(in, inlen, out, &outlen);
         printf("%s %ld %ld\n", out, outlen,  base64_encode_len(inlen));
-        size_t dlen = base64_auto_decode(out, outlen, dout);
+        base64_auto_decode(out, outlen, dout, &dlen);
         dout[dlen] = '\0';
         printf("%s %ld\n", dout, dlen);
     }
@@ -115,17 +117,70 @@ void testBase64() {
     {
         printf("base64 encode auto decode \n");
         size_t inlen = strlen(in);
-        size_t outlen = base64_encode(in, inlen, out);
+        base64_encode(in, inlen, out, &outlen);
         printf("%s %ld %ld\n", out, outlen,  base64_encode_len(inlen));
-        size_t dlen = base64_auto_decode(out, outlen, dout);
+        base64_auto_decode(out, outlen, dout, &dlen);
         dout[dlen] = '\0';
         printf("%s %ld\n", dout, dlen);
     }
+
+    {
+        printf("base64 encode auto decode 2 \n");
+        char* out_test = "ICsvPeS9oOWlvSBiYXNlNjQg5rWL6K+VIA====";
+        outlen = strlen(out_test);
+        memcpy(out, out_test, outlen);
+        base64_auto_decode(out, outlen, dout, &dlen);
+        dout[dlen] = '\0';
+        printf("%s %ld\n", dout, dlen);
+    }
+
 }
+
+/**
+ *
+ *  编码耗时：147.43 ms（平均单次：0.000147 ms）
+ *  解码耗时：218.82 ms（平均单次：0.000219 ms）
+ */
+void testBase64Perf() {
+    char out[1024];
+    char dout[1024];
+    char* in = " +/=你好 base64 测试+/=你好 base64 测试+/=你好 base64 测试+/=你好 base64 测试+/=你好 base64 测试+/=你好 base64 测试v+/=你好 base64 测试+/=你好 base64 测试+/=你好 base64 测试+/=你好 base64 测试 ";
+    size_t inlen = strlen(in);
+    size_t outlen;
+    size_t dlen;
+    {
+        clock_t start, end;
+        start = clock();
+        size_t LOOP_COUNT = 10000*100;
+        for (size_t i=0; i<LOOP_COUNT; i++) {
+            base64_encode(in, inlen, out, &outlen);
+        }
+        end = clock();
+        double cost_ms = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+        printf("编码耗时：%.2f ms（平均单次：%.6f ms）\n",
+           cost_ms, cost_ms / LOOP_COUNT);
+    }
+
+    {
+        clock_t start, end;
+        start = clock();
+        size_t LOOP_COUNT = 10000*100;
+        for (size_t i=0; i<10000*100; i++) {
+            base64_auto_decode(out, outlen, dout, &dlen);
+        }
+        end = clock();
+        double cost_ms = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+        printf("解码耗时：%.2f ms（平均单次：%.6f ms）\n",
+           cost_ms, cost_ms / LOOP_COUNT);
+    }
+
+
+}
+
 
 int main(void) {
     testBase64();
-
+    testBase64Perf();
     //print_normal_table();
     //print_url_safe_table();
 

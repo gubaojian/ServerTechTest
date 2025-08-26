@@ -23,6 +23,8 @@ public class Main {
         testBase64();
 
         testHex();
+
+        System.out.println(Base64.getDecoder().decode("ICsvPeS9oOWlvSBiYXNlNjQg5rWL6K+VIA="));
     }
 
     /**
