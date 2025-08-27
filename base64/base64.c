@@ -348,7 +348,7 @@ int base64_decode_url_safe(const unsigned char *in, size_t inlen, unsigned char 
     return ret;
 }
 
-int base64_decode_url_safe_or_std(const unsigned char *in, size_t inlen, unsigned char *out, size_t* outlen) {
+int base64_decode_both_url_safe_and_std(const unsigned char *in, size_t inlen, unsigned char *out, size_t* outlen) {
     if (outlen == NULL) {
         return -1;
     }

@@ -40,7 +40,7 @@ int base64_decode_url_safe(const unsigned char *in, size_t inlen, unsigned char 
 /**
  * Base64 解码 和 URL-Safe Base64 解码。不支持空格换行
  */
-int base64_decode_url_safe_or_std(const unsigned char *in, size_t inlen, unsigned char *out, size_t* outlen);
+int base64_decode_both_url_safe_and_std(const unsigned char *in, size_t inlen, unsigned char *out, size_t* outlen);
 
 /**
  * 自动解码支持，支持带换行和空格的标准 Base64 解码 和 URL-Safe Base64 解码。
