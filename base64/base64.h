@@ -59,7 +59,7 @@ bool base64_has_invalid_chars(const unsigned char *in, size_t inlen);
  * 自动清理输入换行，空格等非法字符情况，转换url safe模式，转换为标准的base64。
  * out缓冲区传入的outlen要保留padding空间，传入0或空间不足，则不会自动padding
  * 输出缓冲区最小需为 inlen 字节（最坏情况：输入全为有效字符，无过滤），
- * 若需自动填充，建议额外预留 2 字节（最多需要2个'='）。
+ * 若需自动填充，建议额外预留 2-4 字节（最多需要2个'='）。
  * 返回0成功，非0失败
  */
 int base64_convert_to_std(const unsigned char *in, size_t inlen,
