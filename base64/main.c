@@ -149,7 +149,7 @@ void testBase64() {
 
     {
         printf("base64 encode auto decode 2 \n");
-        char* out_test = "ICsvPeS9oOWlvSBiYXNlNjQg5rWL6K+VIA====";
+        char* out_test = "ICsvPeS9oOWlvSBiYXNlNjQg5rWL6K+VIA==";
         outlen = strlen(out_test);
         memcpy(out, out_test, outlen);
         base64_auto_decode(out, outlen, dout, &dlen);
@@ -159,7 +159,7 @@ void testBase64() {
 
     {
         printf("base64 encode auto decode with to std \n");
-        char* out_test = "I CsvPeS9oOW  lvSBiYXN   lNj\n Qg5rWL6K+VIA====";
+        char* out_test = "I CsvPeS9oOW  lvSBiYXN   lNj\n Qg5rWL6K+VIA==";
         outlen = strlen(out_test);
         memcpy(out, out_test, outlen);
         base64_auto_decode(out, outlen, dout, &dlen);
