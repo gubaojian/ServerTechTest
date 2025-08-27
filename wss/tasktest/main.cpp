@@ -69,6 +69,8 @@ private:
         loop = uv_loop_new();
         if (loop == nullptr) {
             std::cerr << "[UVTaskPool] uv_loop_new failed: out of memory" << std::endl;
+            stopFlag = true;
+            hasInitFlag = false;
             return;
         }
         uv_async_init(loop, &stopAsync, [](uv_async_t *handle) {
@@ -87,9 +89,8 @@ private:
                 uv_close((uv_handle_t*)&pool->stopAsync, [](uv_handle_t* handle) {
                     auto *pool = (UVTaskPool *) handle->data;
                     uv_close((uv_handle_t*)&pool->taskAsync, [](uv_handle_t* handle) {
-                          auto *pool = (UVTaskPool *) handle->data;
-                           uv_loop_close(pool->loop);
-                           free(pool->loop);
+                           auto *pool = (UVTaskPool *) handle->data;
+                           uv_loop_delete(pool->loop);
                            pool->loop = nullptr;
                     });
                });
@@ -186,6 +187,8 @@ private:
         loop = uv_loop_new();
         if (loop == nullptr) {
             std::cerr << "[UVTaskConcurrentPool] uv_loop_new failed: out of memory" << std::endl;
+            stopFlag = true;
+            hasInitFlag = false;
             return;
         }
         uv_async_init(loop, &stopAsync, [](uv_async_t *handle) {
@@ -205,8 +208,7 @@ private:
                     auto *pool = (UVTaskConcurrentPool *) handle->data;
                     uv_close((uv_handle_t*)&pool->taskAsync, [](uv_handle_t* handle) {
                            auto *pool = (UVTaskConcurrentPool *) handle->data;
-                           uv_loop_close(pool->loop);
-                           free(pool->loop);
+                           uv_loop_delete(pool->loop);
                            pool->loop = nullptr;
                     });
                 });
