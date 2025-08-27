@@ -386,19 +386,19 @@ void test() {
     testConcurrentQueueTwo();
 }
 
-size_t test_for_stable_count = 1024;
+size_t test_for_stable_count = 1024*1024*10*2;
 
 void testForStable() {
-    for (int i=0; i<test_for_stable_count; i++) {
+    for (size_t i=0; i<test_for_stable_count; i++) {
         test();
     }
     std::thread test2([] {
-        for (int i=0; i<test_for_stable_count; i++) {
+        for (size_t i=0; i<test_for_stable_count; i++) {
             test();
         }
     });
     std::thread test3([] {
-        for (int i=0; i<test_for_stable_count; i++) {
+        for (size_t i=0; i<test_for_stable_count; i++) {
             test();
         }
     });
