@@ -18,11 +18,11 @@ struct UVTask {
 class UVTaskPool {
 public:
     UVTaskPool() {
+        swapTasks[0] = std::make_shared<std::vector<UVTask>>();
+        swapTasks[1] = std::make_shared<std::vector<UVTask>>();
         stopFlag = false;
         hasInitFlag = false;
         loop = nullptr;
-        swapTasks[0] = std::make_shared<std::vector<UVTask> >();
-        swapTasks[1] = std::make_shared<std::vector<UVTask> >();
         tasks = swapTasks[swapTaskIndex];
         loopThread = std::make_shared<std::thread>([this]() {
             runLoop();
@@ -35,7 +35,7 @@ public:
 
 public:
     void post(std::function<void()> &&func) {
-        {
+        if (!stopFlag) {
             UVTask task(std::move(func));
             std::lock_guard<std::mutex> lock(tasksMutex);
             tasks->emplace_back(task);
@@ -85,15 +85,11 @@ private:
                 }
             }
             if (needClose) {
-                uv_stop(pool->loop);
+                uv_close((uv_handle_t*)&pool->taskAsync, [](uv_handle_t* handle) {
+                });
                 uv_close((uv_handle_t*)&pool->stopAsync, [](uv_handle_t* handle) {
-                    auto *pool = (UVTaskPool *) handle->data;
-                    uv_close((uv_handle_t*)&pool->taskAsync, [](uv_handle_t* handle) {
-                           auto *pool = (UVTaskPool *) handle->data;
-                           uv_loop_delete(pool->loop);
-                           pool->loop = nullptr;
-                    });
-               });
+                });
+                uv_stop(pool->loop);
             }
         });
         uv_async_init(loop, &taskAsync, [](uv_async_t *handle) {
@@ -106,7 +102,11 @@ private:
                 pool->tasks = pool->swapTasks[pool->swapTaskIndex];
             }
             for (auto &task: *executeTasks) {
-                task.func();
+                 try {
+                    task.func();
+                 } catch (std::exception &e) {
+                     std::cerr << "[UVTaskPool] run task error " << e.what() << std::endl;
+                 }
             }
             executeTasks->clear();
         });
@@ -118,6 +118,8 @@ private:
         }
         stopFlag = true;
         hasInitFlag = false;
+        uv_loop_delete(loop);
+        loop = nullptr;
     }
 
 private:
@@ -139,10 +141,10 @@ private:
 class UVTaskConcurrentPool {
 public:
     UVTaskConcurrentPool() {
+        tasks = std::make_shared<moodycamel::ConcurrentQueue<UVTask>>();
         stopFlag = false;
         hasInitFlag = false;
         loop = nullptr;
-        tasks = std::make_shared<moodycamel::ConcurrentQueue<UVTask> >();
         loopThread = std::make_shared<std::thread>([this]() {
             runLoop();
         });
@@ -154,7 +156,7 @@ public:
 
 public:
     void post(std::function<void()> &&func) {
-        {
+        if (!stopFlag) {
             UVTask task(std::move(func));
             tasks->enqueue(task);
         }
@@ -203,15 +205,11 @@ private:
                 }
             }
             if (needClose) {
-                uv_stop(pool->loop);
-                uv_close((uv_handle_t*)&pool->stopAsync, [](uv_handle_t* handle) {
-                    auto *pool = (UVTaskConcurrentPool *) handle->data;
-                    uv_close((uv_handle_t*)&pool->taskAsync, [](uv_handle_t* handle) {
-                           auto *pool = (UVTaskConcurrentPool *) handle->data;
-                           uv_loop_delete(pool->loop);
-                           pool->loop = nullptr;
-                    });
+                uv_close((uv_handle_t*)&pool->taskAsync, [](uv_handle_t* handle) {
                 });
+                uv_close((uv_handle_t*)&pool->stopAsync, [](uv_handle_t* handle) {
+                });
+                uv_stop(pool->loop);
             }
         });
         uv_async_init(loop, &taskAsync, [](uv_async_t *handle) {
@@ -221,7 +219,11 @@ private:
                  UVTask task;
                  hasTask = pool->tasks->try_dequeue(task);
                  if (hasTask) {
-                     task.func();
+                     try {
+                         task.func();
+                     } catch (std::exception &e) {
+                         std::cerr << "[UVTaskConcurrentPool] run task error " << e.what() << std::endl;
+                     }
                  }
             } while (hasTask);
         });
@@ -233,6 +235,8 @@ private:
         }
         stopFlag = true;
         hasInitFlag = false;
+        uv_loop_delete(loop);
+        loop = nullptr;
     }
 
 private:
@@ -383,6 +387,11 @@ UVTaskPool pool start
 UVTaskPool pool used: 32.6434 ms
 UVTaskConcurrentPool pool used: 130.991 ms
 UVTaskConcurrentPool pool used: 72.3749 ms //去掉唤醒
+
+lsof -p 8427 | wc -l
+     853
+ps aux | grep tasktest
+
  * @param argc
  * @param argv
  * @return

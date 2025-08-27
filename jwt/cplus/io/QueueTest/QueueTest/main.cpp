@@ -16,11 +16,12 @@
 #include <functional>
 #include <string>
 #include <numeric>
+#include <boost/asio.hpp>
 #include <boost/lockfree/queue.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
 #include "FastSwapQueue.h"
-#include "BatchPostMessage.h"
+#include "BatchQueue.h"
 
 /**
 
@@ -485,6 +486,7 @@ double test_boost_post_with_swap_queue(int thread_count) {
     fastSwapQueue.setConsumeTasksFunc([&] {
         boost::asio::post(io_context, [&] {
             fastSwapQueue.consumeTasks();
+            //flush websocket
         });
     });
     auto start_time = high_resolution_clock::now();
@@ -530,8 +532,8 @@ double test_boost_post_with_batch_queue(int thread_count) {
     std::atomic<size_t> counter(0);
     std::atomic<bool> finished(false);
     
-    BatchPostMessage<int> batchPostMessage(256, true);
-    batchPostMessage.setOnBatchMessageAction([&](auto batchMsg) {
+    BatchQueue<int> batchQueue(256);
+    batchQueue.setOnBatchAction([&](auto batchMsg) {
         boost::asio::post(io_context, [&,batchMsg] {
             for(int i=0; i<batchMsg->size(); i++) {
                 std::shared_ptr<std::string> in = std::make_shared<std::string>(1025, 'a');
@@ -545,7 +547,15 @@ double test_boost_post_with_batch_queue(int thread_count) {
                     finished = true;
                 }
             }
-            batchPostMessage.recycle(batchMsg);
+            batchQueue.recycle(batchMsg);
+        });
+    });
+    
+    batchQueue.setAutoFlashTimerFunc([&] () {
+        auto timer = std::make_shared<boost::asio::steady_timer>(io_context);
+        timer->expires_after(std::chrono::milliseconds(3));
+        timer->async_wait([&, timer](const boost::system::error_code& ec) {
+            if (!ec) batchQueue.flush();
         });
     });
   
@@ -553,9 +563,9 @@ double test_boost_post_with_batch_queue(int thread_count) {
     
     // 提交任务
     for (size_t i = 0; i < QUEUE_SIZE; ++i) {
-        batchPostMessage.add(i);
+        batchQueue.add(i);
     }
-    batchPostMessage.flush();
+    batchQueue.flush();
     
     // 等待所有任务完成
     while (!finished) std::this_thread::yield();
