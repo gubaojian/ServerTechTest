@@ -4,7 +4,13 @@
 
 #include "fast_hex.h"
 
-int main(void) {
+
+/**
+* 编码耗时：167.22 ms（平均单次：0.000167 ms）
+* 解码耗时：177.38 ms（平均单次：0.000177 ms）
+ *
+ */
+void testPerformance() {
     char encode_dest[1024];
     char decode_dest[1024];
     {
@@ -41,5 +47,21 @@ int main(void) {
                cost_ms, cost_ms / LOOP_COUNT);
         }
     }
+}
+
+int main(void) {
+    char encode_dest[1024];
+    char decode_dest[1024];
+    {
+        char* in  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789测试性能编码解abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789测试性能编码解abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789测试性能编码解abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789测试性能编码解abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789测试性能编码解码あいうえおαβγδε一二三四五六七八九十abcdefghijklmnopqrstuvwxyzABCDEFG";
+        size_t len = strlen(in);
+        encodeHex(encode_dest, in, len);
+        encode_dest[len*2] = '\n';
+        printf("%s  = %s\n", in, encode_dest);
+        decodeHexLUT4(decode_dest, encode_dest, len);
+        decode_dest[len] = '\n';
+        printf("%s = %s\n",  encode_dest, decode_dest);
+    }
+    testPerformance();
     return 0;
 }

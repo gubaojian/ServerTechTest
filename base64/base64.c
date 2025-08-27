@@ -4,9 +4,11 @@
 
 #include "base64.h"
 
+#include <stdlib.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 
 static const unsigned char cdk_data_bin2ascii[65] =
@@ -27,6 +29,8 @@ static const unsigned char cdk_url_safe_data_bin2ascii[65] =
 #define CDK_B64_ERROR               0xFF
 #define CDK_B64_NOT_BASE64(a)       (((a)|0x13) == 0xF3)
 #define CDK_B64_BASE64(a)           (!CDK_B64_NOT_BASE64(a))
+
+
 
 static const unsigned char cdk_data_ascii2bin[128] = {
        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -86,6 +90,42 @@ static const unsigned char cdk_url_safe_combine_data_ascii2bin[128] = {
     0x31, 0x32, 0x33, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 };
 
+
+static const unsigned char cdk_base64_auto_to_std[256] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x2B, 0x00, 0x2B, 0x00, 0x2F,
+    0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
+    0x38, 0x39, 0x00, 0x00, 0x00, 0x3D, 0x00, 0x00,
+    0x00, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47,
+    0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F,
+    0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57,
+    0x58, 0x59, 0x5A, 0x00, 0x00, 0x00, 0x00, 0x2F,
+    0x00, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67,
+    0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F,
+    0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77,
+    0x78, 0x79, 0x7A, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
 static unsigned char cdk_conv_ascii2bin(unsigned char a, const unsigned char *table)
 {
     if (a & 0x80)
@@ -131,7 +171,7 @@ static int base64_encodeblock(unsigned char *out,
 }
 
 static int base64_decodeblock(unsigned char *out,
-                               const unsigned char *in, int n, size_t tableId)
+                               const unsigned char *in, size_t n, size_t tableId)
 {
     int i, ret = 0, a, b, c, d;
     unsigned long l;
@@ -159,7 +199,12 @@ static int base64_decodeblock(unsigned char *out,
     while ((n > 0) && (CDK_B64_NOT_BASE64(cdk_conv_ascii2bin(in[n - 1], table))))
         n--;
 
-    int remain = n % 4;
+    size_t remain = n % 4;
+
+#ifdef CDK_B64_DECODE_NO_AUTO_PADDING
+    if (remain != 0)
+        return -1;
+#endif
 
     if (n == 0)
         return 0;
@@ -235,7 +280,6 @@ static int base64_decodeblock(unsigned char *out,
     return ret;
 }
 
-
 int base64_encode(const unsigned char *in, size_t inlen, unsigned char *out, size_t* outlen) {
     if (outlen == NULL) {
         return -1;
@@ -294,7 +338,26 @@ int base64_decode_url_safe(const unsigned char *in, size_t inlen, unsigned char 
         *outlen = 0;
         return -1;
     }
+
     int ret = base64_decodeblock(out, in, inlen,  1);
+    if (ret >= 0) {
+        *outlen = ret;
+        return 0;
+    }
+    *outlen = 0;
+    return ret;
+}
+
+int base64_decode_url_safe_or_std(const unsigned char *in, size_t inlen, unsigned char *out, size_t* outlen) {
+    if (outlen == NULL) {
+        return -1;
+    }
+    if (in == NULL || out == NULL) {
+        *outlen = 0;
+        return -1;
+    }
+
+    int ret = base64_decodeblock(out, in, inlen,  2);
     if (ret >= 0) {
         *outlen = ret;
         return 0;
@@ -312,11 +375,130 @@ int base64_auto_decode(const unsigned char *in, size_t inlen, unsigned char *out
         *outlen = 0;
         return -1;
     }
+    if (inlen == 0) {
+        *outlen = 0;
+        return -1;
+    }
+    //most cast is valid base64 format
     int ret = base64_decodeblock(out, in, inlen, 2);
     if (ret >= 0) {
         *outlen = ret;
         return 0;
     }
+    //decode failed bad case which is very rare
+    size_t stdInlen = sizeof(unsigned char) * inlen + 4; //add space for padding
+    unsigned char* stdIn = (unsigned char*)malloc(stdInlen);
+    if (stdIn == NULL) {
+        *outlen = 0;
+        return -2;
+    }
+
+    ret = base64_convert_to_std(in, inlen, stdIn, &stdInlen);
+    if (ret == 0 && stdInlen > 0) {
+        ret = base64_decodeblock(out, stdIn, stdInlen, 2);
+        if (ret >= 0) {
+            *outlen = ret;
+            free(stdIn);
+            return 0;
+        }
+    }
+    free(stdIn);
     *outlen = 0;
     return ret;
+}
+
+
+bool base64_has_invalid_chars(const unsigned char *in, size_t inlen) {
+    if (in == NULL) {
+        return true;
+    }
+    while (inlen >= 4) {
+        const unsigned char a = cdk_base64_auto_to_std[*in++];
+        const unsigned char b = cdk_base64_auto_to_std[*in++];
+        const unsigned char c = cdk_base64_auto_to_std[*in++];
+        const unsigned char d = cdk_base64_auto_to_std[*in++];
+        inlen-=4;
+        if (!(a && b && c && d)) { //most case fast path
+            return true;
+        }
+    }
+    while (inlen > 0) {
+        unsigned char a = cdk_base64_auto_to_std[*in++];
+        if (!a) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int base64_convert_to_std(const unsigned char *in, size_t inlen,
+                       unsigned char *out, size_t *outlen) {
+    if (outlen == NULL) {
+        return -1;
+    }
+    if (in == NULL || out == NULL) {
+        *outlen = 0;
+        return -1;
+    }
+    size_t stdLen = 0;
+    while (inlen >= 4) {
+        const unsigned char a = cdk_base64_auto_to_std[*in++];
+        const unsigned char b = cdk_base64_auto_to_std[*in++];
+        const unsigned char c = cdk_base64_auto_to_std[*in++];
+        const unsigned char d = cdk_base64_auto_to_std[*in++];
+        inlen-=4;
+        if (a && b && c && d) { //most case fast path
+            *out++ = a;
+            *out++ = b;
+            *out++ = c;
+            *out++ = d;
+            stdLen+=4;
+            continue;
+        }
+        if (a) {
+            *out++ = a;
+            stdLen++;
+        }
+        if (b) {
+            *out++ = b;
+            stdLen++;
+        }
+        if (c) {
+            *out++ = c;
+            stdLen++;
+        }
+        if (d) {
+            *out++ = d;
+            stdLen++;
+        }
+    }
+    while (inlen > 0) {
+        unsigned char a = cdk_base64_auto_to_std[*in++];
+        if (a) {
+            *out++ = a;
+            stdLen++;
+        }
+        inlen--;
+    }
+
+    size_t paddingSize = (4 - (stdLen % 4)) % 4;
+    //缓冲区大小位设置，或者空间小，则不进行自动padding
+    if (*outlen <= 0 || (*outlen < (stdLen + paddingSize))) {
+        *outlen = stdLen;
+        return 0;
+    }
+
+    if (paddingSize == 3) {
+        *outlen = 0;
+        return -2;
+    } else if (paddingSize == 2) {
+        *out++ = '=';
+        *out++ = '=';
+        stdLen+=2;
+    } else if (paddingSize == 1) {
+        *out++ = '=';
+        stdLen += 1;
+    }
+    *outlen = stdLen;
+    return 0;
 }

@@ -78,6 +78,29 @@ void print_url_safe_table() {
     printf("\n\n");
 }
 
+void print_base64_auto_to_std_table() {
+    static const unsigned char valid_ascii[65] =
+       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    unsigned char ascii2bin[256] = {};
+    memset(ascii2bin, 0, sizeof(ascii2bin));
+    for (int i=0; i<65; i++) {
+        unsigned char c = valid_ascii[i];
+        ascii2bin[c] = c;
+    }
+    ascii2bin['-'] = '+';
+    ascii2bin['_'] = '/';
+    ascii2bin['='] = '=';
+    printf("\n\n");
+    for (int i=0; i<256; i+=8) {
+        for (int j=0; j<8; j++) {
+            printf("0x%02X, ", (unsigned int)ascii2bin[i +j]);
+        }
+        printf("\n");
+    }
+    printf("\n\n");
+}
+
 void testBase64() {
     char out[1024];
     char dout[1024];
@@ -134,12 +157,23 @@ void testBase64() {
         printf("%s %ld\n", dout, dlen);
     }
 
+    {
+        printf("base64 encode auto decode with to std \n");
+        char* out_test = "I CsvPeS9oOW  lvSBiYXN   lNj\n Qg5rWL6K+VIA====";
+        outlen = strlen(out_test);
+        memcpy(out, out_test, outlen);
+        base64_auto_decode(out, outlen, dout, &dlen);
+        dout[dlen] = '\0';
+        printf("%s %ld\n", dout, dlen);
+    }
+
 }
 
 /**
  *
- *  编码耗时：147.43 ms（平均单次：0.000147 ms）
- *  解码耗时：218.82 ms（平均单次：0.000219 ms）
+*  编码耗时：66.93 ms（平均单次：0.000067 ms）
+*  解码耗时：77.70 ms（平均单次：0.000078 ms）
+*  自动解码包含空格的解码耗时：164.25 ms（平均单次：0.000164 ms）
  */
 void testBase64Perf() {
     char out[1024];
@@ -174,6 +208,23 @@ void testBase64Perf() {
            cost_ms, cost_ms / LOOP_COUNT);
     }
 
+    {
+        clock_t start, end;
+        start = clock();
+        size_t LOOP_COUNT = 10000*100;
+        char* out_test = "ICsvPeS 9oOWlvSBiYXNlNjQg5r WL6K+VKy895L2g5aW9IGJhc2U2NCDmtYvor5UrLz3kvaDlpb0gYmFzZTY0IOa1i+ivlSsvPeS9oOWlvSBiYXNlNjQg5rWL6K+VKy895L2g5aW9IGJhc2U2NCDmtYvor5UrLz3kvaDlpb0gYmFzZTY0IOa1i+ivlXYrLz3kvaDlpb0gYmFzZTY0IOa1i+ivlSsvPeS9oOWlvSBiYXNlNjQg5rWL6K+VKy895L2g5aW9IGJhc2U2NCDmtYvor5UrLz3kvaDlpb0gYmFzZTY0IOa1i+ivlSA=";
+        outlen = strlen(out_test);
+        memcpy(out, out_test, outlen);
+
+        for (size_t i=0; i<LOOP_COUNT; i++) {
+            base64_auto_decode(out, outlen, dout, &dlen);
+        }
+        end = clock();
+        double cost_ms = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+        printf("自动解码包含空格的解码耗时：%.2f ms（平均单次：%.6f ms）\n",
+           cost_ms, cost_ms / LOOP_COUNT);
+    }
+
 
 }
 
@@ -183,6 +234,8 @@ int main(void) {
     testBase64Perf();
     //print_normal_table();
     //print_url_safe_table();
+
+    //print_base64_auto_to_std_table();
 
     return 0;
 }
