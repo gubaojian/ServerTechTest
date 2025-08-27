@@ -106,6 +106,8 @@ private:
                     task.func();
                  } catch (std::exception &e) {
                      std::cerr << "[UVTaskPool] run task error " << e.what() << std::endl;
+                 } catch (...) {
+                      std::cerr << "[UVTaskPool] run task unkown exception" << std::endl;
                  }
             }
             executeTasks->clear();
@@ -223,6 +225,8 @@ private:
                          task.func();
                      } catch (std::exception &e) {
                          std::cerr << "[UVTaskConcurrentPool] run task error " << e.what() << std::endl;
+                     } catch (...) {
+                         std::cerr << "[UVTaskConcurrentPool] run task unkown exception" << std::endl;
                      }
                  }
             } while (hasTask);
