@@ -259,12 +259,11 @@ void testSwapQueue() {
             executeCount++;
         });
     }
+    pool.stop();
     end_time = uv_hrtime();
     std::cout << "UVTaskPool pool used: " << ((end_time - start_time) / 1000000.0) << " ms" << std::endl;
     //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     std::cout << "uv_queue_work pool done " << executeCount << std::endl;
-    pool.stop();
-    std::cout << "uv_queue_work pool stop success " << executeCount << std::endl;
 }
 
 void testSwapQueueTwoThread() {
@@ -288,12 +287,11 @@ void testSwapQueueTwoThread() {
         });
     }
     twoThread.join();
+    pool.stop();
     end_time = uv_hrtime();
     std::cout << "UVTaskPool two producer used: " << ((end_time - start_time) / 1000000.0) << " ms" << std::endl;
     //std::this_thread::sleep_for(std::chrono::milliseconds(500));
     std::cout << "UVTaskPool two producer done " << executeCount << std::endl;
-    pool.stop();
-    std::cout << "UVTaskPool two producer stop success" << executeCount << std::endl;
 }
 
 void testConcurrentQueue() {
@@ -309,11 +307,12 @@ void testConcurrentQueue() {
             executeCount++;
         });
     }
+    pool.stop();
     end_time = uv_hrtime();
     std::cout << "UVTaskConcurrentPool pool used: " << ((end_time - start_time) / 1000000.0) << " ms" << std::endl;
     //std::this_thread::sleep_for(std::chrono::milliseconds(500));
     std::cout << "UVTaskConcurrentPool pool done " << executeCount << std::endl;
-    pool.stop();
+
 }
 
 
@@ -339,11 +338,11 @@ void testConcurrentQueueTwo() {
         });
     }
     twoThread.join();
+    pool.stop();
     end_time = uv_hrtime();
     std::cout << "UVTaskConcurrentPool two thread pool used: " << ((end_time - start_time) / 1000000.0) << " ms" << std::endl;
-    //std::this_thread::sleep_for(std::chrono::milliseconds(500));
     std::cout << "UVTaskConcurrentPool two thread pool done " << executeCount << std::endl;
-    pool.stop();
+
 }
 
 
