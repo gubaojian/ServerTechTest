@@ -20,6 +20,7 @@ public:
     UVTaskPool() {
         stopFlag = false;
         hasInitFlag = false;
+        loop = nullptr;
         swapTasks[0] = std::make_shared<std::vector<UVTask> >();
         swapTasks[1] = std::make_shared<std::vector<UVTask> >();
         tasks = swapTasks[swapTaskIndex];
@@ -139,6 +140,7 @@ public:
     UVTaskConcurrentPool() {
         stopFlag = false;
         hasInitFlag = false;
+        loop = nullptr;
         tasks = std::make_shared<moodycamel::ConcurrentQueue<UVTask> >();
         loopThread = std::make_shared<std::thread>([this]() {
             runLoop();
