@@ -42,19 +42,20 @@ public:
         }
         {
             std::lock_guard<std::mutex> lock(stopMutex);
-            if (loop != nullptr && !stopFlag) {
+            if (hasInitFlag && loop != nullptr && !stopFlag) {
                 uv_async_send(&taskAsync);
             }
         }
     }
 
     void stop() {
-        {
+        if (!stopFlag) {
             std::lock_guard<std::mutex> lock(stopMutex);
-            if (loop != nullptr) {
+            if (loop != nullptr && !stopFlag) {
                 uv_async_send(&stopAsync);
             }
         }
+        std::cout << "UVTaskPool wait join" << std::endl;
         if (loopThread->joinable()) {
             loopThread->join();
         }
@@ -90,20 +91,23 @@ private:
             }
             executeTasks->clear();
         });
-
+        hasInitFlag = true;
         while (!stopFlag) {
             uv_run(loop, UV_RUN_DEFAULT);
         }
+        stopFlag = true;
+        hasInitFlag = false;
         loop = nullptr;
     }
 
 private:
     std::shared_ptr<std::thread> loopThread;
+    bool hasInitFlag = false;
     uv_loop_t *loop = nullptr;
     uv_async_t taskAsync{};
     std::mutex tasksMutex;
-    std::shared_ptr<std::vector<UVTask> > tasks;
-    std::shared_ptr<std::vector<UVTask> > swapTasks[2];
+    std::shared_ptr<std::vector<UVTask>> tasks;
+    std::shared_ptr<std::vector<UVTask>> swapTasks[2];
     int64_t swapTaskIndex = 0;
     uv_async_t stopAsync{};
     std::atomic<bool> stopFlag;
@@ -136,19 +140,20 @@ public:
         }
         {
             std::lock_guard<std::mutex> lock(stopMutex);
-            if (loop != nullptr && !stopFlag) {
+            if (hasInitFlag && loop != nullptr && !stopFlag) {
                 uv_async_send(&taskAsync);
             }
         }
     }
 
     void stop() {
-        {
+        if (!stopFlag) {
             std::lock_guard<std::mutex> lock(stopMutex);
-            if (loop != nullptr) {
+            if (loop != nullptr && !stopFlag) {
                 uv_async_send(&stopAsync);
             }
         }
+        std::cout << "UVTaskConcurrentPool wait join" << std::endl;
         if (loopThread->joinable()) {
             loopThread->join();
         }
@@ -180,17 +185,19 @@ private:
                      task.func();
                  }
             } while (hasTask);
-
         });
-
+        hasInitFlag = true;
         while (!stopFlag) {
             uv_run(loop, UV_RUN_DEFAULT);
         }
+        stopFlag = true;
+        hasInitFlag = false;
         loop = nullptr;
     }
 
 private:
     std::shared_ptr<std::thread> loopThread;
+    bool hasInitFlag = false;
     uv_loop_t *loop = nullptr;
     uv_async_t taskAsync{};
     std::shared_ptr<moodycamel::ConcurrentQueue<UVTask> > tasks;
@@ -221,6 +228,7 @@ void testSwapQueue() {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     std::cout << "uv_queue_work pool done " << executeCount << std::endl;
     pool.stop();
+    std::cout << "uv_queue_work pool stop success " << executeCount << std::endl;
 }
 
 void testSwapQueueTwoThread() {
@@ -249,6 +257,7 @@ void testSwapQueueTwoThread() {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     std::cout << "UVTaskPool two producer done " << executeCount << std::endl;
     pool.stop();
+    std::cout << "UVTaskPool two producer stop success" << executeCount << std::endl;
 }
 
 void testConcurrentQueue() {
@@ -302,6 +311,27 @@ void testConcurrentQueueTwo() {
 }
 
 
+void test() {
+    testSwapQueue();
+    testConcurrentQueue();
+    testSwapQueueTwoThread();
+    testConcurrentQueueTwo();
+}
+
+
+void testForStable() {
+    for (int i=0; i<1024; i++) {
+        test();
+    }
+
+    std::thread test2([] {
+        for (int i=0; i<1024; i++) {
+            test();
+        }
+    });
+
+    test2.join();
+}
 /**
 
 UVTaskPool pool start
@@ -314,13 +344,8 @@ UVTaskConcurrentPool pool used: 72.3749 ms //去掉唤醒
  */
 int main(int argc, char *argv[]) {
 
-    testSwapQueue();
-
-    testConcurrentQueue();
-
-    testSwapQueueTwoThread();
-
-    testConcurrentQueueTwo();
+    test();
+    testForStable();
 
     return 0;
 }
