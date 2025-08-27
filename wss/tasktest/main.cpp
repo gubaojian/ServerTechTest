@@ -19,8 +19,7 @@ class UVTaskPool {
 public:
     UVTaskPool() {
         stopFlag = false;
-        stopAsync.data = this;
-        taskAsync.data = this;
+        hasInitFlag = false;
         swapTasks[0] = std::make_shared<std::vector<UVTask> >();
         swapTasks[1] = std::make_shared<std::vector<UVTask> >();
         tasks = swapTasks[swapTaskIndex];
@@ -36,7 +35,7 @@ public:
 public:
     void post(std::function<void()> &&func) {
         {
-            UVTask task(func);
+            UVTask task(std::move(func));
             std::lock_guard<std::mutex> lock(tasksMutex);
             tasks->emplace_back(task);
         }
@@ -49,32 +48,50 @@ public:
     }
 
     void stop() {
+        bool needJoin = false;
         if (!stopFlag) {
             std::lock_guard<std::mutex> lock(stopMutex);
             if (loop != nullptr && !stopFlag) {
                 uv_async_send(&stopAsync);
+                needJoin = true;
             }
         }
-        std::cout << "UVTaskPool wait join" << std::endl;
-        if (loopThread->joinable()) {
-            loopThread->join();
+        if (needJoin) {
+            if (loopThread->joinable()) {
+                loopThread->join();
+            }
         }
     }
 
 private:
     void runLoop() {
         loop = uv_loop_new();
+        if (loop == nullptr) {
+            std::cerr << "[UVTaskPool] uv_loop_new failed: out of memory" << std::endl;
+            return;
+        }
         uv_async_init(loop, &stopAsync, [](uv_async_t *handle) {
             auto *pool = (UVTaskPool *) handle->data;
-            std::lock_guard<std::mutex> lock(pool->stopMutex);
-            if (!pool->stopFlag) {
-                pool->stopFlag = true;
-                uv_close((uv_handle_t*)&pool->taskAsync, NULL);
-                uv_close((uv_handle_t*)&pool->stopAsync, NULL);
+            bool needClose = false;
+            {
+                std::lock_guard<std::mutex> lock(pool->stopMutex);
+                if (!pool->stopFlag) {
+                    pool->stopFlag = true;
+                    pool->hasInitFlag = false;
+                    needClose = true;
+                }
+            }
+            if (needClose) {
                 uv_stop(pool->loop);
-                uv_loop_close(pool->loop);
-                free(pool->loop);
-                pool->loop = nullptr;
+                uv_close((uv_handle_t*)&pool->stopAsync, [](uv_handle_t* handle) {
+                    auto *pool = (UVTaskPool *) handle->data;
+                    uv_close((uv_handle_t*)&pool->taskAsync, [](uv_handle_t* handle) {
+                          auto *pool = (UVTaskPool *) handle->data;
+                           uv_loop_close(pool->loop);
+                           free(pool->loop);
+                           pool->loop = nullptr;
+                    });
+               });
             }
         });
         uv_async_init(loop, &taskAsync, [](uv_async_t *handle) {
@@ -91,18 +108,19 @@ private:
             }
             executeTasks->clear();
         });
+        stopAsync.data = this;
+        taskAsync.data = this;
         hasInitFlag = true;
         while (!stopFlag) {
             uv_run(loop, UV_RUN_DEFAULT);
         }
         stopFlag = true;
         hasInitFlag = false;
-        loop = nullptr;
     }
 
 private:
     std::shared_ptr<std::thread> loopThread;
-    bool hasInitFlag = false;
+    std::atomic<bool> hasInitFlag = false;
     uv_loop_t *loop = nullptr;
     uv_async_t taskAsync{};
     std::mutex tasksMutex;
@@ -120,8 +138,7 @@ class UVTaskConcurrentPool {
 public:
     UVTaskConcurrentPool() {
         stopFlag = false;
-        stopAsync.data = this;
-        taskAsync.data = this;
+        hasInitFlag = false;
         tasks = std::make_shared<moodycamel::ConcurrentQueue<UVTask> >();
         loopThread = std::make_shared<std::thread>([this]() {
             runLoop();
@@ -135,7 +152,7 @@ public:
 public:
     void post(std::function<void()> &&func) {
         {
-            UVTask task(func);
+            UVTask task(std::move(func));
             tasks->enqueue(task);
         }
         {
@@ -147,32 +164,50 @@ public:
     }
 
     void stop() {
+        bool needJoin = false;
         if (!stopFlag) {
             std::lock_guard<std::mutex> lock(stopMutex);
             if (loop != nullptr && !stopFlag) {
                 uv_async_send(&stopAsync);
+                needJoin = true;
             }
         }
-        std::cout << "UVTaskConcurrentPool wait join" << std::endl;
-        if (loopThread->joinable()) {
-            loopThread->join();
+        if (needJoin) {
+            if (loopThread->joinable()) {
+                loopThread->join();
+            }
         }
     }
 
 private:
     void runLoop() {
         loop = uv_loop_new();
+        if (loop == nullptr) {
+            std::cerr << "[UVTaskConcurrentPool] uv_loop_new failed: out of memory" << std::endl;
+            return;
+        }
         uv_async_init(loop, &stopAsync, [](uv_async_t *handle) {
             auto *pool = (UVTaskConcurrentPool *) handle->data;
-            std::lock_guard<std::mutex> lock(pool->stopMutex);
-            if (!pool->stopFlag) {
-                pool->stopFlag = true;
-                uv_close((uv_handle_t*)&pool->stopAsync, NULL);
-                uv_close((uv_handle_t*)&pool->taskAsync, NULL);
+            bool needClose = false;
+            {
+                std::lock_guard<std::mutex> lock(pool->stopMutex);
+                if (!pool->stopFlag) {
+                    pool->stopFlag = true;
+                    pool->hasInitFlag = false;
+                    needClose = true;
+                }
+            }
+            if (needClose) {
                 uv_stop(pool->loop);
-                uv_loop_close(pool->loop);
-                free(pool->loop);
-                pool->loop = nullptr;
+                uv_close((uv_handle_t*)&pool->stopAsync, [](uv_handle_t* handle) {
+                    auto *pool = (UVTaskConcurrentPool *) handle->data;
+                    uv_close((uv_handle_t*)&pool->taskAsync, [](uv_handle_t* handle) {
+                           auto *pool = (UVTaskConcurrentPool *) handle->data;
+                           uv_loop_close(pool->loop);
+                           free(pool->loop);
+                           pool->loop = nullptr;
+                    });
+                });
             }
         });
         uv_async_init(loop, &taskAsync, [](uv_async_t *handle) {
@@ -186,18 +221,19 @@ private:
                  }
             } while (hasTask);
         });
+        stopAsync.data = this;
+        taskAsync.data = this;
         hasInitFlag = true;
         while (!stopFlag) {
             uv_run(loop, UV_RUN_DEFAULT);
         }
         stopFlag = true;
         hasInitFlag = false;
-        loop = nullptr;
     }
 
 private:
     std::shared_ptr<std::thread> loopThread;
-    bool hasInitFlag = false;
+    std::atomic<bool> hasInitFlag = false;
     uv_loop_t *loop = nullptr;
     uv_async_t taskAsync{};
     std::shared_ptr<moodycamel::ConcurrentQueue<UVTask> > tasks;
@@ -225,7 +261,7 @@ void testSwapQueue() {
     }
     end_time = uv_hrtime();
     std::cout << "UVTaskPool pool used: " << ((end_time - start_time) / 1000000.0) << " ms" << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     std::cout << "uv_queue_work pool done " << executeCount << std::endl;
     pool.stop();
     std::cout << "uv_queue_work pool stop success " << executeCount << std::endl;
@@ -254,7 +290,7 @@ void testSwapQueueTwoThread() {
     twoThread.join();
     end_time = uv_hrtime();
     std::cout << "UVTaskPool two producer used: " << ((end_time - start_time) / 1000000.0) << " ms" << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(500));
     std::cout << "UVTaskPool two producer done " << executeCount << std::endl;
     pool.stop();
     std::cout << "UVTaskPool two producer stop success" << executeCount << std::endl;
@@ -275,7 +311,7 @@ void testConcurrentQueue() {
     }
     end_time = uv_hrtime();
     std::cout << "UVTaskConcurrentPool pool used: " << ((end_time - start_time) / 1000000.0) << " ms" << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(500));
     std::cout << "UVTaskConcurrentPool pool done " << executeCount << std::endl;
     pool.stop();
 }
@@ -305,7 +341,7 @@ void testConcurrentQueueTwo() {
     twoThread.join();
     end_time = uv_hrtime();
     std::cout << "UVTaskConcurrentPool two thread pool used: " << ((end_time - start_time) / 1000000.0) << " ms" << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(500));
     std::cout << "UVTaskConcurrentPool two thread pool done " << executeCount << std::endl;
     pool.stop();
 }
@@ -318,19 +354,25 @@ void test() {
     testConcurrentQueueTwo();
 }
 
+size_t test_for_stable_count = 1024;
 
 void testForStable() {
-    for (int i=0; i<1024; i++) {
+    for (int i=0; i<test_for_stable_count; i++) {
         test();
     }
-
     std::thread test2([] {
-        for (int i=0; i<1024; i++) {
+        for (int i=0; i<test_for_stable_count; i++) {
+            test();
+        }
+    });
+    std::thread test3([] {
+        for (int i=0; i<test_for_stable_count; i++) {
             test();
         }
     });
 
     test2.join();
+    test3.join();
 }
 /**
 
