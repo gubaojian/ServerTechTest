@@ -17,8 +17,8 @@ class FastSwapQueue {
 public:
     FastSwapQueue(bool multiConsumer = false) {
         this->multiConsumer = multiConsumer;
-        swapTasks[0] = std::make_shared<std::vector<FastSwapQueueTask> >();
-        swapTasks[1] = std::make_shared<std::vector<FastSwapQueueTask> >();
+        swapTasks[0] = std::make_shared<std::vector<FastSwapQueueTask>>();
+        swapTasks[1] = std::make_shared<std::vector<FastSwapQueueTask>>();
         tasks = swapTasks[swapTaskIndex];
     }
 public:
@@ -27,9 +27,11 @@ public:
     }
 public:
     void post(std::function<void()> &&func) {
-        FastSwapQueueTask task(func);
-        std::lock_guard<std::mutex> lock(tasksMutex);
-        tasks->emplace_back(task);
+        {
+            FastSwapQueueTask task(std::move(func));
+            std::lock_guard<std::mutex> lock(tasksMutex);
+            tasks->emplace_back(task);
+        }
         if (consumeFunc != nullptr) {
             bool needCallConsume = hasWeakUpFlag.test_and_set(std::memory_order_acquire);
             if (!needCallConsume) {
