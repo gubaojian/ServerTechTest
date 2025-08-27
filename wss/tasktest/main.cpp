@@ -40,21 +40,23 @@ public:
             std::lock_guard<std::mutex> lock(tasksMutex);
             tasks->emplace_back(task);
         }
-        if (loop != nullptr
-            && !stopFlag) {
-            bool needAsyncSend = hasWeakUpFlag.test_and_set(std::memory_order_acquire);
-            if (!needAsyncSend) {
+        {
+            std::lock_guard<std::mutex> lock(stopMutex);
+            if (loop != nullptr && !stopFlag) {
                 uv_async_send(&taskAsync);
             }
         }
     }
 
     void stop() {
-        if (loop != nullptr) {
-            uv_async_send(&stopAsync);
-            if (loopThread->joinable()) {
-                loopThread->join();
+        {
+            std::lock_guard<std::mutex> lock(stopMutex);
+            if (loop != nullptr) {
+                uv_async_send(&stopAsync);
             }
+        }
+        if (loopThread->joinable()) {
+            loopThread->join();
         }
     }
 
@@ -63,8 +65,11 @@ private:
         loop = uv_loop_new();
         uv_async_init(loop, &stopAsync, [](uv_async_t *handle) {
             auto *pool = (UVTaskPool *) handle->data;
+            std::lock_guard<std::mutex> lock(pool->stopMutex);
             if (!pool->stopFlag) {
                 pool->stopFlag = true;
+                uv_close((uv_handle_t*)&pool->taskAsync, NULL);
+                uv_close((uv_handle_t*)&pool->stopAsync, NULL);
                 uv_stop(pool->loop);
                 uv_loop_close(pool->loop);
                 free(pool->loop);
@@ -73,8 +78,7 @@ private:
         });
         uv_async_init(loop, &taskAsync, [](uv_async_t *handle) {
             auto *pool = (UVTaskPool *) handle->data;
-            pool->hasWeakUpFlag.clear(std::memory_order_release);
-            std::shared_ptr<std::vector<UVTask> > executeTasks;
+            std::shared_ptr<std::vector<UVTask>> executeTasks;
             {
                 std::lock_guard<std::mutex> lock(pool->tasksMutex);
                 executeTasks = pool->swapTasks[pool->swapTaskIndex];
@@ -98,12 +102,12 @@ private:
     uv_loop_t *loop = nullptr;
     uv_async_t taskAsync{};
     std::mutex tasksMutex;
-    std::atomic_flag hasWeakUpFlag = ATOMIC_FLAG_INIT;
     std::shared_ptr<std::vector<UVTask> > tasks;
     std::shared_ptr<std::vector<UVTask> > swapTasks[2];
     int64_t swapTaskIndex = 0;
     uv_async_t stopAsync{};
     std::atomic<bool> stopFlag;
+    std::mutex stopMutex;
 };
 
 
@@ -130,22 +134,23 @@ public:
             UVTask task(func);
             tasks->enqueue(task);
         }
-        if (loop != nullptr
-            && !stopFlag) {
-           // bool needAsyncSend = hasWeakUpFlag.test_and_set(std::memory_order_acquire);
-           // if (!needAsyncSend) {
-            //    uv_async_send(&taskAsync);
-           // }
-            uv_async_send(&taskAsync);
+        {
+            std::lock_guard<std::mutex> lock(stopMutex);
+            if (loop != nullptr && !stopFlag) {
+                uv_async_send(&taskAsync);
+            }
         }
     }
 
     void stop() {
-        if (loop != nullptr) {
-            uv_async_send(&stopAsync);
-            if (loopThread->joinable()) {
-                loopThread->join();
+        {
+            std::lock_guard<std::mutex> lock(stopMutex);
+            if (loop != nullptr) {
+                uv_async_send(&stopAsync);
             }
+        }
+        if (loopThread->joinable()) {
+            loopThread->join();
         }
     }
 
@@ -154,8 +159,11 @@ private:
         loop = uv_loop_new();
         uv_async_init(loop, &stopAsync, [](uv_async_t *handle) {
             auto *pool = (UVTaskConcurrentPool *) handle->data;
+            std::lock_guard<std::mutex> lock(pool->stopMutex);
             if (!pool->stopFlag) {
                 pool->stopFlag = true;
+                uv_close((uv_handle_t*)&pool->stopAsync, NULL);
+                uv_close((uv_handle_t*)&pool->taskAsync, NULL);
                 uv_stop(pool->loop);
                 uv_loop_close(pool->loop);
                 free(pool->loop);
@@ -164,7 +172,6 @@ private:
         });
         uv_async_init(loop, &taskAsync, [](uv_async_t *handle) {
             auto *pool = (UVTaskConcurrentPool *) handle->data;
-            //pool->hasWeakUpFlag.clear(std::memory_order_release);
             bool hasTask = false;
             do {
                  UVTask task;
@@ -187,102 +194,10 @@ private:
     uv_loop_t *loop = nullptr;
     uv_async_t taskAsync{};
     std::shared_ptr<moodycamel::ConcurrentQueue<UVTask> > tasks;
-    int64_t swapTaskIndex = 0;
     uv_async_t stopAsync{};
     std::atomic<bool> stopFlag;
+    std::mutex stopMutex;
 };
-
-class UVTaskConcurrentPool2 {
-public:
-    UVTaskConcurrentPool2() {
-        stopFlag = false;
-        stopAsync.data = this;
-        taskAsync.data = this;
-        swapTasks[0] = std::make_shared<std::vector<UVTask> >();
-        swapTasks[1] = std::make_shared<std::vector<UVTask> >();
-        tasks = swapTasks[swapTaskIndex];
-        loopThread = std::make_shared<std::thread>([this]() {
-            runLoop();
-        });
-    }
-
-    ~UVTaskConcurrentPool2() {
-        stop();
-    }
-
-public:
-    void post(std::function<void()> &&func) {
-        {
-            UVTask task(func);
-            std::lock_guard<std::mutex> lock(tasksMutex);
-            tasks->emplace_back(task);
-        }
-        if (loop != nullptr
-            && !stopFlag) {
-            bool needAsyncSend = hasWeakUpFlag.test_and_set(std::memory_order_acquire);
-            if (!needAsyncSend) {
-                uv_async_send(&taskAsync);
-            }
-        }
-    }
-
-    void stop() {
-        if (loop != nullptr) {
-            uv_async_send(&stopAsync);
-            if (loopThread->joinable()) {
-                loopThread->join();
-            }
-        }
-    }
-
-private:
-    void runLoop() {
-        loop = uv_loop_new();
-        uv_async_init(loop, &stopAsync, [](uv_async_t *handle) {
-            auto *pool = (UVTaskConcurrentPool2 *) handle->data;
-            if (!pool->stopFlag) {
-                pool->stopFlag = true;
-                uv_stop(pool->loop);
-                uv_loop_close(pool->loop);
-                free(pool->loop);
-                pool->loop = nullptr;
-            }
-        });
-        uv_async_init(loop, &taskAsync, [](uv_async_t *handle) {
-            auto *pool = (UVTaskConcurrentPool2 *) handle->data;
-            pool->hasWeakUpFlag.clear(std::memory_order_release);
-            std::shared_ptr<std::vector<UVTask> > executeTasks;
-            {
-                std::lock_guard<std::mutex> lock(pool->tasksMutex);
-                executeTasks = pool->swapTasks[pool->swapTaskIndex];
-                pool->swapTaskIndex = (pool->swapTaskIndex + 1) % 2;
-                pool->tasks = pool->swapTasks[pool->swapTaskIndex];
-            }
-            for (auto &task: *executeTasks) {
-                task.func();
-            }
-            executeTasks->clear();
-        });
-
-        while (!stopFlag) {
-            uv_run(loop, UV_RUN_DEFAULT);
-        }
-        loop = nullptr;
-    }
-
-private:
-    std::shared_ptr<std::thread> loopThread;
-    uv_loop_t *loop = nullptr;
-    uv_async_t taskAsync{};
-    std::mutex tasksMutex;
-    std::atomic_flag hasWeakUpFlag = ATOMIC_FLAG_INIT;
-    std::shared_ptr<std::vector<UVTask> > tasks;
-    std::shared_ptr<std::vector<UVTask> > swapTasks[2];
-    int64_t swapTaskIndex = 0;
-    uv_async_t stopAsync{};
-    std::atomic<bool> stopFlag;
-};
-
 
 
 int64_t executeCount = 0;
