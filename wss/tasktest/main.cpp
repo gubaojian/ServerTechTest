@@ -23,6 +23,7 @@ public:
         stopFlag = false;
         hasInitFlag = false;
         loop = nullptr;
+        autoCatchException = false;
         tasks = swapTasks[swapTaskIndex];
         loopThread = std::make_shared<std::thread>([this]() {
             runLoop();
@@ -46,6 +47,10 @@ public:
                 uv_async_send(&taskAsync);
             }
         }
+    }
+
+    void setAutoCatchException(bool catchException) {
+        this->autoCatchException = catchException;
     }
 
     void stop() {
@@ -102,13 +107,17 @@ private:
                 pool->tasks = pool->swapTasks[pool->swapTaskIndex];
             }
             for (auto &task: *executeTasks) {
-                 try {
+                if (pool->autoCatchException) {
+                    try {
+                       task.func();
+                     } catch (std::exception &e) {
+                         std::cerr << "[UVTaskPool] run task error " << e.what() << std::endl;
+                     } catch (...) {
+                          std::cerr << "[UVTaskPool] run task unkown exception" << std::endl;
+                     }
+                } else {
                     task.func();
-                 } catch (std::exception &e) {
-                     std::cerr << "[UVTaskPool] run task error " << e.what() << std::endl;
-                 } catch (...) {
-                      std::cerr << "[UVTaskPool] run task unkown exception" << std::endl;
-                 }
+                }
             }
             executeTasks->clear();
         });
@@ -136,6 +145,7 @@ private:
     uv_async_t stopAsync{};
     std::atomic<bool> stopFlag;
     std::mutex stopMutex;
+    bool autoCatchException;
 };
 
 
@@ -147,6 +157,7 @@ public:
         stopFlag = false;
         hasInitFlag = false;
         loop = nullptr;
+        autoCatchException = false;
         loopThread = std::make_shared<std::thread>([this]() {
             runLoop();
         });
@@ -168,6 +179,10 @@ public:
                 uv_async_send(&taskAsync);
             }
         }
+    }
+
+    void setAutoCatchException(bool catchException) {
+        this->autoCatchException = catchException;
     }
 
     void stop() {
@@ -221,13 +236,18 @@ private:
                  UVTask task;
                  hasTask = pool->tasks->try_dequeue(task);
                  if (hasTask) {
-                     try {
-                         task.func();
-                     } catch (std::exception &e) {
-                         std::cerr << "[UVTaskConcurrentPool] run task error " << e.what() << std::endl;
-                     } catch (...) {
-                         std::cerr << "[UVTaskConcurrentPool] run task unkown exception" << std::endl;
-                     }
+                     if (pool->autoCatchException) {
+                         try {
+                              task.func();
+                          } catch (std::exception &e) {
+                              std::cerr << "[UVTaskConcurrentPool] run task error " << e.what() << std::endl;
+                          } catch (...) {
+                              std::cerr << "[UVTaskConcurrentPool] run task unkown exception" << std::endl;
+                          }
+                    } else {
+                        task.func();
+                    }
+
                  }
             } while (hasTask);
         });
@@ -252,6 +272,7 @@ private:
     uv_async_t stopAsync{};
     std::atomic<bool> stopFlag;
     std::mutex stopMutex;
+    bool autoCatchException;
 };
 
 
