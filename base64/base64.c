@@ -170,6 +170,13 @@ static int base64_encodeblock(unsigned char *out,
     return ret;
 }
 
+static bool base64CanTrim(unsigned char c) {
+    return (c == CDK_B64_WS)
+    || (c == CDK_B64_EOLN)
+    || (c == CDK_B64_CR)
+    || (c == CDK_B64_EOF);
+}
+
 static int base64_decodeblock(unsigned char *out,
                                const unsigned char *in, size_t n, size_t tableId)
 {
@@ -187,7 +194,7 @@ static int base64_decodeblock(unsigned char *out,
         table = cdk_data_ascii2bin;
 
     /* trim whitespace from the start of the line. */
-    while ((n > 0) && (cdk_conv_ascii2bin(*in, table) == CDK_B64_WS)) {
+    while ((n > 0) && (base64CanTrim(cdk_conv_ascii2bin(*in, table)))) {
         in++;
         n--;
     }

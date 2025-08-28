@@ -279,6 +279,19 @@ void testBase64() {
         printf("%s decode len %ld\n", dout, dlen);
     }
 
+    {
+        printf("base64 encode decode for \rYWJjZA==\t \n");
+        char* out2 = "\rYWJjZA==\t";
+        size_t outlen = strlen(out2);
+        memcpy(out, out2, outlen);
+        base64_decode(out, outlen, dout, &dlen);
+        dout[dlen] = '\0';
+        if (dlen != 4) {
+            printf("base64 encode decode failed test, dlen %ld not right, should be 4 \n", dlen);
+        }
+        printf("%s decode len %ld\n", dout, dlen);
+    }
+
 
 
 }
