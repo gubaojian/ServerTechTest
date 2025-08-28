@@ -130,8 +130,8 @@ private:
     }
 
     void cancelTimerInLoop(const int64_t timerId) const {
-        auto findId = (*timerTasksMapInLoop).find(timerId);
-        if (findId == (*timerTasksMapInLoop).end()) {
+        auto findId = timerTasksMapInLoop->find(timerId);
+        if (findId == timerTasksMapInLoop->end()) {
             return;
         }
         const std::shared_ptr<UVTimerTask>& timerTask = findId->second;
