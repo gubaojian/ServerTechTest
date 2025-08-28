@@ -177,7 +177,104 @@ void testBase64() {
         base64_decode(out, outlen, dout, &dlen);
         dout[dlen] = '\0';
         if (dlen != 1) {
-            printf("base64 encode decode failed test, dlen not right\n");
+            printf("base64 encode decode failed test, dlen %ld not right, should be  1 \n", dlen);
+        }
+        printf("%s decode len %ld\n", dout, dlen);
+    }
+
+    {
+        printf("base64 encode decode for ab \n");
+        char* in2 = "ab";
+        size_t inlen2 = strlen(in2);
+        base64_encode(in2, inlen2, out, &outlen);
+        out[outlen] = '\0';
+        printf("%s %ld %ld\n", out, outlen,  base64_encode_len(inlen2));
+        base64_decode(out, outlen, dout, &dlen);
+        dout[dlen] = '\0';
+        if (dlen != 2) {
+            printf("base64 encode decode failed test, dlen %ld not right, should be  2\n", dlen);
+        }
+        printf("%s decode len %ld\n", dout, dlen);
+    }
+
+    {
+        printf("base64 encode decode for none \n");
+        char* in2 = "";
+        size_t inlen2 = strlen(in2);
+        base64_encode(in2, inlen2, out, &outlen);
+        out[outlen] = '\0';
+        printf("%s %ld %ld\n", out, outlen,  base64_encode_len(inlen2));
+        base64_decode(out, outlen, dout, &dlen);
+        dout[dlen] = '\0';
+        if (dlen != 0) {
+            printf("base64 encode decode failed test, dlen %ld not right, should be  0\n", dlen);
+        }
+        printf("%s decode len %ld\n", dout, dlen);
+    }
+
+    {
+        printf("base64 encode decode for abc \n");
+        char* in2 = "abc";
+        size_t inlen2 = strlen(in2);
+        base64_encode(in2, inlen2, out, &outlen);
+        out[outlen] = '\0';
+        printf("%s %ld %ld\n", out, outlen,  base64_encode_len(inlen2));
+        base64_decode(out, outlen, dout, &dlen);
+        dout[dlen] = '\0';
+        if (dlen != 3) {
+            printf("base64 encode decode failed test, dlen %ld not right, should be 3 \n", dlen);
+        }
+        printf("%s decode len %ld\n", dout, dlen);
+    }
+
+    {
+        printf("base64 encode decode for YWJjZQ \n");
+        char* out2 = "YWJjZQ";
+        size_t outlen = strlen(out2);
+        memcpy(out, out2, outlen);
+        base64_decode(out, outlen, dout, &dlen);
+        dout[dlen] = '\0';
+        if (dlen != 4) {
+            printf("base64 encode decode failed test, dlen %ld not right, should be 4 \n", dlen);
+        }
+        printf("%s decode len %ld\n", dout, dlen);
+    }
+
+    {
+        printf("base64 encode decode for YWJjZQ== \n");
+        char* out2 = "YWJjZQ==";
+        size_t outlen = strlen(out2);
+        memcpy(out, out2, outlen);
+        base64_decode(out, outlen, dout, &dlen);
+        dout[dlen] = '\0';
+        if (dlen != 4) {
+            printf("base64 encode decode failed test, dlen %ld not right, should be 4 \n", dlen);
+        }
+        printf("%s decode len %ld\n", dout, dlen);
+    }
+
+    {
+        printf("base64 encode decode for YWJjZQ=== \n");
+        char* out2 = "YWJjZQ===";
+        size_t outlen = strlen(out2);
+        memcpy(out, out2, outlen);
+        base64_decode(out, outlen, dout, &dlen);
+        dout[dlen] = '\0';
+        if (dlen != 0) {
+            printf("base64 encode decode failed test, dlen %ld not right, should be 0 \n", dlen);
+        }
+        printf("%s decode len %ld\n", dout, dlen);
+    }
+
+    {
+        printf("base64 encode decode for YWJjZg!! \n");
+        char* out2 = "YWJjZg!!";
+        size_t outlen = strlen(out2);
+        memcpy(out, out2, outlen);
+        base64_decode(out, outlen, dout, &dlen);
+        dout[dlen] = '\0';
+        if (dlen != 0) {
+            printf("base64 encode decode failed test, dlen %ld not right, should be 0 \n", dlen);
         }
         printf("%s decode len %ld\n", dout, dlen);
     }
