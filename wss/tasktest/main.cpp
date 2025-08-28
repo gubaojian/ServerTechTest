@@ -97,7 +97,6 @@ private:
         if (executeTasks->size() >= 512*1024) { // max 4 mb
             executeTasks->resize(512*1024);
             executeTasks->shrink_to_fit();
-
         }
         executeTasks->clear();
     }
