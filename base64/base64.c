@@ -227,36 +227,31 @@ static int base64_decodeblock(unsigned char *out,
     }
 
     /* process the last block with auto padding. */
-    int  autoPaddingSize = 0;
-    int eof = 0;
+     int eof = 0;
     if (remain == 0) {
         eof = (in[1] == '=') + (in[2] == '=') + (in[3] == '=');
         a = cdk_conv_ascii2bin(*(in++), table);
         b = cdk_conv_ascii2bin(*(in++), table);
         c = cdk_conv_ascii2bin(*(in++), table);
         d = cdk_conv_ascii2bin(*(in++), table);
-        autoPaddingSize = 0;
     } else if (remain == 1) {
         eof = 1 + 1 + 1;
         a = cdk_conv_ascii2bin(*(in++), table);
         b = cdk_conv_ascii2bin('=', table);
         c = cdk_conv_ascii2bin('=', table);
         d = cdk_conv_ascii2bin('=', table);
-        autoPaddingSize = 3;
     } else if (remain == 2) {
         eof = (in[1] == '=') + 1 + 1;
         a = cdk_conv_ascii2bin(*(in++), table);
         b = cdk_conv_ascii2bin(*(in++), table);
         c = cdk_conv_ascii2bin('=', table);
         d = cdk_conv_ascii2bin('=', table);
-        autoPaddingSize = 2;
     } else if (remain == 3) {
         eof = (in[1] == '=') + (in[2] == '=') + 1;
         a = cdk_conv_ascii2bin(*(in++), table);
         b = cdk_conv_ascii2bin(*(in++), table);
         c = cdk_conv_ascii2bin(*(in++), table);
         d = cdk_conv_ascii2bin('=', table);
-        autoPaddingSize = 1;
     }
     if ((a | b | c | d) & 0x80)
         return -1;
@@ -264,7 +259,7 @@ static int base64_decodeblock(unsigned char *out,
          (((unsigned long)b) << 12L) |
          (((unsigned long)c) << 6L) | (((unsigned long)d)));
 
-    if (autoPaddingSize > 2 || eof > 2)
+    if (eof > 2)
         return -1;
 
 
