@@ -88,8 +88,6 @@ public:
         });
     }
 
-
-
     void setAutoCatchException(bool catchException) {
         this->autoCatchException = catchException;
     }
