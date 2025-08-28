@@ -167,6 +167,21 @@ void testBase64() {
         printf("%s %ld\n", dout, dlen);
     }
 
+    {
+        printf("base64 encode decode for a \n");
+        char* in2 = "a";
+        size_t inlen2 = strlen(in2);
+        base64_encode(in2, inlen2, out, &outlen);
+        out[outlen] = '\0';
+        printf("%s %ld %ld\n", out, outlen,  base64_encode_len(inlen2));
+        base64_decode(out, outlen, dout, &dlen);
+        dout[dlen] = '\0';
+        if (dlen != 1) {
+            printf("base64 encode decode failed test, dlen not right\n");
+        }
+        printf("%s decode len %ld\n", dout, dlen);
+    }
+
 }
 
 /**

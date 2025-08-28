@@ -227,31 +227,36 @@ static int base64_decodeblock(unsigned char *out,
     }
 
     /* process the last block with auto padding. */
-    int  autoPadding = 0;
+    int  autoPaddingSize = 0;
+    int eof = 0;
     if (remain == 0) {
+        eof = (in[2] == '=') + (in[3] == '=');
         a = cdk_conv_ascii2bin(*(in++), table);
         b = cdk_conv_ascii2bin(*(in++), table);
         c = cdk_conv_ascii2bin(*(in++), table);
         d = cdk_conv_ascii2bin(*(in++), table);
-        autoPadding = 0;
+        autoPaddingSize = 0;
     } else if (remain == 1) {
+        eof = 1 + 1;
         a = cdk_conv_ascii2bin(*(in++), table);
         b = cdk_conv_ascii2bin('=', table);
         c = cdk_conv_ascii2bin('=', table);
         d = cdk_conv_ascii2bin('=', table);
-        autoPadding = 3;
+        autoPaddingSize = 3;
     } else if (remain == 2) {
+        eof = 1 + 1;
         a = cdk_conv_ascii2bin(*(in++), table);
         b = cdk_conv_ascii2bin(*(in++), table);
         c = cdk_conv_ascii2bin('=', table);
         d = cdk_conv_ascii2bin('=', table);
-        autoPadding = 2;
+        autoPaddingSize = 2;
     } else if (remain == 3) {
+        eof = (in[2] == '=') + 1;
         a = cdk_conv_ascii2bin(*(in++), table);
         b = cdk_conv_ascii2bin(*(in++), table);
         c = cdk_conv_ascii2bin(*(in++), table);
         d = cdk_conv_ascii2bin('=', table);
-        autoPadding = 1;
+        autoPaddingSize = 1;
     }
     if ((a | b | c | d) & 0x80)
         return -1;
@@ -259,10 +264,11 @@ static int base64_decodeblock(unsigned char *out,
          (((unsigned long)b) << 12L) |
          (((unsigned long)c) << 6L) | (((unsigned long)d)));
 
-    if (autoPadding > 2)
+    if (autoPaddingSize > 2)
         return -1;
 
-    switch (autoPadding) {
+
+    switch (eof) {
     case 2:
         *(out++) = (unsigned char)(l >> 16L) & 0xff;
         break;
@@ -276,7 +282,7 @@ static int base64_decodeblock(unsigned char *out,
         *(out++) = (unsigned char)(l) & 0xff;
         break;
     }
-    ret += 3 - autoPadding;
+    ret += 3 - eof;
     return ret;
 }
 
