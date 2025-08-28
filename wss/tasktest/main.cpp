@@ -18,8 +18,10 @@ struct UVTask {
 class UVTaskPool {
 public:
     UVTaskPool() {
-        swapTasks[0] = std::make_shared<std::vector<UVTask>>();
-        swapTasks[1] = std::make_shared<std::vector<UVTask>>();
+        swapTasks[0] = std::make_shared<std::vector<std::shared_ptr<UVTask>>>();
+        swapTasks[1] = std::make_shared<std::vector<std::shared_ptr<UVTask>>>();
+        swapTasks[0]->reserve(4096);
+        swapTasks[1]->reserve(4096);
         stopFlag = false;
         hasInitFlag = false;
         loop = nullptr;
@@ -37,9 +39,9 @@ public:
 public:
     void post(std::function<void()> &&func) {
         if (!stopFlag) {
-            UVTask task(std::move(func));
+            std::shared_ptr<UVTask> task = std::make_shared<UVTask>(std::move(func));
             std::lock_guard<std::mutex> lock(tasksMutex);
-            tasks->emplace_back(task);
+            tasks->emplace_back(std::move(task));
         }
         {
             std::lock_guard<std::mutex> lock(stopMutex);
@@ -70,6 +72,36 @@ public:
     }
 
 private:
+    // only can be called in uv loop thread
+    void executeTasksInLoop() {
+        std::shared_ptr<std::vector<std::shared_ptr<UVTask>>> executeTasks;
+        {
+            std::lock_guard<std::mutex> lock(tasksMutex);
+            executeTasks = swapTasks[swapTaskIndex];
+            swapTaskIndex = (swapTaskIndex + 1) % 2;
+            tasks = swapTasks[swapTaskIndex];
+        }
+        for (auto &task: *executeTasks) {
+            if (autoCatchException) {
+                try {
+                    task->func();
+                } catch (std::exception &e) {
+                    std::cerr << "[UVTaskPool] run task error " << e.what() << std::endl;
+                } catch (...) {
+                    std::cerr << "[UVTaskPool] run task unknown exception" << std::endl;
+                }
+            } else {
+                task->func();
+            }
+        }
+        if (executeTasks->size() >= 512*1024) { // max 4 mb
+            executeTasks->resize(512*1024);
+            executeTasks->shrink_to_fit();
+
+        }
+        executeTasks->clear();
+    }
+
     void runLoop() {
         loop = uv_loop_new();
         if (loop == nullptr) {
@@ -90,6 +122,7 @@ private:
                 }
             }
             if (needClose) {
+                pool->executeTasksInLoop();
                 uv_close((uv_handle_t*)&pool->taskAsync, [](uv_handle_t* handle) {
                 });
                 uv_close((uv_handle_t*)&pool->stopAsync, [](uv_handle_t* handle) {
@@ -98,28 +131,8 @@ private:
             }
         });
         uv_async_init(loop, &taskAsync, [](uv_async_t *handle) {
-            auto *pool = (UVTaskPool *) handle->data;
-            std::shared_ptr<std::vector<UVTask>> executeTasks;
-            {
-                std::lock_guard<std::mutex> lock(pool->tasksMutex);
-                executeTasks = pool->swapTasks[pool->swapTaskIndex];
-                pool->swapTaskIndex = (pool->swapTaskIndex + 1) % 2;
-                pool->tasks = pool->swapTasks[pool->swapTaskIndex];
-            }
-            for (auto &task: *executeTasks) {
-                if (pool->autoCatchException) {
-                    try {
-                       task.func();
-                     } catch (std::exception &e) {
-                         std::cerr << "[UVTaskPool] run task error " << e.what() << std::endl;
-                     } catch (...) {
-                          std::cerr << "[UVTaskPool] run task unkown exception" << std::endl;
-                     }
-                } else {
-                    task.func();
-                }
-            }
-            executeTasks->clear();
+             auto *pool = (UVTaskPool *) handle->data;
+             pool->executeTasksInLoop();
         });
         stopAsync.data = this;
         taskAsync.data = this;
@@ -139,8 +152,8 @@ private:
     uv_loop_t *loop = nullptr;
     uv_async_t taskAsync{};
     std::mutex tasksMutex;
-    std::shared_ptr<std::vector<UVTask>> tasks;
-    std::shared_ptr<std::vector<UVTask>> swapTasks[2];
+    std::shared_ptr<std::vector<std::shared_ptr<UVTask>>> tasks;
+    std::shared_ptr<std::vector<std::shared_ptr<UVTask>>> swapTasks[2];
     int64_t swapTaskIndex = 0;
     uv_async_t stopAsync{};
     std::atomic<bool> stopFlag;
@@ -153,7 +166,7 @@ private:
 class UVTaskConcurrentPool {
 public:
     UVTaskConcurrentPool() {
-        tasks = std::make_shared<moodycamel::ConcurrentQueue<UVTask>>();
+        tasks = std::make_shared<moodycamel::ConcurrentQueue<std::shared_ptr<UVTask>>>();
         stopFlag = false;
         hasInitFlag = false;
         loop = nullptr;
@@ -170,8 +183,8 @@ public:
 public:
     void post(std::function<void()> &&func) {
         if (!stopFlag) {
-            UVTask task(std::move(func));
-            tasks->enqueue(task);
+            std::shared_ptr<UVTask> task = std::make_shared<UVTask>(std::move(func));
+            tasks->enqueue(std::move(task));
         }
         {
             std::lock_guard<std::mutex> lock(stopMutex);
@@ -202,6 +215,27 @@ public:
     }
 
 private:
+    void executeTasksInLoop() {
+        bool hasTask = false;
+        do {
+            std::shared_ptr<UVTask> task;
+            hasTask = tasks->try_dequeue(task);
+            if (hasTask) {
+                if (autoCatchException) {
+                    try {
+                        task->func();
+                    } catch (std::exception &e) {
+                        std::cerr << "[UVTaskConcurrentPool] run task error " << e.what() << std::endl;
+                    } catch (...) {
+                        std::cerr << "[UVTaskConcurrentPool] run task unknown exception" << std::endl;
+                    }
+                } else {
+                    task->func();
+                }
+
+            }
+        } while (hasTask);
+    }
     void runLoop() {
         loop = uv_loop_new();
         if (loop == nullptr) {
@@ -222,6 +256,7 @@ private:
                 }
             }
             if (needClose) {
+                pool->executeTasksInLoop();
                 uv_close((uv_handle_t*)&pool->taskAsync, [](uv_handle_t* handle) {
                 });
                 uv_close((uv_handle_t*)&pool->stopAsync, [](uv_handle_t* handle) {
@@ -231,25 +266,7 @@ private:
         });
         uv_async_init(loop, &taskAsync, [](uv_async_t *handle) {
             auto *pool = (UVTaskConcurrentPool *) handle->data;
-            bool hasTask = false;
-            do {
-                 UVTask task;
-                 hasTask = pool->tasks->try_dequeue(task);
-                 if (hasTask) {
-                     if (pool->autoCatchException) {
-                         try {
-                              task.func();
-                          } catch (std::exception &e) {
-                              std::cerr << "[UVTaskConcurrentPool] run task error " << e.what() << std::endl;
-                          } catch (...) {
-                              std::cerr << "[UVTaskConcurrentPool] run task unkown exception" << std::endl;
-                          }
-                    } else {
-                        task.func();
-                    }
-
-                 }
-            } while (hasTask);
+            pool->executeTasksInLoop();
         });
         stopAsync.data = this;
         taskAsync.data = this;
@@ -268,7 +285,7 @@ private:
     std::atomic<bool> hasInitFlag = false;
     uv_loop_t *loop = nullptr;
     uv_async_t taskAsync{};
-    std::shared_ptr<moodycamel::ConcurrentQueue<UVTask> > tasks;
+    std::shared_ptr<moodycamel::ConcurrentQueue<std::shared_ptr<UVTask>>> tasks;
     uv_async_t stopAsync{};
     std::atomic<bool> stopFlag;
     std::mutex stopMutex;
