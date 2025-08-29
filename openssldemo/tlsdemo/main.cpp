@@ -17,6 +17,7 @@
 void handle_ssl_error(const char *msg) {
     fprintf(stderr, "[ERROR] %s: \n", msg);
     ERR_print_errors_fp(stderr);
+    ERR_get_error();
     ERR_clear_error();
     exit(EXIT_FAILURE);
 }
@@ -161,6 +162,11 @@ int main() {
     char decrypted[BUF_SIZE] = {0};
     ret = BIO_read(client_ssl_bio, decrypted, BUF_SIZE - 1);
     if (ret <= 0) handle_ssl_error("Client read failed");
+
+    ret = BIO_read(client_ssl_bio, decrypted, BUF_SIZE - 1);
+    printf("Client read IO_should_retry %d %ld\n", BIO_should_retry(client_ssl_bio), ERR_get_error());
+
+    if (ret <= 0) handle_ssl_error("Client read failed retry");
 
     // 9. 输出结果
     printf("\n=== Result ===\n");

@@ -3,6 +3,7 @@
 #include <time.h>
 
 #include "base64.h"
+#include "ngx_base64.h"
 
 
 
@@ -356,9 +357,51 @@ void testBase64Perf() {
 }
 
 
+void testNgxBase64Perf() {
+    char out[1024];
+    char dout[1024];
+    char* in = " +/=你好 base64 测试+/=你好 base64 测试+/=你好 base64 测试+/=你好 base64 测试+/=你好 base64 测试+/=你好 base64 测试v+/=你好 base64 测试+/=你好 base64 测试+/=你好 base64 测试+/=你好 base64 测试 ";
+    size_t inlen = strlen(in);
+    size_t outlen;
+    size_t dlen;
+    base64_encode(in, inlen, out, &outlen);
+
+    {
+        clock_t start, end;
+        start = clock();
+        size_t LOOP_COUNT = 10000*100;
+        ngx_str_t dst;
+        dst.data = dout;
+        dst.len = 1024;
+        ngx_str_t src;
+        src.data = out;
+        src.len = outlen;
+        for (size_t i=0; i<10000*100; i++) {
+            ngx_decode_base64(&dst, &src);
+        }
+        end = clock();
+        double cost_ms = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+        printf("ngx 解码%s\n", dst.data);
+        printf("ngx 解码耗时：%.2f ms（平均单次：%.6f ms）\n",
+           cost_ms, cost_ms / LOOP_COUNT);
+    }
+
+
+
+}
+
+
+/**
+* 编码耗时：57.14 ms（平均单次：0.000057 ms）
+* 解码耗时：77.86 ms（平均单次：0.000078 ms）
+* 自动解码包含空格的解码耗时：169.83 ms（平均单次：0.000170 ms）
+* ngx 解码耗时：188.76 ms（平均单次：0.000189 ms）
+ * @return
+ */
 int main(void) {
     testBase64();
     testBase64Perf();
+    testNgxBase64Perf();
     //print_normal_table();
     //print_url_safe_table();
 
