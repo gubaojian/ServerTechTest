@@ -17,7 +17,8 @@ public class UrlHMacSignUtil {
         if (appSecret == null) {
             throw new IllegalArgumentException("appSecret should not be null");
         }
-        if (appSecret.length() < 32) {
+        byte[] secret = appSecret.getBytes(StandardCharsets.UTF_8);
+        if (secret.length < 32) {
             throw new IllegalArgumentException("appSecret should be 32 byte");
         }
 
@@ -54,7 +55,7 @@ public class UrlHMacSignUtil {
         String data = sb.toString();
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKey = new SecretKeySpec(appSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            SecretKeySpec secretKey = new SecretKeySpec(secret, "HmacSHA256");
             mac.init(secretKey);
             byte[] bts = mac.doFinal(data.getBytes(StandardCharsets.UTF_8)); // 仅计算 HMAC-SHA256
             jdkx.compat.util.HexFormat hexFormat = jdkx.compat.util.HexFormat.of().withLowerCase();
@@ -78,8 +79,9 @@ public class UrlHMacSignUtil {
         if (appSecret == null) {
             throw new IllegalArgumentException("appSecret should not be null");
         }
-        if (appSecret.length() < 32) {
-            throw new IllegalArgumentException("appSecret should be at least 32 byte");
+        byte[] secret = appSecret.getBytes(StandardCharsets.UTF_8);
+        if (secret.length < 32) {
+            throw new IllegalArgumentException("appSecret should be 32 byte");
         }
         if (processor.getQueryParameter("port") == null) {
             throw new IllegalArgumentException("uri should be contains port parameter");
@@ -117,7 +119,7 @@ public class UrlHMacSignUtil {
         String data = sb.toString();
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKey = new SecretKeySpec(appSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            SecretKeySpec secretKey = new SecretKeySpec(secret, "HmacSHA256");
             mac.init(secretKey);
             byte[] bts = mac.doFinal(data.getBytes(StandardCharsets.UTF_8)); // 仅计算 HMAC-SHA256
             jdkx.compat.util.HexFormat hexFormat = jdkx.compat.util.HexFormat.of().withLowerCase();
