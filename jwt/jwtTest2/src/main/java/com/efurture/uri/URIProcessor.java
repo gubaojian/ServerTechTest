@@ -1,4 +1,4 @@
-package jdkx.compat.uri;
+package com.efurture.uri;
 
 
 import java.net.MalformedURLException;
@@ -155,11 +155,6 @@ public class URIProcessor {
         return clearQuery();
     }
 
-    public URIProcessor removeQueryParameter(String key) {
-        queryMap.remove(key);
-        return this;
-    }
-
     public URIProcessor putAllParameter(Map<String, String> parameters) {
         Set<Map.Entry<String, String>> entries = parameters.entrySet();
         for(Map.Entry<String, String> entry : entries) {
@@ -175,6 +170,11 @@ public class URIProcessor {
                 appendQueryParameter(entry.getKey(), value);
             }
         }
+        return this;
+    }
+
+    public URIProcessor removeQueryParameter(String key) {
+        queryMap.remove(key);
         return this;
     }
 
