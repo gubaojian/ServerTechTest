@@ -14,12 +14,18 @@ else()
     endif()
 endif()
 
-
 if(EXISTS "${USER_HOME_DIR}")
     message(STATUS "current user home dir: ${USER_HOME_DIR}")
 else()
     message(WARNING "cann't found current user home dir: ${USER_HOME_DIR}")
 endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CDEPS_DIR "${USER_HOME_DIR}/cdeps/debug")
+else ()
+    set(CDEPS_DIR "${USER_HOME_DIR}/cdeps/release")
+endif()
+
 
 message("${USER_HOME_DIR}/cdeps_debug/openssl/lib/cmake/OpenSSL")
 
@@ -27,7 +33,7 @@ set(OPENSSL_SOURCE_DIR "/Users/baojian/cdeps_source")
 
 set(OPENSSL_USE_STATIC_LIBS TRUE)
 find_package(OpenSSL 3.5.1 REQUIRED CONFIG
-        PATHS "${USER_HOME_DIR}/cdeps_debug/openssl/lib/cmake/OpenSSL"
+        PATHS "${CDEPS_DIR}/openssl/3.5.1/lib/cmake/OpenSSL"
         NO_DEFAULT_PATH)
 
 if(OPENSSL_FOUND)
