@@ -19,11 +19,11 @@ public class UrlHMacSignUtil {
         }
         byte[] secret = appSecret.getBytes(StandardCharsets.UTF_8);
         if (secret.length < 32) {
-            throw new IllegalArgumentException("appSecret should be 32 byte");
+            throw new IllegalArgumentException("appSecret should be at least 32 byte");
         }
 
         if (processor.getQueryParameter("port") == null) {
-            throw new IllegalArgumentException("uri should be contains port");
+            throw new IllegalArgumentException("uri should contain port parameter");
         }
 
         TreeMap<String, String> signParameters = new TreeMap<>();
@@ -80,16 +80,23 @@ public class UrlHMacSignUtil {
         }
         byte[] secret = appSecret.getBytes(StandardCharsets.UTF_8);
         if (secret.length < 32) {
-            throw new IllegalArgumentException("appSecret should be 32 byte");
+            throw new IllegalArgumentException("appSecret should be at least 32 byte");
         }
         if (processor.getQueryParameter("port") == null) {
-            throw new IllegalArgumentException("uri should be contains port parameter");
+            throw new IllegalArgumentException("uri should contain port parameter");
         }
         processor.removeQueryParameter("sign");
         String signTime = processor.getQueryParameter("signTime");
-        long time = Long.parseLong(signTime);
-        if (Math.abs(System.currentTimeMillis() - time) > 1000*60) {
-            throw new IllegalArgumentException("signTime is expired " + uri);
+        if (signTime == null) {
+            throw new IllegalArgumentException("parameter signTime should not be null");
+        }
+        try {
+            long time = Long.parseLong(signTime);
+            if (Math.abs(System.currentTimeMillis() - time) > 1000*60) {
+                throw new IllegalArgumentException("signTime is expired " + uri);
+            }
+        }catch (Exception e) {
+            throw new IllegalArgumentException("parameter signTime is illegal", e);
         }
         TreeMap<String, String> signParameters = new TreeMap<>();
         Set<Map.Entry<String, List<String>>> entries = queryMap.entrySet();
