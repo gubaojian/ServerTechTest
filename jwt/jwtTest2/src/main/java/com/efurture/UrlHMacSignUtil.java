@@ -8,7 +8,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class HMacSignUtil {
+public class UrlHMacSignUtil {
 
 
     public static URI signUrl(String uri, String appSecret) {
