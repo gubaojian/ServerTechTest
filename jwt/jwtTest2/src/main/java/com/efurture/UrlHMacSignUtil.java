@@ -41,7 +41,6 @@ public class UrlHMacSignUtil {
         }
         signParameters.put("signTime", String.valueOf(System.currentTimeMillis()));
         signParameters.put("salt", UUID.randomUUID().toString());
-        signParameters.put("port", String.valueOf(processor.getSourceUri().getPort()));
 
         Set<Map.Entry<String, String>> signEntries = signParameters.entrySet();
         StringBuilder sb = new StringBuilder();
