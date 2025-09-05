@@ -18,8 +18,14 @@ public class URIProcessor {
 
     public URIProcessor(URI sourceUri) {
         this.sourceUri = sourceUri;
-        this.queryMap = new LinkedHashMap<>();
+        this.queryMap = new LinkedHashMap<>(12);
         this.parseQueryParametersToMap();
+    }
+
+    private URIProcessor(URI sourceUri, Map<String, List<String>> queryMap) {
+        this.sourceUri = sourceUri;
+        this.queryMap = new LinkedHashMap<>(12);
+        putAllParameters(queryMap);
     }
 
     public static URIProcessor fromURI(URI uri) {
@@ -41,6 +47,10 @@ public class URIProcessor {
 
     public static URIProcessor fromURL(String url) {
         return fromURI(url);
+    }
+
+    public static URIProcessor fromProcessor(URIProcessor processor) {
+        return new URIProcessor(processor.getSourceUri(), processor.getQueryMap());
     }
 
     public URI getSourceUri() {
@@ -226,8 +236,8 @@ public class URIProcessor {
         }
         int start = 0;
         do {
-            int nextAmpersand = query.indexOf('&', start);
-            int end = nextAmpersand != -1 ? nextAmpersand : query.length();
+            int nextAndPos = query.indexOf('&', start);
+            int end = nextAndPos != -1 ? nextAndPos : query.length();
 
             int separator = query.indexOf('=', start);
             if (separator > end || separator == -1) {
@@ -248,8 +258,8 @@ public class URIProcessor {
             }
 
             // Move start to end of name.
-            if (nextAmpersand != -1) {
-                start = nextAmpersand + 1;
+            if (nextAndPos != -1) {
+                start = nextAndPos + 1;
             } else {
                 break;
             }

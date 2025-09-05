@@ -1,6 +1,7 @@
 package com.efurture;
 
 import com.efurture.uri.URIProcessor;
+import jdkx.compat.util.threadlocal.ThreadLocalUtil;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -12,7 +13,25 @@ public class UrlHMacSignUtil {
 
 
     public static URI signUrl(String uri, String appSecret) {
-        URIProcessor processor =  URIProcessor.fromURL(uri);
+        return innerSignUrl(URIProcessor.fromURI(uri), appSecret);
+    }
+
+    public static URI signUrl(URI uri, String appSecret) {
+        return innerSignUrl(URIProcessor.fromURI(uri), appSecret);
+    }
+
+    public static URI signUrl(URIProcessor processor, String appSecret) {
+        URIProcessor innerProcessor = URIProcessor.fromProcessor(processor);
+        return innerSignUrl(innerProcessor, appSecret);
+    }
+
+    /**
+     * 对URIProcessor进行签名（内部会拷贝新实例，不修改原processor参数）
+     * @param processor 待签名的URIProcessor
+     * @param appSecret 签名密钥（≥32字节）
+     * @return 签名后的URI
+     */
+    private static URI innerSignUrl(URIProcessor processor, String appSecret) {
         Map<String, List<String>> queryMap = processor.getQueryMap();
         if (appSecret == null) {
             throw new IllegalArgumentException("appSecret should not be null");
@@ -40,10 +59,11 @@ public class UrlHMacSignUtil {
             signParameters.put(entry.getKey(), value);
         }
         signParameters.put("signTime", String.valueOf(System.currentTimeMillis()));
-        signParameters.put("salt", UUID.randomUUID().toString());
+        signParameters.put("salt", String.valueOf(ThreadLocalUtil.getSecureRandom().nextLong()));
+        signParameters.put("traceId", UUID.randomUUID().toString());
 
         Set<Map.Entry<String, String>> signEntries = signParameters.entrySet();
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(512);
         for(Map.Entry<String, String> entry : signEntries) {
             sb.append(entry.getKey());
             sb.append("=");
@@ -51,12 +71,12 @@ public class UrlHMacSignUtil {
             sb.append("&");
         }
         sb.deleteCharAt(sb.length()-1);
-        String data = sb.toString();
+        String signData = sb.toString();
         try {
-            Mac mac = Mac.getInstance("HmacSHA256");
+            Mac mac = ThreadLocalUtil.getLocalValueEntry().getHmacSHA256();
             SecretKeySpec secretKey = new SecretKeySpec(secret, "HmacSHA256");
             mac.init(secretKey);
-            byte[] bts = mac.doFinal(data.getBytes(StandardCharsets.UTF_8)); // 仅计算 HMAC-SHA256
+            byte[] bts = mac.doFinal(signData.getBytes(StandardCharsets.UTF_8)); // 仅计算 HMAC-SHA256
             jdkx.compat.util.HexFormat hexFormat = jdkx.compat.util.HexFormat.of().withLowerCase();
             String sign = hexFormat.formatHex(bts);
             signParameters.put("sign", sign);
@@ -90,20 +110,23 @@ public class UrlHMacSignUtil {
         if (signTime == null) {
             throw new IllegalArgumentException("parameter signTime should not be null");
         }
+        long signTimeNum = 0 ;
         try {
-            long time = Long.parseLong(signTime);
-            if (Math.abs(System.currentTimeMillis() - time) > 1000*60) {
-                throw new IllegalArgumentException("signTime is expired " + uri);
-            }
-        }catch (Exception e) {
-            throw new IllegalArgumentException("parameter signTime is illegal", e);
+            signTimeNum = Long.parseLong(signTime);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("parameter signTime is illegal number ", e);
+        }
+        long abs = Math.abs(System.currentTimeMillis() - signTimeNum);
+        long expireTime = 1000*60*2L; //2*60秒过期
+        if (abs > expireTime) {
+            throw new IllegalArgumentException("signTime is expired, current time " + System.currentTimeMillis() + " abs: " + abs + " sign time " + signTimeNum);
         }
         TreeMap<String, String> signParameters = new TreeMap<>();
         Set<Map.Entry<String, List<String>>> entries = queryMap.entrySet();
         for(Map.Entry<String, List<String>> entry : entries) {
             List<String> values = entry.getValue();
             if (values != null && values.size() > 1) {
-                throw new IllegalArgumentException("url one only can't contains two same parameter, key contains two values " + entry.getKey());
+                throw new IllegalArgumentException("url one only can't contains multiple values for the same parameter, parameter key contains two values " + entry.getKey());
             }
             String value = "";
             if (values != null && values.size() == 1) {
@@ -111,10 +134,8 @@ public class UrlHMacSignUtil {
             }
             signParameters.put(entry.getKey(), value);
         }
-
-
         Set<Map.Entry<String, String>> signEntries = signParameters.entrySet();
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(512);
         for(Map.Entry<String, String> entry : signEntries) {
             sb.append(entry.getKey());
             sb.append("=");
@@ -122,12 +143,12 @@ public class UrlHMacSignUtil {
             sb.append("&");
         }
         sb.deleteCharAt(sb.length()-1);
-        String data = sb.toString();
+        String signData = sb.toString();
         try {
-            Mac mac = Mac.getInstance("HmacSHA256");
+            Mac mac = ThreadLocalUtil.getLocalValueEntry().getHmacSHA256();
             SecretKeySpec secretKey = new SecretKeySpec(secret, "HmacSHA256");
             mac.init(secretKey);
-            byte[] bts = mac.doFinal(data.getBytes(StandardCharsets.UTF_8)); // 仅计算 HMAC-SHA256
+            byte[] bts = mac.doFinal(signData.getBytes(StandardCharsets.UTF_8)); // 仅计算 HMAC-SHA256
             jdkx.compat.util.HexFormat hexFormat = jdkx.compat.util.HexFormat.of().withLowerCase();
             String sign = hexFormat.formatHex(bts);
             return expect_sign.equals(sign);
@@ -136,15 +157,56 @@ public class UrlHMacSignUtil {
         }
     }
 
+    /**
+     * sign url used 4183ms. sign count 1000000
+     * sign check sign url used 2299ms. sign count 1000000
+     * */
+    private static void testPerf() {
+        URI signUri = null;
+        {
+            long start = System.currentTimeMillis();
+            String appSecret = "dssssssssssssssssssss1242142141241242142444444";
+            String uri = "http://127.0.0.1:8001?appId=333&role=client&port=8001";
+
+            int times = 10000*100;
+            for (int i = 0; i < times; i++) {
+                signUri =  signUrl(uri, appSecret);
+            }
+            long end = System.currentTimeMillis();
+
+            System.out.println("sign url used " + (end - start) + "ms. sign count " + times);
+        }
+
+        {
+            long start = System.currentTimeMillis();
+            String appSecret = "dssssssssssssssssssss1242142141241242142444444";
+            String uri = signUri.toString();
+
+            int times = 10000*100;
+            for (int i = 0; i < times; i++) {
+                checkSignUrl(uri, appSecret);
+            }
+            long end = System.currentTimeMillis();
+
+            System.out.println("sign check sign url used " + (end - start) + "ms. sign count " + times);
+        }
+        System.out.println("sign url " +  signUri);
+
+    }
+
     public static void main(String[] args) {
-        String appSecret = "dssssssssssssssssssss1242142141241242142444444";
-        String uri = "http://127.0.0.1:8001?appId=333&role=client&port=8001";
-        URI signUri = signUrl(uri, appSecret);
-        System.out.println(uri);
-        System.out.println(signUri);
-        System.out.println(checkSignUrl(signUri.toString(), appSecret));
-        System.out.println("after alert uri");
-        System.out.println(checkSignUrl(URIProcessor.fromURI(signUri).appendQueryParameter("h", "eee").toURI().toString(), appSecret));
+        {
+            String appSecret = "dssssssssssssssssssss1242142141241242142444444";
+            String uri = "http://127.0.0.1:8001?appId=333&role=client&port=8001";
+            URI signUri = signUrl(uri, appSecret);
+            System.out.println(uri);
+            System.out.println(signUri);
+            System.out.println(checkSignUrl(signUri.toString(), appSecret));
+            System.out.println("after alert uri " + System.currentTimeMillis());
+            System.out.println(checkSignUrl(URIProcessor.fromURI(signUri).appendQueryParameter("h", "eee").toURI().toString(), appSecret));
+        }
+
+        testPerf();
 
     }
 }
