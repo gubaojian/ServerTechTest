@@ -1,6 +1,9 @@
 package jdkx.compat.util.threadlocal;
 
 import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
@@ -45,7 +48,7 @@ public class LocalValueEntry {
     }
 
 
-    public Mac getHmacSHA256() throws NoSuchAlgorithmException {
+    public Mac getHmacSHA256() throws NoSuchAlgorithmException, InvalidKeyException {
         if (hmacSHA256 == null) {
             hmacSHA256 =  Mac.getInstance("HmacSHA256");
         }
