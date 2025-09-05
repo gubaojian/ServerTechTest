@@ -45,19 +45,7 @@ public class HMacSignUtil {
             throw new IllegalArgumentException("uri should contain port parameter");
         }
 
-        TreeMap<String, String> signParameters = new TreeMap<>();
-        Set<Map.Entry<String, List<String>>> entries = queryMap.entrySet();
-        for(Map.Entry<String, List<String>> entry : entries) {
-            List<String> values = entry.getValue();
-            if (values != null && values.size() > 1) {
-                throw new IllegalArgumentException("url one only can't contains two same parameter, key contains two values " + entry.getKey());
-            }
-            String value = "";
-            if (values != null && values.size() == 1) {
-                value = values.get(0);
-            }
-            signParameters.put(entry.getKey(), value);
-        }
+        TreeMap<String, String> signParameters = genSignMap(queryMap);
         signParameters.put("signTime", String.valueOf(System.currentTimeMillis()));
         signParameters.put("salt", String.valueOf(ThreadLocalUtil.getSecureRandom().nextLong()));
         signParameters.put("traceId", UUID.randomUUID().toString());
@@ -121,19 +109,7 @@ public class HMacSignUtil {
         if (abs > expireTime) {
             throw new IllegalArgumentException("signTime is expired, current time " + System.currentTimeMillis() + " abs: " + abs + " sign time " + signTimeNum);
         }
-        TreeMap<String, String> signParameters = new TreeMap<>();
-        Set<Map.Entry<String, List<String>>> entries = queryMap.entrySet();
-        for(Map.Entry<String, List<String>> entry : entries) {
-            List<String> values = entry.getValue();
-            if (values != null && values.size() > 1) {
-                throw new IllegalArgumentException("url one only can't contains multiple values for the same parameter, parameter key contains two values " + entry.getKey());
-            }
-            String value = "";
-            if (values != null && values.size() == 1) {
-                value = values.get(0);
-            }
-            signParameters.put(entry.getKey(), value);
-        }
+        TreeMap<String, String> signParameters = genSignMap(queryMap);
         Set<Map.Entry<String, String>> signEntries = signParameters.entrySet();
         StringBuilder sb = new StringBuilder(512);
         for(Map.Entry<String, String> entry : signEntries) {
@@ -155,6 +131,23 @@ public class HMacSignUtil {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static TreeMap<String, String> genSignMap(Map<String, List<String>> queryMap) {
+        TreeMap<String, String> signParameters = new TreeMap<>();
+        Set<Map.Entry<String, List<String>>> entries = queryMap.entrySet();
+        for(Map.Entry<String, List<String>> entry : entries) {
+            List<String> values = entry.getValue();
+            if (values != null && values.size() > 1) {
+                throw new IllegalArgumentException("url one only can't contains multiple values for the same parameter, parameter key contains two values " + entry.getKey());
+            }
+            String value = "";
+            if (values != null && values.size() == 1) {
+                value = values.get(0);
+            }
+            signParameters.put(entry.getKey(), value);
+        }
+        return signParameters;
     }
 
     /**
