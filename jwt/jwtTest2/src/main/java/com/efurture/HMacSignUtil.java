@@ -77,6 +77,15 @@ public class HMacSignUtil {
     }
 
     public static boolean checkSignUrl(String uri, byte[] appSecret) {
+        try {
+            return innerCheckSignUrl(uri, appSecret);
+        }catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private static boolean innerCheckSignUrl(String uri, byte[] appSecret) {
         URIProcessor processor =  URIProcessor.fromURL(uri);
         Map<String, List<String>> queryMap = processor.getQueryMap();
         String expect_sign = processor.getQueryParameter("sign");
@@ -198,11 +207,25 @@ public class HMacSignUtil {
             System.out.println("after alert uri " + System.currentTimeMillis());
             System.out.println(checkSignUrl(URIProcessor.fromURI(signUri).appendQueryParameter("h", "eee").toURI().toString(), appSecret));
         }
+
+        {
+            System.out.println(URIProcessor.fromURI("http://example.com?search=java%2520%2526%2520uri&page=1").toURI().toString());
+            System.out.println(URIProcessor.fromURI("http://example.com?search=java%2520%2526%2520uri&page=1").fastToUri());
+
+
+            System.out.println(URI.create("http://example.com?param=%25G2").toString());
+
+            //System.out.println(URIProcessor.fromURI("http://example.com?param=%25G2").fastToUri());
+
+
+            System.out.println(URIProcessor.fromURI("mailto:test@example.com/test?test=1").toURI().toString());
+            System.out.println(URIProcessor.fromURI("mailto:test@example.com?test=1").fastToUri());
+
+        }
     }
 
     public static void main(String[] args) {
         demo();
         testPerf();
-
     }
 }
