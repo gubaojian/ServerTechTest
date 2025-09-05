@@ -9,18 +9,18 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class UrlHMacSignUtil {
+public class HMacSignUtil {
 
 
-    public static URI signUrl(String uri, String appSecret) {
+    public static  String signUrl(String uri, byte[] appSecret) {
         return innerSignUrl(URIProcessor.fromURI(uri), appSecret);
     }
 
-    public static URI signUrl(URI uri, String appSecret) {
+    public static  String signUrl(URI uri, byte[] appSecret) {
         return innerSignUrl(URIProcessor.fromURI(uri), appSecret);
     }
 
-    public static URI signUrl(URIProcessor processor, String appSecret) {
+    public static  String signUrl(URIProcessor processor, byte[] appSecret) {
         URIProcessor innerProcessor = URIProcessor.fromProcessor(processor);
         return innerSignUrl(innerProcessor, appSecret);
     }
@@ -31,13 +31,13 @@ public class UrlHMacSignUtil {
      * @param appSecret 签名密钥（≥32字节）
      * @return 签名后的URI
      */
-    private static URI innerSignUrl(URIProcessor processor, String appSecret) {
+    private static String innerSignUrl(URIProcessor processor, byte[] appSecret) {
         Map<String, List<String>> queryMap = processor.getQueryMap();
         if (appSecret == null) {
             throw new IllegalArgumentException("appSecret should not be null");
         }
-        byte[] secret = appSecret.getBytes(StandardCharsets.UTF_8);
-        if (secret.length < 32) {
+        byte[] secret =  appSecret;
+        if (secret == null || secret.length < 32) {
             throw new IllegalArgumentException("appSecret should be at least 32 byte");
         }
 
@@ -82,13 +82,13 @@ public class UrlHMacSignUtil {
             signParameters.put("sign", sign);
             processor.clearAllParameters();
             processor.putAllParameter(signParameters);
-            return processor.toURI();
+            return processor.fastToUri();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static boolean checkSignUrl(String uri, String appSecret) {
+    public static boolean checkSignUrl(String uri, byte[] appSecret) {
         URIProcessor processor =  URIProcessor.fromURL(uri);
         Map<String, List<String>> queryMap = processor.getQueryMap();
         String expect_sign = processor.getQueryParameter("sign");
@@ -98,8 +98,8 @@ public class UrlHMacSignUtil {
         if (appSecret == null) {
             throw new IllegalArgumentException("appSecret should not be null");
         }
-        byte[] secret = appSecret.getBytes(StandardCharsets.UTF_8);
-        if (secret.length < 32) {
+        byte[] secret = appSecret;
+        if (secret == null || secret.length < 32) {
             throw new IllegalArgumentException("appSecret should be at least 32 byte");
         }
         if (processor.getQueryParameter("port") == null) {
@@ -148,10 +148,10 @@ public class UrlHMacSignUtil {
             Mac mac = ThreadLocalUtil.getLocalValueEntry().getHmacSHA256();
             SecretKeySpec secretKey = new SecretKeySpec(secret, "HmacSHA256");
             mac.init(secretKey);
-            byte[] bts = mac.doFinal(signData.getBytes(StandardCharsets.UTF_8)); // 仅计算 HMAC-SHA256
+            byte[] genSign = mac.doFinal(signData.getBytes(StandardCharsets.UTF_8)); // 仅计算 HMAC-SHA256
             jdkx.compat.util.HexFormat hexFormat = jdkx.compat.util.HexFormat.of().withLowerCase();
-            String sign = hexFormat.formatHex(bts);
-            return expect_sign.equals(sign);
+            byte[] sign = hexFormat.parseHex(expect_sign);
+            return Arrays.equals(genSign, sign);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -162,10 +162,10 @@ public class UrlHMacSignUtil {
      * sign check sign url used 2299ms. sign count 1000000
      * */
     private static void testPerf() {
-        URI signUri = null;
+        String signUri = null;
         {
             long start = System.currentTimeMillis();
-            String appSecret = "dssssssssssssssssssss1242142141241242142444444";
+            byte[] appSecret = "dssssssssssssssssssss1242142141241242142444444".getBytes(StandardCharsets.UTF_8);
             String uri = "http://127.0.0.1:8001?appId=333&role=client&port=8001";
 
             int times = 10000*100;
@@ -179,7 +179,7 @@ public class UrlHMacSignUtil {
 
         {
             long start = System.currentTimeMillis();
-            String appSecret = "dssssssssssssssssssss1242142141241242142444444";
+            byte[] appSecret = "dssssssssssssssssssss1242142141241242142444444".getBytes(StandardCharsets.UTF_8);
             String uri = signUri.toString();
 
             int times = 10000*100;
@@ -194,18 +194,21 @@ public class UrlHMacSignUtil {
 
     }
 
-    public static void main(String[] args) {
+    private static void demo() {
         {
-            String appSecret = "dssssssssssssssssssss1242142141241242142444444";
-            String uri = "http://127.0.0.1:8001?appId=333&role=client&port=8001";
-            URI signUri = signUrl(uri, appSecret);
+            byte[] appSecret = "dssssssssssssssssssss1242142141241242142444444".getBytes(StandardCharsets.UTF_8);
+            String uri = "http://127.0.0.1:8001?appId=333&role=client&port=8001#test";
+            String signUri = signUrl(uri, appSecret);
             System.out.println(uri);
             System.out.println(signUri);
             System.out.println(checkSignUrl(signUri.toString(), appSecret));
             System.out.println("after alert uri " + System.currentTimeMillis());
             System.out.println(checkSignUrl(URIProcessor.fromURI(signUri).appendQueryParameter("h", "eee").toURI().toString(), appSecret));
         }
+    }
 
+    public static void main(String[] args) {
+        demo();
         testPerf();
 
     }
