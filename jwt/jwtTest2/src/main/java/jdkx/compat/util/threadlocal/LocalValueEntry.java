@@ -1,8 +1,6 @@
 package jdkx.compat.util.threadlocal;
 
 import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -54,4 +52,31 @@ public class LocalValueEntry {
         }
         return hmacSHA256;
     }
+
+    public String genTraceId() {
+        StringBuilder sb = new StringBuilder(96);
+        sb.append(currentTimeNano());
+        sb.append('-');
+        sb.append(Math.abs(getRandom().nextLong()));
+        sb.append('-');
+        sb.append(Math.abs(getSecureRandom().nextLong()));
+        return sb.toString();
+    }
+
+    public long currentTimeNano() {
+        long currentTime = System.currentTimeMillis()*1000000L;
+        if (currentTime == preTime) {
+            currentTime += Math.max((System.nanoTime() - preNanoTime), 1L);
+        } else {
+            if (currentTime < preTime) {
+                currentTime = preTime + 1;
+            }
+            preNanoTime = System.nanoTime();
+            preTime = currentTime;
+        }
+        return currentTime;
+    }
+
+    private long preTime = 0;
+    private long preNanoTime = 0;
 }

@@ -27,5 +27,9 @@ public class ThreadLocalUtil {
         return new LocalValueEntry();
     }
 
+    public static String genTraceId() {
+        return getLocalValueEntry().genTraceId();
+    }
+
 
 }

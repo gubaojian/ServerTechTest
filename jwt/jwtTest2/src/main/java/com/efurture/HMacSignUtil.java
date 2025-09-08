@@ -47,8 +47,8 @@ public class HMacSignUtil {
 
         TreeMap<String, String> signParameters = genSignMap(queryMap);
         signParameters.put("signTime", String.valueOf(System.currentTimeMillis()));
-        signParameters.put("salt", String.valueOf(ThreadLocalUtil.getSecureRandom().nextLong()));
-        signParameters.put("traceId", UUID.randomUUID().toString());
+        signParameters.put("salt", String.valueOf(Math.abs(ThreadLocalUtil.getSecureRandom().nextLong())));
+        signParameters.put("traceId", ThreadLocalUtil.genTraceId());
 
         Set<Map.Entry<String, String>> signEntries = signParameters.entrySet();
         StringBuilder sb = new StringBuilder(512);
@@ -179,10 +179,12 @@ public class HMacSignUtil {
             System.out.println("sign url used " + (end - start) + "ms. sign count " + times);
         }
 
+        System.out.println("sign url " +  signUri);
+
         {
             long start = System.currentTimeMillis();
             byte[] appSecret = "dssssssssssssssssssss1242142141241242142444444".getBytes(StandardCharsets.UTF_8);
-            String uri = signUri.toString();
+            String uri = signUri;
 
             int times = 10000*100;
             for (int i = 0; i < times; i++) {
