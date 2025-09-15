@@ -63,3 +63,10 @@ base64/cmake-build-debug/*
 base64/cmake-build-release/*
 base64/.idea/*
 
+
+HttpLibTest/test/
+HttpLibTest/test/*
+
+HttpLibTest/.idea/
+HttpLibTest/.idea/*
+

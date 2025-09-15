@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.efurture.test</groupId>
+    <artifactId>PomTest</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <!-- 1. 配置「依赖下载仓库」：从 http://127.0.0.1:8080/maven/ 下载依赖 -->
+    <repositories>
+        <repository>
+            <!-- 仓库ID：必须与下面「认证配置」的server.id一致 -->
+            <id>local-maven-repo</id>
+            <!-- 仓库地址（你的本地服务地址） -->
+            <url>http://127.0.0.1:8080/maven/</url>
+            <!-- 启用仓库（默认true） -->
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <!-- 快照版本更新策略：always（每次都更）、daily（默认，每日一次） -->
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <!-- 仓库ID：与认证配置的server.id一致 -->
+            <id>local-maven-repo</id>
+            <!-- 正式版本（releases）上传地址 -->
+            <url>http://127.0.0.1:8080/maven/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <!-- 快照版本（snapshots）上传地址 -->
+            <id>local-maven-repo</id>
+            <url>http://127.0.0.1:8080/maven/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+
+
+    <dependencies>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.4</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.18.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+        <!---
+               <dependency>
+                   <groupId>org.bouncycastle</groupId>
+                   <artifactId>bcprov-jdk18on</artifactId>
+                   <version>1.81</version>
+               </dependency>
+               -->
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-debug-jdk18on -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-debug-jdk18on</artifactId>
+            <version>1.81</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.cryptomator</groupId>
+            <artifactId>siv-mode</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>de.mkammerer</groupId>
+            <artifactId>argon2-jvm</artifactId>
+            <version>2.11</version> <!-- 最新版参考 Maven 中央仓库 -->
+        </dependency>
+    </dependencies>
+
+</project>
