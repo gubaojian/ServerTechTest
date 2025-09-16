@@ -8,7 +8,7 @@ import com.ibm.icu.util.ULocale;
 public class Main {
     public static void main(String[] args) {
         // 待分词文本（中英日混合）
-        String text = "ICU4J 77.1 支持中文、English和日本語Sqlite分com.taobao.efurture词。与 MySQL 相比，SQLite 更适合嵌入式场景，无需独立服务";
+        String text = "ICU4J 77.1 支持中文、English和日本語Sqlite分com.taobao.efurture词。JAVA-Websocket 与 MySQL 相比，SQLite 更适合嵌入式场景，无需独立服务";
 
         // 创建单词分词器（使用默认语言环境，自动识别文本语言）
         BreakIterator wordIterator = BreakIterator.getWordInstance(ULocale.ROOT);
