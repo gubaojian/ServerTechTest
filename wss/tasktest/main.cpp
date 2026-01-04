@@ -429,7 +429,7 @@ void testSwapQueue() {
     end_time = uv_hrtime();
     std::cout << "UVTaskPool pool used: " << ((end_time - start_time) / 1000000.0) << " ms" << std::endl;
     //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    std::cout << "uv_queue_work pool done " << executeCount << std::endl;
+    std::cout << "UVTaskPool pool done " << executeCount << std::endl;
 }
 
 void testSwapQueueTwoThread() {
