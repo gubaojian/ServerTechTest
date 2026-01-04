@@ -29,10 +29,10 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         native-lib.cpp)
 
 
-include_directories(/Users/efurture/demo/TestApplication/app/src/main/include/)
+include_directories(/Users/efurture/code/ServerTechTest/android/TestApplication/app/src/main/include/)
 
 
-set(OPENSSL_LIB_DIR "/Users/efurture/demo/TestApplication/app/src/main/jniLibs/arm64-v8a")
+set(OPENSSL_LIB_DIR "/Users/efurture/code/ServerTechTest/android/TestApplication/app/src/main/jniLibs/arm64-v8a")
 add_library(crypto SHARED IMPORTED)
 set_target_properties(crypto PROPERTIES
         IMPORTED_LOCATION ${OPENSSL_LIB_DIR}/libcrypto.so
